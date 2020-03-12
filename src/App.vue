@@ -1,23 +1,23 @@
 <template>
   <div id="app">
-    <Login></Login>
+    <!--<img src="./assets/logo.png">-->
+    <router-view/>     <!--路由容器，可嵌套，这里显示的是App.vue下的路由容器-->
   </div>
 </template>
+
 <script>
-  import Login from '@/components/Login'
-  export default {
-    name: 'App',
-    components: {
-      'Login': Login
-    },
-    data() {
-      return {}
-    }
-  }
+export default {
+  name: 'App'
+}
 </script>
+
 <style>
-  #app {
-    text-align: center;
-    margin-top:400px ;
-  }
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
 </style>

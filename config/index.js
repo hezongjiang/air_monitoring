@@ -10,7 +10,15 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      'api':{
+        target: 'http://api.aisensing.cn',   //前端请求默认发送到这里，注意修改
+        changeOrigin: true,                  //是否跨域
+        pathRewrite:{                        //端口重写
+          '^/api':''
+        }
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
