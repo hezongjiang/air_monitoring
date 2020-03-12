@@ -1,6 +1,6 @@
 # air_monitoring
 
-> A Vue.js project
+> A Vue.js project for air monitoring
 
 ## Build Setup
 
