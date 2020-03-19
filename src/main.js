@@ -6,12 +6,17 @@ import router from './router'
 import axios from 'axios'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import 'font-awesome/css/font-awesome.min.css'
 import store from './store'
+import echarts from 'echarts'
 // 前端请求默认发送到这个url
 axios.defaults.baseURL = 'http://api.aisensing.cn'
 
 // 全局注册后，在其他组件通过this.$axios 发送数据
 Vue.prototype.$axios = axios
+
+Vue.prototype.$echarts = echarts
+
 Vue.config.productionTip = false
 
 Vue.use(ElementUI)
