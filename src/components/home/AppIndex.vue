@@ -19,7 +19,7 @@
     </div>
     <div class="bdmap" style="position:relative;">
       <div id="allmap"></div>
-      <div style="position:absolute;top:17%;left:14%;z-index:1;background-color:white;padding:16px;border-radius:12px;width:34%">
+      <div style="position:absolute;top:17%;left:14%;z-index:1;background-color:white;padding:16px;border-radius:12px;width:34%" :style="{visibility: viewInfo}">
         <el-row type="flex" align="bottom" style="border-bottom:1px solid #ccc;padding-bottom:8px">
           <el-col :span="14"  class="grid" style="text-align:left;font-size:18px;font-weight:bold;color:black">{{ termInfo.remark }}<span :style="{color:(termState === '在线' ? '#11aa11' : '#999' )}" style="font-size:13px;color:green;font-weight:normal">&nbsp;&nbsp;{{ termState }}</span></el-col>
           <el-col :span="4" :offset="6" class="grid" style="font-size:13px;color:blue">查看详情</el-col>
@@ -49,7 +49,7 @@
           <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:18px;color:black">{{ airInfo.direct }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windDir }}</span></el-col>
         </el-row>
       </div>
-      <div style="position:absolute;top:48%;left:14%;z-index:1;background-color:white;padding:16px;border-radius:12px;width:34%">
+      <div style="position:absolute;top:48%;left:14%;z-index:1;background-color:white;padding:16px;border-radius:12px;width:34%" :style="{visibility: viewInfo}">
         <el-row type="flex" align="bottom">
           <el-col :span="8" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">经度</el-col>
           <el-col :span="8" :offset="4" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">纬度</el-col>
@@ -68,7 +68,7 @@
           <el-col :span="12" class="grid" style="font-weight:bold;text-align:left;font-size:18px;color:black">{{ termInfo.version }}</el-col>
         </el-row>
       </div>
-      <div id="main" style="width: 45%;height: 52.5%;position:absolute;top:17%;left:52%;z-index:1;background-color:white;border-radius:12px"></div>
+      <div id="main" style="width: 45%;height: 52.5%;position:absolute;top:17%;left:52%;z-index:1;background-color:white;border-radius:12px" :style="{visibility: viewInfo}"></div>
     </div>
   </div>
 </template>
@@ -106,13 +106,15 @@ export default {
       chartNO2: [],
       chartPM10: [],
       chartPM25: [],
-      chartX: []
+      chartX: [],
+      viewInfo: 'hidden'
     }
   },
   methods: {
     focusInfo: function (addr) {
       let that = this
       var d=new Date()
+      this.viewInfo='visible'
       this.$axios
       .all([this.$axios.get('/device/'+addr+'/macAirDeviceInfo'), 
             this.$axios.get('/device/macAirList'),
