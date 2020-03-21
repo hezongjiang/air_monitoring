@@ -27,4 +27,10 @@ body {
 .el-table th.gutter{
   display: table-cell!important;
 }
+/* 修改分页器的样式 */
+.el-pager li,.el-pager li.active,.el-pager li:hover,
+.el-pagination .btn-prev,.el-pagination .btn-next,
+.el-pagination .btn-prev:disabled,.el-pagination .btn-next:disabled{
+  background-color: transparent;
+}
 </style>

@@ -18,22 +18,24 @@
           <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
         <el-button type="primary" size="medium" v-on:click="getTable" style="margin-left: 20px">查询</el-button>
-        <el-button v-on:click="exportExcel" size="medium" style="float: right; margin-right:10px "><i class="el-icon-download"></i>导出Excel</el-button>
+        <el-button v-on:click="exportExcel" size="medium" style="float: right; margin-right:6px "><i class="el-icon-download"></i>导出Excel</el-button>
       </div>
       <!--表格-->
+      <div style="padding: 30px">
       <el-table id="table" :data="filtedData.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
-                stripe highlight-current-row border  style="margin: 20px auto; width: 1260px">
+                stripe highlight-current-row border >
         <el-table-column prop="macAddress" label="站点名称" align="center"></el-table-column>
         <el-table-column prop="beginTime" label="告警时间" align="center"></el-table-column>
         <el-table-column prop="airType" label="气体类型" align="center"></el-table-column>
         <el-table-column prop="airValue" label="气体值" align="center"></el-table-column>
         <el-table-column prop="topType" label="异常类型" align="center"></el-table-column>
       </el-table>
+      </div>
     </div>
     <!--分页器-->
     <el-pagination align="center" @size-change='handleSizeChange' @current-change='handleCurrentChange'
                    :current-page="currentPage" :page-size="pageSize" layout="total, sizes, prev, pager, next"
-                   :total="filtedData.length" style="padding: 10px 20px 40px 20px">
+                   :total="filtedData.length" style="padding: 10px 20px 40px 20px;">
     </el-pagination>
   </div>
 </template>
@@ -190,7 +192,7 @@
 
 <style scoped>
   .form_container{
-    margin: 10px 90px 40px 90px;
+    margin: 10px 90px 10px 90px;
     padding-bottom: 20px ;
     background: #ffffff;
     border-radius: 20px;
@@ -218,4 +220,5 @@
   #filter_container span{
     font-size: 14px;
   }
+
 </style>
