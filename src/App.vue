@@ -23,4 +23,8 @@ body {
   text-align: center;
   color: #2c3e50;
 }
+/* 解决element-ui表格表头和内容对不齐的问题*/
+.el-table th.gutter{
+  display: table-cell!important;
+}
 </style>

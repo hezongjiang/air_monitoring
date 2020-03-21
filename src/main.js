@@ -9,6 +9,8 @@ import 'element-ui/lib/theme-chalk/index.css'
 import 'font-awesome/css/font-awesome.min.css'
 import store from './store'
 import echarts from 'echarts'
+import toExcel from '@/excel/json2excel'
+
 // 前端请求默认发送到这个url
 axios.defaults.baseURL = 'http://api.aisensing.cn'
 
@@ -16,6 +18,8 @@ axios.defaults.baseURL = 'http://api.aisensing.cn'
 Vue.prototype.$axios = axios
 
 Vue.prototype.$echarts = echarts
+
+Vue.prototype.$toExcel = toExcel
 
 Vue.config.productionTip = false
 

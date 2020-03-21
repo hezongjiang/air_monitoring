@@ -2,7 +2,7 @@
     <!--登录界面-->
 
       <el-form class="login-container">
-        <h3 class="login-title">登录</h3>
+        <h3 class="login-title">大气质量智能监控平台</h3>
         <div ref="tips" id="tips">{{tips}}</div>
         <el-form-item>
           <el-input  v-on:input="input" v-model="loginForm.username" placeholder="用户名" clearable></el-input>
@@ -88,7 +88,7 @@
     padding: 10px 40px;
     border-radius: 10px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-
+    background: white;
   }
   #tips{
     text-align: left;

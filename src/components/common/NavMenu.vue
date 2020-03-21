@@ -11,14 +11,15 @@
       <el-menu-item v-for="(item,i) in navList" :key="i" :index="item.name">
         {{ item.navItem }}
       </el-menu-item>
-      <a href="#">退出登录</a>
+      <router-link :to="{ path: '/login'}" replace>退出登录</router-link>
       <i class="fa fa-sign-out" aria-hidden="true"></i>
-      <a href="#">用户名</a>
+      <a>{{username}}</a>
       <i class="fa fa-user-o" aria-hidden="true"></i>
     </el-menu>
 </template>
 
 <script>
+  import store from '@/store'
   export default {
     name: 'NavMenu',
     data () {
@@ -27,7 +28,8 @@
           {name: '/index', navItem: '站点概览'},
           {name: '/alarm', navItem: '告警功能'},
           {name: '/analyse', navItem: '数据分析'}
-        ]
+        ],
+        username: store.state.user.username
       }
     }
   }
