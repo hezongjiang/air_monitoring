@@ -51,8 +51,7 @@
                 password: this.loginForm.password
               }}
           ).then(res => {
-              console.log(res.data.data)
-              if (res.data.data.code === 1) { // code=1为登录成功，code=0为登录失败
+              if (res.data.successful === true) { // successful = true为登录成功
                   this.$message({
                     message: '登录成功',
                     center: true,
@@ -61,7 +60,6 @@
                   // 登录成功后，将loginForm信息存入本地
                   this.$store.commit('login', this.loginForm) // 对store里的login方法，输入参数this.loginForm
                   let path = this.$route.query.redirect
-                  console.log(path)
                   this.$router.replace({path: path === '/' || path === undefined ? '/index' : path})
                 } else {
                   this.$message({
@@ -72,7 +70,6 @@
                 }
               }
             ).catch(error => {
-            alert('出错了')
             console.log(error)
             })
         }
