@@ -23,6 +23,9 @@ body {
   text-align: center;
   color: #2c3e50;
 }
+.anchorBL {
+  display: none; /* 隐藏百度地图左下角的版权logo和文字*/
+}
 /* 解决element-ui表格表头和内容对不齐的问题*/
 .el-table th.gutter{
   display: table-cell!important;

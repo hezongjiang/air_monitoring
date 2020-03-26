@@ -5,6 +5,7 @@ import AppIndex from '@/components/home/AppIndex'
 import Home from '@/components/Home'
 import Alarm from '@/components/Alarm'
 import Analyse from '@/components/Analyse'
+import Detail from '@/components/Detail'
 
 Vue.use(Router)
 
@@ -23,6 +24,14 @@ export default new Router({
           component: AppIndex, // 路由定义/index指向AppIndex这个组件
           meta: {
             requireAuth: true // 需要登录才能访问的页面
+          }
+        },
+        {
+          path: '/detail',
+          name: 'Detail',
+          component: Detail,
+          meta: {
+            requireAuth: true
           }
         },
         {
