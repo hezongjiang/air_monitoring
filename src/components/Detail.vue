@@ -50,7 +50,9 @@
               placeholder="开始日期"
               size="mini"
               value-format="yyyy-MM-dd"
-              style="width:150px">
+              style="width:150px"
+              :editable="false"
+              :clearable="false">
             </el-date-picker>
             ～
             <el-date-picker
@@ -59,24 +61,26 @@
               placeholder="结束日期"
               size="mini"
               value-format="yyyy-MM-dd"
-              style="width:150px">
+              style="width:150px"
+              :editable="false"
+              :clearable="false">
             </el-date-picker>
             &nbsp;&nbsp;
             <el-button type="primary" size="mini" @click="searchDate(termInfo.macAddress)"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
           </el-col>
-          <el-col :span="3" style="text-align:right;font-size:13px;font-weight:bold;color:#999"><el-button id="xxButton" size="mini" @click="zoomChange($event)" :class="visibleSign==1||visibleSign==2||visibleSign==3?'':goneClass">切换缩放模式</el-button><el-button size="mini" @click="exportExcel" :class="visibleSign===4?'':goneClass"><i class="fa fa-download" aria-hidden="true"></i>&nbsp;导出Excel</el-button></el-col>
+          <el-col :span="3" style="text-align:right;font-size:13px;font-weight:bold;color:#999"><el-button size="mini" @click="zoomChange($event)" :class="activeSign==1||activeSign==2||activeSign==3?'':goneClass">切换缩放模式</el-button><el-button size="mini" @click="exportExcel" :class="activeSign===4?'':goneClass"><i class="fa fa-download" aria-hidden="true"></i>&nbsp;导出Excel</el-button></el-col>
         </el-row>
         <div style="position:relative;margin-top:4px">
-          <div id="concentration" :style="{ visibility:(visibleSign===1?'visible':'hidden') }" style="width: 100%;height: 432px;position:absolute"></div>
-          <div id="temperature" :style="{ visibility:(visibleSign===2?'visible':'hidden') }" style="width: 100%;height: 432px;position:absolute"></div>
-          <div id="humidity" :style="{ visibility:(visibleSign===3?'visible':'hidden') }" style="width: 100%;height: 432px;position:absolute"></div>
+          <div id="concentration" :style="{ visibility:(activeSign===1?'visible':'hidden') }" style="width: 100%;height: 432px;position:absolute"></div>
+          <div id="temperature" :style="{ visibility:(activeSign===2?'visible':'hidden') }" style="width: 100%;height: 432px;position:absolute"></div>
+          <div id="humidity" :style="{ visibility:(activeSign===3?'visible':'hidden') }" style="width: 100%;height: 432px;position:absolute"></div>
           <el-table 
             element-loading-text="拼命加载中"
             element-loading-spinner="el-icon-loading"
             element-loading-background="rgba(0, 0, 0, 0.8)"
             :cell-style="{ padding:0, fontSize:'12px'}"
             :header-cell-style="{ padding:0, background:'#dddddd', fontSize:'13px'}"
-            :style="{ visibility:(visibleSign===4?'visible':'hidden') }"
+            :style="{ visibility:(activeSign===4?'visible':'hidden') }"
             fit
             :data="list" border style="width:100%" ref="multipleTable" max-height="438px" tooltip-effect="dark">
             <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center" width="100" sortable></el-table-column>
@@ -105,7 +109,6 @@ export default {
       termState: '',
       batteryIcon: '',
       activeSign: 1,
-      visibleSign: 1,
       goneClass: 'sth-gone',
       airChart: '',
       tempChart: '',
@@ -122,7 +125,8 @@ export default {
           show: true
         },
         dataZoom: { 
-          type: 'inside'
+          type: 'inside',
+          filterMode: 'none'
         },
         legend: {
           top: 10,
@@ -180,7 +184,8 @@ export default {
           show: true
         },
         dataZoom: { 
-          type: 'inside'
+          type: 'inside',
+          filterMode: 'none'
         },
         grid: {
           left: '30px',
@@ -214,7 +219,8 @@ export default {
           show: true
         },
         dataZoom: { 
-          type: 'inside'
+          type: 'inside',
+          filterMode: 'none'
         },
         grid: {
           left: '30px',
@@ -249,8 +255,9 @@ export default {
     focusInfo: function (addr) {
       let that = this
       this.termInfo.macAddress = addr
-      this.newBeginT=that.beginT
-      this.newEndT=that.endT
+      this.newBeginT=this.beginT
+      this.newEndT=this.endT
+      this.list=[]
       if(new Date().getDate() == this.$moment(this.endT).format("D")) {
         var endH=new Date().getHours()
         for(var j=0;j<this.N;j++) {
@@ -345,34 +352,28 @@ export default {
     },
     chooseData:function (x) {
       this.activeSign=x
-      this.visibleSign=x
     },
     searchDate:function (x) {
-      if(this.newBeginT && this.newEndT) {
-        this.beginT=this.$moment(this.newBeginT).format("YYYY-MM-DD")
-        this.endT=this.$moment(this.newEndT).format("YYYY-MM-DD")
-        this.chartSO2=[]
-        this.chartNO2=[]
-        this.chartPM10=[]
-        this.chartPM25=[]
-        this.chartTemp=[]
-        this.chartHumidity=[]
-        this.chartX=[]
-        this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
-        if(!(new Date().getDate() == this.$moment(this.endT).format("D"))) {
-          for(var j=0;j<this.N+1;j++) {
-            this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
-            for(var i=1;i<24;i++) {
-              this.chartX[24*j+i]=i
-            }
+      this.beginT=this.newBeginT
+      this.endT=this.newEndT
+      this.optionAir.series[0].data=[]
+      this.optionAir.series[1].data=[]
+      this.optionAir.series[2].data=[]
+      this.optionAir.series[3].data=[]
+      this.optionTemp.series[0].data=[]
+      this.optionHumidity.series[0].data=[]
+      this.chartX=[]
+      this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
+      if(!(new Date().getDate() == this.$moment(this.endT).format("D"))) {
+        for(var j=0;j<this.N+1;j++) {
+          this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
+          for(var i=1;i<24;i++) {
+            this.chartX[24*j+i]=i
           }
-          console.log(this.chartX)
         }
-        this.focusInfo(x)
+        console.log(this.chartX)
       }
-      else {
-        alert("请选择查询的起止日期")
-      }
+      this.focusInfo(x)
     },
     zoomChange: function (e) {  
       e.currentTarget.blur()
@@ -408,6 +409,8 @@ export default {
     this.humidityChart = this.$echarts.init(document.getElementById('humidity'))
     this.beginT=this.$moment().subtract(this.N,'days').format("YYYY-MM-DD")
     this.endT=this.$moment().format("YYYY-MM-DD")
+    this.newBeginT=this.beginT
+    this.newEndT=this.endT
   }
 }
 </script>

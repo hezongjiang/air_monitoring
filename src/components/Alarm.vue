@@ -14,7 +14,7 @@
         </el-date-picker>
 
         <span style="padding: 10px 10px 10px 60px;">站点</span>
-        <el-select size="medium" v-model="value2" clearable placeholder="请选择站点">
+        <el-select size="medium" v-model="value2" placeholder="请选择站点">
           <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
         <el-button type="primary" size="medium" v-on:click="getTable" style="margin-left: 20px">查询</el-button>
