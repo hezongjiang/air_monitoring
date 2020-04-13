@@ -23,17 +23,18 @@ body {
   /* text-align: center; */
   color: #2c3e50;
 }
+/* 隐藏百度地图左下角的版权logo和文字*/
 .anchorBL {
-  display: none; /* 隐藏百度地图左下角的版权logo和文字*/
+  display: none;
 }
 /* 解决element-ui表格表头和内容对不齐的问题*/
-.el-table th.gutter{
+/* .el-table th.gutter{
   display: table-cell!important;
-}
+} */
 /* 修改分页器的样式 */
 .el-pager li,.el-pager li.active,.el-pager li:hover,
 .el-pagination .btn-prev,.el-pagination .btn-next,
-.el-pagination .btn-prev:disabled,.el-pagination .btn-next:disabled{
+.el-pagination .btn-prev:disabled,.el-pagination .btn-next:disabled {
   background-color: transparent;
 }
 </style>

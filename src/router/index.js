@@ -9,7 +9,7 @@ import Detail from '@/components/Detail'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/home',
@@ -22,33 +22,21 @@ export default new Router({
           path: '/index',
           name: 'AppIndex',
           component: AppIndex, // 路由定义/index指向AppIndex这个组件
-          meta: {
-            requireAuth: true // 需要登录才能访问的页面
-          }
         },
         {
           path: '/detail',
           name: 'Detail',
           component: Detail,
-          meta: {
-            requireAuth: true
-          }
         },
         {
           path: '/alarm',
           name: 'Alarm',
           component: Alarm,
-          meta: {
-            requireAuth: true
-          }
         },
         {
           path: '/analyse',
           name: 'Analyse',
           component: Analyse,
-          meta: {
-            requireAuth: true
-          }
         }
       ]
     },
@@ -59,3 +47,16 @@ export default new Router({
     }
   ]
 })
+// 挂载路由导航守卫
+router.beforeEach((to, from, next) => {
+  if(to.path === '/login') return next()
+  // 获取token
+  const tokenStr = window.sessionStorage.getItem('username')
+  if(!tokenStr) return next({
+    path: 'login',
+    query: {redirect: to.fullPath}
+  })
+  next()
+})
+
+export default router

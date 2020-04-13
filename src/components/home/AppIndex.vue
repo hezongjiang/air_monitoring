@@ -17,60 +17,60 @@
         <li :class="{active: termInfo.macAddress === '440604:010:AAK'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:010:AAK')">南庄污水处理厂</a></li>
       </ul>
     </div>
-    <div class="bdmap" style="position:relative">
+    <div class="bdmap">
       <div id="allmap"></div>
-      <div style="position:absolute;top:17%;left:14%;z-index:1;background-color:white;padding:12px 16px;border-radius:6px;width:34%" :style="{visibility: viewInfo}">
-        <el-row type="flex" align="bottom" style="border-bottom:1px solid #ccc;padding-bottom:8px">
-          <el-col :span="18"  class="grid" style="text-align:left;font-size:18px;font-weight:bold;color:black">{{ termInfo.remark }}<span :style="{color:(termState === '在线' ? '#11aa11' : '#999' )}" style="font-size:13px;color:green;font-weight:normal">&nbsp;&nbsp;{{ termState }}</span></el-col>
-          <el-col :span="6" class="grid" style="font-size:13px;color:blue;text-align:right"><router-link to="/detail" style="text-decoration: none; color: blue">查看详情</router-link></el-col>
+      <div class="winchild1" :style="{visibility: viewInfo}">
+        <el-row class="state-detail" type="flex" align="bottom">
+          <el-col :span="18" class="term-state">{{ termInfo.remark }}<span :style="{color:(termState === '在线' ? '#11aa11' : '#999' )}" style="font-size:13px;color:green;font-weight:normal">&nbsp;&nbsp;{{ termState }}</span></el-col>
+          <el-col :span="6" class="view-detail"><router-link to="/detail" style="text-decoration: none; color: blue">查看详情</router-link></el-col>
         </el-row>
-        <el-row type="flex" align="bottom" style="padding-top:14px">
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">SO<span style="font-size:12px">2&nbsp;μg/m3</span></el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">NO<span style="font-size:12px">2&nbsp;μg/m3</span></el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">PM10<span style="font-size:12px">&nbsp;μg/m3</span></el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">PM2.5<span style="font-size:12px">&nbsp;μg/m3</span></el-col>
+        <el-row class="air-type" type="flex" align="bottom" style="padding-top:14px">
+          <el-col :span="6">SO<span>2&nbsp;μg/m3</span></el-col>
+          <el-col :span="6">NO<span>2&nbsp;μg/m3</span></el-col>
+          <el-col :span="6">PM10<span>&nbsp;μg/m3</span></el-col>
+          <el-col :span="6">PM2.5<span>&nbsp;μg/m3</span></el-col>
         </el-row>
-        <el-row type="flex" align="bottom" style="padding-top:3px">
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:18px" :style="{color:colorSO2}">{{ parseFloat(airInfo.SO2).toFixed(2) }}</el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:18px" :style="{color:colorNO2}">{{ parseFloat(airInfo.NO2).toFixed(2) }}</el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:18px" :style="{color:colorPM10}">{{ parseFloat(airInfo.PM10).toFixed(2) }}</el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:18px" :style="{color:colorPM25}">{{ parseFloat(airInfo.PM25).toFixed(2) }}</el-col>
+        <el-row class="air-value" type="flex" align="bottom" style="padding-top:3px">
+          <el-col :span="6" :style="{color:colorSO2}">{{ parseFloat(airInfo.SO2).toFixed(2) }}</el-col>
+          <el-col :span="6" :style="{color:colorNO2}">{{ parseFloat(airInfo.NO2).toFixed(2) }}</el-col>
+          <el-col :span="6" :style="{color:colorPM10}">{{ parseFloat(airInfo.PM10).toFixed(2) }}</el-col>
+          <el-col :span="6" :style="{color:colorPM25}">{{ parseFloat(airInfo.PM25).toFixed(2) }}</el-col>
         </el-row>
-        <el-row type="flex" align="bottom" style="padding-top:14px">
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">温度<span style="font-size:12px">&nbsp;℃</span></el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">湿度<span style="font-size:12px">&nbsp;%R.H.</span></el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">风速<span style="font-size:12px">&nbsp;m/s</span></el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">风向</el-col>
+        <el-row class="other-item" type="flex" align="bottom" style="padding-top:14px">
+          <el-col :span="6">温度<span>&nbsp;℃</span></el-col>
+          <el-col :span="6">湿度<span>&nbsp;%R.H.</span></el-col>
+          <el-col :span="6">风速<span>&nbsp;m/s</span></el-col>
+          <el-col :span="6">风向</el-col>
         </el-row>
-        <el-row type="flex" align="bottom" style="padding-top:3px">
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:18px;color:black">{{ airInfo.temp }}</el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:18px;color:black">{{ airInfo.humidity }}</el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:18px;color:black">{{ airInfo.speed }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windSpe }}</span></el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:18px;color:black">{{ airInfo.direct }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windDir }}</span></el-col>
-        </el-row>
-      </div>
-      <div style="position:absolute;top:49.2%;left:14%;z-index:1;background-color:white;padding:12px 16px;border-radius:6px;width:34%" :style="{visibility: viewInfo}">
-        <el-row type="flex" align="bottom">
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">经度</el-col>
-          <el-col :span="6" :offset="6" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">纬度</el-col>
-          <el-col :span="6" class="grid" style="font-weight:bold;text-align:right;font-size:13px;color:black">{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></el-col>
-        </el-row>
-        <el-row type="flex" align="bottom" style="padding-top:3px">
-          <el-col :span="12" class="grid" style="font-weight:bold;text-align:left;font-size:18px;color:black">{{ parseFloat(termInfo.lon/100).toFixed(6) }}</el-col>
-          <el-col :span="12" class="grid" style="font-weight:bold;text-align:left;font-size:18px;color:black">{{ parseFloat(termInfo.lat/100).toFixed(6) }}</el-col>
-        </el-row>
-        <el-row type="flex" align="bottom" style="padding-top:10px">
-          <el-col :span="12" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">设备编号</el-col>
-          <el-col :span="12" class="grid" style="font-weight:bold;text-align:left;font-size:15px;color:#999">固件版本</el-col>
-        </el-row>
-        <el-row type="flex" align="bottom" style="padding-top:3px">
-          <el-col :span="12" class="grid" style="font-weight:bold;text-align:left;font-size:18px;color:black">{{ termInfo.macAddress }}</el-col>
-          <el-col :span="12" class="grid" style="font-weight:bold;text-align:left;font-size:18px;color:black">{{ termInfo.version }}</el-col>
+        <el-row class="other-value" type="flex" align="bottom" style="padding-top:3px">
+          <el-col :span="6">{{ airInfo.temp }}</el-col>
+          <el-col :span="6">{{ airInfo.humidity }}</el-col>
+          <el-col :span="6">{{ airInfo.speed }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windSpe }}</span></el-col>
+          <el-col :span="6">{{ airInfo.direct }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windDir }}</span></el-col>
         </el-row>
       </div>
-      <div id="main" style="width: 46%;height: 52.5%;position:absolute;top:17%;left:52%;z-index:1;background-color:white;border-radius:6px" :style="{visibility: viewInfo}"></div>
-      <div style="position:absolute;top:10px;right:10px;z-index:1" :style="{visibility: viewInfo}"><el-button size="mini" type="danger" plain @click="closeSuspend">关闭悬浮窗口</el-button></div>
-      <div style="position:absolute;bottom:10px;left:10px;z-index:1;background-color:white;padding:3px 3px 0 3px" :style="{visibility: viewInfo}">
+      <div class="winchild2" :style="{visibility: viewInfo}">
+        <el-row class="info1" type="flex" align="bottom">
+          <el-col :span="6">经度</el-col>
+          <el-col :span="6" :offset="6">纬度</el-col>
+          <el-col :span="6" style="text-align:right;font-size:13px;color:black">{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></el-col>
+        </el-row>
+        <el-row class="info1-value" type="flex" align="bottom" style="padding-top:3px">
+          <el-col :span="12">{{ parseFloat(termInfo.lon/100).toFixed(6) }}</el-col>
+          <el-col :span="12">{{ parseFloat(termInfo.lat/100).toFixed(6) }}</el-col>
+        </el-row>
+        <el-row class="info2" type="flex" align="bottom" style="padding-top:10px">
+          <el-col :span="12">设备编号</el-col>
+          <el-col :span="12">固件版本</el-col>
+        </el-row>
+        <el-row class="info2-value" type="flex" align="bottom" style="padding-top:3px">
+          <el-col :span="12">{{ termInfo.macAddress }}</el-col>
+          <el-col :span="12">{{ termInfo.version }}</el-col>
+        </el-row>
+      </div>
+      <div id="main" :style="{visibility: viewInfo}"></div>
+      <div class="win-close-btn" :style="{visibility: viewInfo}"><el-button size="mini" type="danger" plain @click="closeSuspend">关闭悬浮窗口</el-button></div>
+      <div class="air-indicator" :style="{visibility: viewInfo}">
         <img src="@/assets/airIndicator.png" width="160" height="88" alt="气体浓度指示图">
       </div>
     </div>
@@ -81,7 +81,7 @@ export default {
   name: 'AppIndex',
   data () {
     return {
-      siteMark: {
+      siteMark: { // mac地址与站点名称的对应关系
         '440604:009:AAJ': '龙湾大桥',
         '440604:002:AAC': '罗南村委',
         '440604:000:AAA': '绿岛湖',
@@ -95,49 +95,50 @@ export default {
         '440604:010:AAK': '南庄污水处理厂'
       },
       map: '',
-      termInfo: { macAddress: ' ' },
-      termState: '',
-      batteryIcon: '',
-      airInfo: '',
-      windSpe: '',
-      windDir: '',
+      termInfo: { macAddress: ' ' }, // 终端信息
+      termState: '', //终端状态
+      batteryIcon: '', // 电池图标
+      airInfo: '', // 气体信息
+      windSpe: '', // 风速
+      windDir: '', // 风向
       colorSO2: 'black',
       colorNO2: 'black',
       colorPM10: 'black',
       colorPM25: 'black',
       charts: '',
+      // 气体曲线图数据
       chartSO2: [],
       chartNO2: [],
       chartPM10: [],
       chartPM25: [],
       chartX: [],
-      viewInfo: 'hidden'
+      viewInfo: 'hidden' // 气泡弹窗可见与否，默认为否
     }
   },
   methods: {
-    focusInfo: function (addr) {
+    focusInfo: function (addr) { // 展示选定站点的信息
       let that = this
       var d=new Date()
       this.viewInfo = 'visible'
       this.termInfo.macAddress = addr
       this.$axios
-      .all([this.$axios.get('/device/'+addr+'/macAirDeviceInfo'), 
-            this.$axios.get('/device/macAirList'),
-            this.$axios.get('/device/macAirHourHistory',{
+      .all([this.$axios.get('/'+addr+'/macAirDeviceInfo'), // 获取选定站点的终端信息
+            this.$axios.get('/macAirList'), // 获取所有站点的空气信息
+            this.$axios.get('/macAirHourHistory',{ // 获取选定站点在一定日期范围内的气体信息
               params: {
                 macAddress: addr,
-                beginTime: this.$moment().subtract(1,'days').format("YYYY-M-D"),
-                endTime: this.$moment().format("YYYY-M-D")
+                beginTime: this.$moment().subtract(1,'days').format("YYYY-M-D"), // 昨天
+                endTime: this.$moment().format("YYYY-M-D") // 当天
               }
             })
       ])
       .then(this.$axios.spread(function (madi, mal, mahh) {
-        console.log(madi)
+        console.log(madi) // 得到选定站点的终端信息
         if(madi.data.successful && madi.data.data.length) {
           that.termInfo = madi.data.data[0]
           var point = new BMap.Point(that.termInfo.lon/100,that.termInfo.lat/100)
-          that.map.centerAndZoom(point, 16)  //初始化地图,设置中心点坐标和地图级别
-          switch(parseInt(that.termInfo.batteryInfo/10)) {
+          that.map.centerAndZoom(point, 16)  //设置地图中心点坐标和地图级别
+          switch(parseInt(that.termInfo.batteryInfo/10)) { // 根据电池电量值选择不同的电池图标
             case 0: that.batteryIcon="fa fa-battery-0"
             break
             case 1:
@@ -155,15 +156,17 @@ export default {
             case 10: that.batteryIcon="fa fa-battery"
             break
           }
-          console.log(mal)
-          for(var i=0;i<mal.data.data.length;i++) {
-            if(mal.data.data[i].macAddress === that.siteMark[addr]) {
+          console.log(mal) // 得到所有站点的空气信息
+          for(var i=0;i<mal.data.data.length;i++) { // 循环检索选定站点的空气信息
+            if(mal.data.data[i].macAddress === that.siteMark[addr]) { //判断是否找到了选定的站点
               that.airInfo = mal.data.data[i]
               that.termState = '在线'
+              // 根据风速值选择不同强度的风
               if(that.airInfo.speed >= 10) { that.windSpe = '强风' }
               else if(that.airInfo.speed >= 6) { that.windSpe = '和风' }
               else if(that.airInfo.speed > 0) { that.windSpe = '微风' }
               else { that.windSpe = '无风' }
+              // 根据风向值选择不同的风向
               if(that.airInfo.direct >= 348) { that.windDir = '北风' }
               else if(that.airInfo.direct >= 282) { that.windDir = '西北风' }
               else if(that.airInfo.direct >= 258) { that.windDir = '西风' }
@@ -173,14 +176,15 @@ export default {
               else if(that.airInfo.direct >= 78) { that.windDir = '东风' }
               else if(that.airInfo.direct >= 12) { that.windDir = '东北风' }
               else { that.windDir = '北风' }
+              // 根据气体值选择不同的颜色
               that.setColorSO2(that.airInfo.SO2)
               that.setColorNO2(that.airInfo.NO2)
               that.setColorPM10(that.airInfo.PM10)
               that.setColorPM25(that.airInfo.PM25)
-              break
+              break // 一旦找到了选定的站点则跳出循环
             }
           }
-          if(i == mal.data.data.length) {
+          if(i == mal.data.data.length) { // 如果循环结束了还没找到选定的站点，则初始化相关信息
             that.airInfo = ''
             that.termState = '离线'
             that.windSpe = ''
@@ -190,27 +194,28 @@ export default {
             that.colorPM10 = 'black'
             that.colorPM25 = 'black'
           }
-          console.log(mahh)
+          console.log(mahh) // 得到选定站点在一定日期范围内的气体信息
           if(mahh.data.successful) {
-            for(var i=0, beginH=d.getHours()+1 ;i<24;i++) {
+            for(var i=0, beginH=d.getHours()+1 ;i<24;i++) { // 只取最近24小时的气体信息
               that.chartSO2[i]=mahh.data.data[mahh.data.data.length-24+i].SO2
               that.chartNO2[i]=mahh.data.data[mahh.data.data.length-24+i].NO2
               that.chartPM10[i]=mahh.data.data[mahh.data.data.length-24+i].PM10
               that.chartPM25[i]=mahh.data.data[mahh.data.data.length-24+i].PM25
+              // 设置横轴数据
               that.chartX[i]=beginH+i
               if( that.chartX[i] >23 ) { that.chartX[i] -= 24 }
               if( that.chartX[i] === 0) { that.chartX[i] = d.getDate()+'日' }
             }
             console.log(that.chartX)
           }
-          else {
+          else { // 如果选定站点在一定日期范围内的气体信息的请求失败，则初始化相关信息
             that.chartSO2=[]
             that.chartNO2=[]
             that.chartPM10=[]
             that.chartPM25=[]
           }
         }
-        else {
+        else { // 如果选定站点的终端信息请求失败，则初始化相关信息
           that.termInfo = { macAddress: addr }
           that.termState = '离线'
           that.batteryIcon = ''
@@ -226,7 +231,7 @@ export default {
           that.chartPM10 = []
           that.chartPM25 = []
         }
-        that.charts.setOption({
+        that.charts.setOption({ // 作24小时气体实时曲线图
           title: {
             text: '24小时气体实时曲线',
             textStyle:{ color: 'black' },
@@ -291,6 +296,7 @@ export default {
         console.log(error)
       })
     },
+    // 地图上的每个站点的标记点击事件
     focusInfo1: function () { this.focusInfo('440604:009:AAJ') },
     focusInfo2: function () { this.focusInfo('440604:002:AAC') },
     focusInfo3: function () { this.focusInfo('440604:000:AAA') },
@@ -302,6 +308,7 @@ export default {
     focusInfo9: function () { this.focusInfo('440604:001:AAB') },
     focusInfo10: function () { this.focusInfo('440604:003:AAD') },
     focusInfo11: function () { this.focusInfo('440604:010:AAK') },
+    // 根据气体值选择不同的颜色
     setColorSO2: function (x) { this.colorSO2 = this.setColorAir(x) },
     setColorNO2: function (x) { this.colorNO2 = this.setColorAir(x) },
     setColorPM10: function (x) { this.colorPM10 = this.setColorAir(x) },
@@ -314,6 +321,7 @@ export default {
       else if(x>=31) return '#ffdf4f'
       else return '#7fcf9f'
     },
+    //关闭气泡弹窗
     closeSuspend: function () {
       this.viewInfo='hidden'
       this.termInfo.macAddress = ''
@@ -322,18 +330,20 @@ export default {
   mounted () {
     this.map = new BMap.Map("allmap") // 创建Map实例
     var point=new BMap.Point(113.02, 22.99)
-    this.map.centerAndZoom(point, 14) // 初始化地图,设置中心点坐标和地图级别
+    this.map.centerAndZoom(point, 14) // 设置地图中心点坐标和地图级别
     this.map.enableScrollWheelZoom(true) // 开启鼠标滚轮缩放
     this.$axios
-      .get('/device/macAirDeviceList')
+      .get('/macAirDeviceList') //获取所有站点的终端信息
       .then(response => {
         for(var i=0;i<response.data.data.length;i++)
         {
-          console.log(response)
+          console.log(response) // 得到所有站点的终端信息
+          // 根据站点坐标设置地图标记
           var marker=new BMap.Marker(new BMap.Point(response.data.data[i].lon/100,response.data.data[i].lat/100))
+          // 为地图标记设置站点名标签
           var label = new BMap.Label(response.data.data[i].remark,{offset:new BMap.Size(-10,-20)})
           marker.setLabel(label)
-          switch(response.data.data[i].macAddress)
+          switch(response.data.data[i].macAddress) // 为每个地图标记添加它所对应的站点的点击事件
           {
             case '440604:009:AAJ': marker.addEventListener("click",this.focusInfo1)
             break
@@ -358,13 +368,13 @@ export default {
             case '440604:010:AAK': marker.addEventListener("click",this.focusInfo11)
             break
           }
-          this.map.addOverlay(marker)
+          this.map.addOverlay(marker) // 显示地图标记
         }
       })
       .catch(function (error) { // 请求失败处理
         console.log(error)
       })
-    this.charts = this.$echarts.init(document.getElementById('main'))
+    this.charts = this.$echarts.init(document.getElementById('main')) // 创建charts实例
   }
 }
 </script>
@@ -418,9 +428,121 @@ export default {
   width: 87%;
   padding: 10px;
   float: left;
+  position: relative;
 }
 #allmap {
   height: 585px;
   border-radius: 6px;
+}
+.winchild1 {
+  position: absolute;
+  top: 17%;
+  left: 14%;
+  z-index: 1;
+  background-color:white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  width: 34%;
+}
+.winchild1 .state-detail {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
+}
+.winchild1 .state-detail .term-state {
+  text-align: left;
+  font-size: 18px;
+  font-weight: bold;
+  color:black;
+}
+.winchild1 .state-detail .view-detail {
+  font-size: 13px;
+  text-align: right;
+}
+.winchild1 .air-type .el-col {
+  font-weight: bold;
+  text-align: left;
+  font-size: 15px;
+  color:#999;
+}
+.winchild1 .air-type .el-col span {
+  font-size: 12px;
+}
+.winchild1 .air-value .el-col {
+  font-weight: bold;
+  text-align: left;
+  font-size: 18px;
+}
+.winchild1 .other-item .el-col {
+  font-weight: bold;
+  text-align: left;
+  font-size: 15px;
+  color:#999;
+}
+.winchild1 .other-item .el-col span {
+  font-size: 12px;
+}
+.winchild1 .other-value .el-col {
+  font-weight: bold;
+  text-align: left;
+  font-size: 18px;
+  color:black;
+}
+.winchild2 {
+  position: absolute;
+  top: 49.2%;
+  left: 14%;
+  z-index: 1;
+  background-color:white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  width:34%; 
+}
+.winchild2 .info1 .el-col {
+  font-weight: bold;
+  text-align: left;
+  font-size: 15px;
+  color:#999;
+}
+.winchild2 .info1-value .el-col {
+  font-weight: bold;
+  text-align: left;
+  font-size: 18px;
+  color:black;
+}
+.winchild2 .info2 .el-col {
+  font-weight: bold;
+  text-align: left;
+  font-size: 15px;
+  color:#999;
+}
+.winchild2 .info2-value .el-col {
+  font-weight: bold;
+  text-align: left;
+  font-size: 18px;
+  color:black;
+}
+#main {
+  width: 46%;
+  height: 52.5%;
+  position: absolute;
+  top: 17%;
+  left: 52%;
+  z-index: 1;
+  background-color:white;
+  border-radius: 6px; 
+}
+.win-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+}
+.air-indicator {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 1;
+  background-color:white;
+  padding: 3px 3px 0 3px;
 }
 </style>

@@ -45,12 +45,13 @@
         if (this.loginForm.username === '' || this.loginForm.password === '') { // 检验是否为空
           this.$refs.tips.style.visibility = 'visible'
         } else {
-          this.$axios.get('/device/login',
+          this.$axios.get('/login',
             {params: {
                 loginName: this.loginForm.username,
                 password: this.loginForm.password
               }}
           ).then(res => {
+              console.log(res)
               if (res.data.successful === true) { // successful = true为登录成功
                   this.$message({
                     message: '登录成功',
@@ -58,9 +59,9 @@
                     duration: 800
                   })
                   // 登录成功后，将loginForm信息存入本地
-                  this.$store.commit('login', this.loginForm) // 对store里的login方法，输入参数this.loginForm
-                  let path = this.$route.query.redirect
-                  this.$router.replace({path: path === '/' || path === undefined ? '/index' : path})
+                  var path = this.$route.query.redirect
+                  window.sessionStorage.setItem('username',this.loginForm.username)
+                  this.$router.push(path === '/' || path === undefined ? '/index' : path)
                 } else {
                   this.$message({
                     message: '账号或密码错误',

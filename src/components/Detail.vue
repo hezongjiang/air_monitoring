@@ -18,31 +18,31 @@
     </div>
     <div class="winmain">
       <div>
-        <el-row type="flex" align="bottom" style="padding:4px 0">
-          <el-col :span="14" style="text-align:left;font-size:18px;font-weight:bold;color:black">{{ termInfo.remark }}</el-col>
-          <el-col :span="10" style="text-align:right;font-size:13px;color:#999"><router-link to="/index" style="text-decoration: none;color:#999;background-color:white;padding:6px 16px 5px 10px;font-size:13px;border-radius: 6px"><i class="fa fa-reply" aria-hidden="true"></i>&nbsp;返回首页</router-link></el-col>
+        <el-row type="flex" align="bottom">
+          <el-col :span="14" class="term-name">{{ termInfo.remark }}</el-col>
+          <el-col :span="10" class="back-home"><router-link to="/index" style="text-decoration: none;background-color:white;padding:6px 16px 5px 10px;border-radius: 6px"><i class="fa fa-reply" aria-hidden="true"></i>&nbsp;返回首页</router-link></el-col>
         </el-row>
       </div>
-      <div style="background-color:white;padding:3px 20px;margin-top:6px;border-radius:6px">
-        <el-row type="flex" align="bottom" style="padding:4px 0">
-          <el-col :span="6" style="text-align:left;font-size:13px;font-weight:bold;color:#999">设备状态&nbsp;&nbsp;&nbsp;&nbsp;<span :style="{color:(termState === '正常' ? '#11aa11' : '#aa1111' )}">{{ termState }}</span></el-col>
-          <el-col :span="6" style="text-align:left;font-size:13px;font-weight:bold;color:#999">经度&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:black'>{{ parseFloat(termInfo.lon/100).toFixed(6) }}</span></el-col>
-          <el-col :span="6" style="text-align:left;font-size:13px;font-weight:bold;color:#999">设备编号&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:black'>{{ termInfo.macAddress }}</span></el-col>
-          <el-col :span="6" style="text-align:left;font-size:13px;font-weight:bold;color:#999">固件版本&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:black'>{{ termInfo.version }}</span></el-col>
+      <div class="term-info">
+        <el-row type="flex" align="bottom">
+          <el-col :span="6">设备状态&nbsp;&nbsp;&nbsp;&nbsp;<span :style="{color:(termState === '正常' ? '#11aa11' : '#aa1111' )}">{{ termState }}</span></el-col>
+          <el-col :span="6">经度&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ parseFloat(termInfo.lon/100).toFixed(6) }}</span></el-col>
+          <el-col :span="6">设备编号&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ termInfo.macAddress }}</span></el-col>
+          <el-col :span="6">固件版本&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ termInfo.version }}</span></el-col>
         </el-row>
-        <el-row type="flex" align="bottom" style="padding:4px 0">
-          <el-col :span="6" style="text-align:left;font-size:13px;font-weight:bold;color:#999">设备电量&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:black'>{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></span></el-col>
-          <el-col :span="6" style="text-align:left;font-size:13px;font-weight:bold;color:#999">纬度&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:black'>{{ parseFloat(termInfo.lat/100).toFixed(6) }}</span></el-col>
-          <el-col :span="6" style="text-align:left;font-size:13px;font-weight:bold;color:#999">设备备注名&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:black'>{{ termInfo.remark }}</span></el-col>
+        <el-row type="flex" align="bottom">
+          <el-col :span="6">设备电量&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></span></el-col>
+          <el-col :span="6">纬度&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ parseFloat(termInfo.lat/100).toFixed(6) }}</span></el-col>
+          <el-col :span="6">设备备注名&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ termInfo.remark }}</span></el-col>
         </el-row>
       </div>
-      <div style="background-color:white;padding:3px 20px;margin-top:6px;border-radius:6px;height:485px">
-        <el-row type="flex" align="middle" style="padding:4px 0">
-          <el-col :span="3" style="font-size:13px" :class="{active:activeSign==1}"><a href="javascript:void(0)" v-on:click="chooseData(1)">气体浓度</a></el-col>
-          <el-col :span="2" style="font-size:13px" :class="{active:activeSign==2}"><a href="javascript:void(0)" v-on:click="chooseData(2)">气温</a></el-col>
-          <el-col :span="2" style="font-size:13px" :class="{active:activeSign==3}"><a href="javascript:void(0)" v-on:click="chooseData(3)">湿度</a></el-col>
-          <el-col :span="3" style="font-size:13px" :class="{active:activeSign==4}"><a href="javascript:void(0)" v-on:click="chooseData(4)">详细数据</a></el-col>
-          <el-col :span="11" style="text-align:left;font-size:13px;color:#999">
+      <div class="chart-table">
+        <el-row class="tab" type="flex" align="middle">
+          <el-col :span="3" :class="{active:activeSign==1}"><a href="javascript:void(0)" v-on:click="chooseData(1)">气体浓度</a></el-col>
+          <el-col :span="2" :class="{active:activeSign==2}"><a href="javascript:void(0)" v-on:click="chooseData(2)">气温</a></el-col>
+          <el-col :span="2" :class="{active:activeSign==3}"><a href="javascript:void(0)" v-on:click="chooseData(3)">湿度</a></el-col>
+          <el-col :span="3" :class="{active:activeSign==4}"><a href="javascript:void(0)" v-on:click="chooseData(4)">详细数据</a></el-col>
+          <el-col :span="11" style="text-align:left;color:#999">
             时间&nbsp;&nbsp;
             <el-date-picker
               type="date"
@@ -68,22 +68,23 @@
             &nbsp;&nbsp;
             <el-button type="primary" size="mini" @click="searchDate(termInfo.macAddress)"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
           </el-col>
-          <el-col :span="3" style="text-align:right;font-size:13px;font-weight:bold;color:#999"><el-button size="mini" @click="zoomChange($event)" :class="activeSign==1||activeSign==2||activeSign==3?'':goneClass">切换缩放模式</el-button><el-button size="mini" @click="exportExcel" :class="activeSign===4?'':goneClass"><i class="fa fa-download" aria-hidden="true"></i>&nbsp;导出Excel</el-button></el-col>
+          <el-col :span="3" style="text-align:right;font-weight:bold;color:#999"><el-button size="mini" @click="zoomChange($event)" :class="activeSign==1||activeSign==2||activeSign==3?'':goneClass">切换缩放模式</el-button><el-button size="mini" @click="exportExcel" :class="activeSign===4?'':goneClass"><i class="fa fa-download" aria-hidden="true"></i>&nbsp;导出Excel</el-button></el-col>
         </el-row>
-        <div style="position:relative;margin-top:4px">
-          <div id="concentration" :style="{ visibility:(activeSign===1?'visible':'hidden') }" style="width: 100%;height: 432px;position:absolute"></div>
-          <div id="temperature" :style="{ visibility:(activeSign===2?'visible':'hidden') }" style="width: 100%;height: 432px;position:absolute"></div>
-          <div id="humidity" :style="{ visibility:(activeSign===3?'visible':'hidden') }" style="width: 100%;height: 432px;position:absolute"></div>
+        <div class="container">
+          <div id="concentration" :style="{ visibility:(activeSign===1?'visible':'hidden') }"></div>
+          <div id="temperature" :style="{ visibility:(activeSign===2?'visible':'hidden') }"></div>
+          <div id="humidity" :style="{ visibility:(activeSign===3?'visible':'hidden') }"></div>
           <el-table 
-            element-loading-text="拼命加载中"
-            element-loading-spinner="el-icon-loading"
-            element-loading-background="rgba(0, 0, 0, 0.8)"
             :cell-style="{ padding:0, fontSize:'12px'}"
             :header-cell-style="{ padding:0, background:'#dddddd', fontSize:'13px'}"
             :style="{ visibility:(activeSign===4?'visible':'hidden') }"
-            fit
-            :data="list" border style="width:100%" ref="multipleTable" max-height="438px" tooltip-effect="dark">
-            <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center" width="100" sortable></el-table-column>
+            :data="list"
+            stripe
+            highlight-current-row
+            border
+            max-height="438px"
+            tooltip-effect="dark">
+            <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center" width="100"></el-table-column>
             <el-table-column show-overflow-tooltip prop="temp" label="气温（℃）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="humidity" label="湿度（%R.H.）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="SO2" label="SO2（μg/m³）" align="center"></el-table-column>
@@ -105,22 +106,22 @@ export default {
   name: 'Detail',
   data() {
     return {
-      termInfo: { macAddress: ' ' },
-      termState: '',
-      batteryIcon: '',
-      activeSign: 1,
-      goneClass: 'sth-gone',
-      airChart: '',
-      tempChart: '',
-      humidityChart: '',
-      chartX: [],
-      N: 2,
-      newBeginT: '',
-      newEndT: '',
-      beginT: '',
-      endT: '',
-      list: [],
-      optionAir: {
+      termInfo: { macAddress: ' ' }, // 终端信息
+      termState: '', // 终端状态
+      batteryIcon: '', // 电池图标
+      activeSign: 1, // 选项卡激活项
+      goneClass: 'sth-gone', // 选项卡内容隐藏
+      airChart: '', // 气体图表
+      tempChart: '', // 温度图表
+      humidityChart: '', // 湿度图表
+      chartX: [], // 横轴数据
+      N: 2, // 默认显示前2天至当天的信息
+      newBeginT: '', // 日期选择器上显示的开始日期
+      newEndT: '', // 日期选择器上显示的结束日期
+      beginT: '', // 实际选定了的开始日期
+      endT: '', // 实际选定了的结束日期
+      list: [], // 存放详细数据
+      optionAir: { // 气体曲线图的设置数据
         tooltip: {
           show: true
         },
@@ -179,7 +180,7 @@ export default {
           smooth: true
         }]
       },
-      optionTemp: {
+      optionTemp: { // 温度曲线图的设置数据
         tooltip: {
           show: true
         },
@@ -214,7 +215,7 @@ export default {
           smooth: true
         }]
       },
-      optionHumidity: {
+      optionHumidity: { // 湿度曲线图的设置数据
         tooltip: {
           show: true
         },
@@ -252,12 +253,13 @@ export default {
     }
   },
   methods: {
-    focusInfo: function (addr) {
+    focusInfo: function (addr) { // 展示选定站点的信息
       let that = this
       this.termInfo.macAddress = addr
       this.newBeginT=this.beginT
       this.newEndT=this.endT
       this.list=[]
+      // 判断结束日期是否为当天，当天和非当天的横轴数据有差异
       if(new Date().getDate() == this.$moment(this.endT).format("D")) {
         var endH=new Date().getHours()
         for(var j=0;j<this.N;j++) {
@@ -273,8 +275,8 @@ export default {
         console.log(this.chartX)
       }
       this.$axios
-      .all([this.$axios.get('/device/'+addr+'/macAirDeviceInfo'), 
-            this.$axios.get('/device/macAirHourHistory',{
+      .all([this.$axios.get('/'+addr+'/macAirDeviceInfo'), // 获取选定站点的终端信息
+            this.$axios.get('/macAirHourHistory',{ // 获取选定站点在一定日期范围内的气体信息
               params: {
                 macAddress: addr,
                 beginTime: this.beginT,
@@ -283,10 +285,10 @@ export default {
             })
       ])
       .then(this.$axios.spread(function (madi, mahh) {
-        console.log(madi)
+        console.log(madi) // 得到选定站点的终端信息
         if(madi.data.successful && madi.data.data.length) {
           that.termInfo = madi.data.data[0]
-          switch(parseInt(that.termInfo.batteryInfo/10)) {
+          switch(parseInt(that.termInfo.batteryInfo/10)) { // 根据电池电量值选择不同的电池图标
             case 0: that.batteryIcon="fa fa-battery-0"
             break
             case 1:
@@ -304,7 +306,7 @@ export default {
             case 10: that.batteryIcon="fa fa-battery"
             break
           }
-          console.log(mahh)
+          console.log(mahh) // 得到选定站点在一定日期范围内的气体信息
           if(mahh.data.successful) {
             that.list=mahh.data.data
             for(var i=0;i<mahh.data.data.length;i++) {
@@ -317,7 +319,7 @@ export default {
             }
             that.termState = '正常'
           }
-          else {
+          else {  // 如果选定站点在一定日期范围内的气体信息的请求失败，则初始化相关信息
             that.termState='查询异常'
             that.optionAir.series[0].data=[]
             that.optionAir.series[1].data=[]
@@ -328,7 +330,7 @@ export default {
             that.list=[]
           }
         }
-        else {
+        else { // 如果选定站点的终端信息请求失败，则初始化相关信息
           that.termInfo = { macAddress: addr }
           that.termState='设备异常'
           that.optionAir.series[0].data=[]
@@ -339,6 +341,7 @@ export default {
           that.optionHumidity.series[0].data=[]
           that.list=[]
         }
+        // 设置横轴数据，作曲线图
         that.optionAir.xAxis.data=that.chartX
         that.optionTemp.xAxis.data=that.chartX
         that.optionHumidity.xAxis.data=that.chartX
@@ -350,12 +353,13 @@ export default {
         console.log(error)
       })
     },
-    chooseData:function (x) {
+    chooseData:function (x) { // 选择要激活的选项卡的内容
       this.activeSign=x
     },
-    searchDate:function (x) {
+    searchDate:function (x) { // 点击查询按钮后展示选定站点的信息
       this.beginT=this.newBeginT
       this.endT=this.newEndT
+      // 初始化图表数据
       this.optionAir.series[0].data=[]
       this.optionAir.series[1].data=[]
       this.optionAir.series[2].data=[]
@@ -364,6 +368,7 @@ export default {
       this.optionHumidity.series[0].data=[]
       this.chartX=[]
       this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
+      // 判断结束日期是否为非当天，当天和非当天的横轴数据有差异
       if(!(new Date().getDate() == this.$moment(this.endT).format("D"))) {
         for(var j=0;j<this.N+1;j++) {
           this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
@@ -375,7 +380,7 @@ export default {
       }
       this.focusInfo(x)
     },
-    zoomChange: function (e) {  
+    zoomChange: function (e) { // 图表缩放模式改变
       e.currentTarget.blur()
       if(this.optionAir.dataZoom.type=='inside') {
         this.optionAir.dataZoom.type='slider'
@@ -394,7 +399,7 @@ export default {
       this.tempChart.setOption(this.optionTemp)
       this.humidityChart.setOption(this.optionHumidity)
     },
-    exportExcel() {
+    exportExcel() { // 导出excel文件
       const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
       const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
       const data = this.list.map(v => filterVal.map(k => v[k]))
@@ -404,13 +409,16 @@ export default {
     }
   },
   mounted () {
+    // 创建charts实例
     this.airChart = this.$echarts.init(document.getElementById('concentration'))
     this.tempChart = this.$echarts.init(document.getElementById('temperature'))
     this.humidityChart = this.$echarts.init(document.getElementById('humidity'))
+    // 设置默认开始日期和结束日期
     this.beginT=this.$moment().subtract(this.N,'days').format("YYYY-MM-DD")
     this.endT=this.$moment().format("YYYY-MM-DD")
     this.newBeginT=this.beginT
     this.newEndT=this.endT
+    this.focusInfo('440604:009:AAJ')
   }
 }
 </script>
@@ -471,6 +479,9 @@ export default {
   padding: 6px 15px;
   border-radius: 12px;
 }
+.el-row {
+  padding:4px 0;
+}
 .el-row .active a {
   background-color:#f2f2f2;
   font-weight: bold;
@@ -478,7 +489,52 @@ export default {
 .el-row a:hover {
   color:#666;
 }
+.term-name {
+  text-align: left;
+  font-size: 18px;
+  font-weight: bold;
+  color:black;
+}
+.back-home {
+  text-align: right;
+  font-size: 13px;
+  color:#999;
+}
 .sth-gone {
   display: none;
+}
+.term-info {
+  background-color:white;
+  padding: 3px 20px;
+  margin-top: 6px;
+  border-radius: 6px;
+}
+.term-info .el-col {
+  text-align: left;
+  font-size: 13px;
+  font-weight: bold;
+  color:#999;
+}
+.term-info .el-col span {
+  color:black;
+}
+.chart-table {
+  background-color:white;
+  padding: 3px 20px;
+  margin-top: 6px;
+  border-radius: 6px;
+  height: 485px;
+}
+.chart-table .tab .el-col {
+  font-size: 13px;
+}
+.chart-table .container {
+  position: relative;
+  margin-top: 4px;
+}
+.chart-table .container div {
+  width: 100%;
+  height: 432px;
+  position: absolute;
 }
 </style>

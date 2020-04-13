@@ -1,6 +1,6 @@
 <template>
     <el-menu
-      :default-active="'/index'"
+      :default-active="this.$route.path"
       router
       mode="horizontal"
       background-color=rgb(52,58,64)
@@ -11,7 +11,7 @@
       <el-menu-item v-for="(item,i) in navList" :key="i" :index="item.name">
         {{ item.navItem }}
       </el-menu-item>
-      <router-link :to="{ path: '/login'}" replace>退出登录</router-link>
+      <a href="javascript:void(0)" @click="logout">退出登录</a>
       <i class="fa fa-sign-out" aria-hidden="true"></i>
       <a>{{username}}</a>
       <i class="fa fa-user-o" aria-hidden="true"></i>
@@ -19,7 +19,6 @@
 </template>
 
 <script>
-  import store from '@/store'
   export default {
     name: 'NavMenu',
     data () {
@@ -29,7 +28,13 @@
           {name: '/alarm', navItem: '告警功能'},
           {name: '/analyse', navItem: '数据分析'}
         ],
-        username: store.state.user.username
+        username: window.sessionStorage.getItem('username')
+      }
+    },
+    methods: {
+      logout () {
+        window.sessionStorage.clear()
+        this.$router.push('/login')
       }
     }
   }

@@ -41,11 +41,11 @@
       <el-button size="mini" style="float: right" @click="zoomChange($event)">切换缩放模式</el-button>
       <el-button size="mini" style="float: right" @click="exportExcel" :class="activeSign===0?'':goneClass"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
     </div>
-    <div style="position:relative;margin-top:4px">
-      <div id="multiSiteAirContrast" :style="{ visibility:(activeSign===0?'visible':'hidden') }" style="width: 100%;height: 468px;position:absolute"></div>
-      <div id="adjustOriginAirContrast" :style="{ visibility:(activeSign===1?'visible':'hidden') }" style="width: 100%;height: 468px;position:absolute"></div>
-      <div id="aqiAirChart" :style="{ visibility:(activeSign===2?'visible':'hidden') }" style="width: 100%;height: 468px;position:absolute"></div>
-      <div id="termBatteryChart" :style="{ visibility:(activeSign===3?'visible':'hidden') }" style="width: 100%;height: 468px;position:absolute"></div>
+    <div class="chart-area">
+      <div id="multiSiteAirContrast" :style="{ visibility:(activeSign===0?'visible':'hidden') }"></div>
+      <div id="adjustOriginAirContrast" :style="{ visibility:(activeSign===1?'visible':'hidden') }"></div>
+      <div id="aqiAirChart" :style="{ visibility:(activeSign===2?'visible':'hidden') }"></div>
+      <div id="termBatteryChart" :style="{ visibility:(activeSign===3?'visible':'hidden') }"></div>
     </div>
   </div>
 </div>
@@ -57,23 +57,24 @@ export default {
   name: 'Analyse',
   data () {
     return {
-      airChart: '',
-      airContrastChart: '',
-      airAQIChart: '',
-      batteryChart: '',
-      chartX: [],
-      beginT: '',
-      endT: '',
-      beginTL: [],
-      endTL: [],
-      activeSign: 0,
-      goneClass: 'sth-gone',
-      N: 1,
-      list: [],
+      airChart: '', // 校准气体数据图表
+      airContrastChart: '', // 校准气体数据与原始气体数据对比的气体图表
+      airAQIChart: '', // 空气AQI图表
+      batteryChart: '', // 终端电量图表
+      chartX: [], // 横轴数据
+      beginT: '', // 日期选择器上显示的开始日期
+      endT: '', // 日期选择器上显示的结束日期
+      beginTL: [], // 存储每个选项卡中的日期选择器上显示的开始日期
+      endTL: [], // 存储每个选项卡中的日期选择器上显示的结束日期
+      activeSign: 0, // 选项卡激活项
+      goneClass: 'sth-gone', // 选项卡内容隐藏
+      N: 1, // 默认显示昨天至当天的信息
+      list: [],  // 存放要导出为excel文件的数据
+      // 各个站点的mac地址
       macAddrList: ['440604:000:AAA','440604:001:AAB','440604:002:AAC','440604:003:AAD','440604:004:AAE','440604:005:AAF','440604:006:AAG','440604:007:AAH','440604:008:AAI','440604:009:AAJ','440604:010:AAK'],
-      airChoose: 'SO2',
-      airCL: [],
-      airOptions: [{
+      airChoose: 'SO2', // 气体选择器默认选定SO2
+      airCL: [], // 不同选项卡所显示的选定气体
+      airOptions: [{ // 校准气体数据曲线图的设置数据
         value: 'SO2',
         label: 'SO2'
       },
@@ -190,7 +191,7 @@ export default {
           smooth: true
         }]
       },
-      optionAirContrast: {
+      optionAirContrast: { // 校准气体数据与原始气体数据对比的气体曲线图的设置数据
         tooltip: {
           show: true
         },
@@ -357,7 +358,7 @@ export default {
           smooth: true
         }]
       },
-      optionAirAQI: {
+      optionAirAQI: { // 空气AQI曲线图的设置数据
         tooltip: {
           show: true
         },
@@ -458,7 +459,7 @@ export default {
           smooth: true
         }]
       },
-      optionBattery: {
+      optionBattery: { // 终端电量曲线图的设置数据
         tooltip: {
           show: true
         },
@@ -562,14 +563,15 @@ export default {
     }
   },
   methods: {
-    searchSth: function () {
+    searchSth: function () { // 查询
       let that = this
       this.chartX=[]
-      if(this.activeSign == 0) {
+      if(this.activeSign == 0) { // 在第一个选项卡中点击的查询
         this.beginTL[0]=this.beginT
         this.endTL[0]=this.endT
         this.airCL[0]=this.airChoose
         this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
+        // 判断结束日期是否为当天，当天和非当天的横轴数据有差异
         if(new Date().getDate() == this.$moment(this.endT).format("D")) {
           var endH=new Date().getHours()
           for(var j=0;j<this.N;j++) {
@@ -584,6 +586,7 @@ export default {
           }
           console.log(this.chartX)
         }
+        // 结束日期为非当天
         else {
           for(var j=0;j<this.N+1;j++) {
             this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
@@ -593,7 +596,7 @@ export default {
           }
           console.log(this.chartX)
         }
-        this.$axios.get('/device/macAllAirHour',{
+        this.$axios.get('/macAllAirHour',{ // 获取校准气体数据
           params: {
             beginTime: this.beginT,
             endTime: this.endT,
@@ -601,7 +604,7 @@ export default {
           }
         })
         .then( maah => {
-          console.log(maah)
+          console.log(maah) // 得到校准气体数据
           if(maah.data.successful) {
             that.list = maah.data.newData
             that.optionAir.series[0].data = maah.data.data.air1
@@ -616,24 +619,27 @@ export default {
             that.optionAir.series[9].data = maah.data.data.air10
             that.optionAir.series[10].data = maah.data.data.air11
           }
-          else {
+          else { // 如果校准气体数据请求失败，则初始化相关信息
             that.list = []
             for(var i=0;i<11;i++) {
               that.optionAir.series[i].data = []
             }
           }
+          // 设置横轴数据
           that.optionAir.xAxis.data=that.chartX
+          // 作图
           that.airChart.setOption(that.optionAir)
         })
         .catch(function (error) { // 请求失败处理
           console.log(error)
         })
       }
-      else if(this.activeSign == 1) {
+      else if(this.activeSign == 1) { // 在第二个选项卡中点击的查询
         this.beginTL[1]=this.beginT
         this.endTL[1]=this.endT
         this.airCL[1]=this.airChoose
         this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
+        // 判断结束日期是否为当天，当天和非当天的横轴数据有差异
         if(new Date().getDate() == this.$moment(this.endT).format("D")) {
           var endH=new Date().getHours()
           for(var j=0;j<this.N;j++) {
@@ -648,6 +654,7 @@ export default {
           }
           console.log(this.chartX)
         }
+        // 结束日期为非当天
         else {
           for(var j=0;j<this.N+1;j++) {
             this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
@@ -658,15 +665,15 @@ export default {
           console.log(this.chartX)
         }
         this.$axios
-        .all([
-          this.$axios.get('/device/macAllAirHour',{
+        .all([ // 获取校准气体数据和原始气体数据
+          this.$axios.get('/macAllAirHour',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               airType: this.airChoose
             }
           }),
-          this.$axios.get('/device/macOldAirHour',{
+          this.$axios.get('/macOldAirHour',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
@@ -675,7 +682,7 @@ export default {
           })
         ])
         .then(this.$axios.spread(function (maah,moah) {
-          console.log(maah)
+          console.log(maah) // 得到校准气体数据
           that.optionAirContrast.series[0].data = maah.data.data.air1
           that.optionAirContrast.series[1].data = maah.data.data.air2
           that.optionAirContrast.series[2].data = maah.data.data.air3
@@ -687,7 +694,7 @@ export default {
           that.optionAirContrast.series[8].data = maah.data.data.air9
           that.optionAirContrast.series[9].data = maah.data.data.air10
           that.optionAirContrast.series[10].data = maah.data.data.air11
-          console.log(moah)
+          console.log(moah) // 得到原始气体数据
           that.optionAirContrast.series[11].data = moah.data.data.air1
           that.optionAirContrast.series[12].data = moah.data.data.air2
           that.optionAirContrast.series[13].data = moah.data.data.air3
@@ -699,93 +706,96 @@ export default {
           that.optionAirContrast.series[19].data = moah.data.data.air9
           that.optionAirContrast.series[20].data = moah.data.data.air10
           that.optionAirContrast.series[21].data = moah.data.data.air11
+          // 设置横轴数据
           that.optionAirContrast.xAxis.data = that.chartX
+          // 作图
           that.airContrastChart.setOption(that.optionAirContrast)
         }))
         .catch(function (error) { // 请求失败处理
           console.log(error)
         })
       }
-      else if(this.activeSign == 2) {
+      else if(this.activeSign == 2) { // 在第三个选项卡中点击的查询
         this.beginTL[2]=this.beginT
         this.endTL[2]=this.endT
         this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
+        // 设置横轴数据
         for(var i=this.N;i>=0;i--) {
           that.optionAirAQI.xAxis.data[this.N-i] = this.$moment().subtract(i,'days').format('YYYY-MM-DD')
         }
         this.$axios
-        .all([
-          this.$axios.get('/device/macDayIAQI',{
+        .all([  // 获取各个站点空气AQI数据
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[0],
               beginTime: this.beginT,
               endTime: this.endT
             }
           }),
-          this.$axios.get('/device/macDayIAQI',{
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[1],
               beginTime: this.beginT,
               endTime: this.endT
             }
           }),
-          this.$axios.get('/device/macDayIAQI',{
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[2],
               beginTime: this.beginT,
               endTime: this.endT
             }
           }),
-          this.$axios.get('/device/macDayIAQI',{
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[3],
               beginTime: this.beginT,
               endTime: this.endT
             }
           }),
-          this.$axios.get('/device/macDayIAQI',{
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[4],
               beginTime: this.beginT,
               endTime: this.endT
             }
           }),
-          this.$axios.get('/device/macDayIAQI',{
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[5],
               beginTime: this.beginT,
               endTime: this.endT
             }
           }),
-          this.$axios.get('/device/macDayIAQI',{
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[6],
               beginTime: this.beginT,
               endTime: this.endT
             }
           }),
-          this.$axios.get('/device/macDayIAQI',{
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[7],
               beginTime: this.beginT,
               endTime: this.endT
             }
           }),
-          this.$axios.get('/device/macDayIAQI',{
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[8],
               beginTime: this.beginT,
               endTime: this.endT
             }
           }),
-          this.$axios.get('/device/macDayIAQI',{
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[9],
               beginTime: this.beginT,
               endTime: this.endT
             }
           }),
-          this.$axios.get('/device/macDayIAQI',{
+          this.$axios.get('/macDayIAQI',{
             params: {
               macAddress: this.macAddrList[10],
               beginTime: this.beginT,
@@ -822,82 +832,82 @@ export default {
           console.log(error)
         })
       }
-      else if(this.activeSign == 3) {
+      else if(this.activeSign == 3) { // 在第四个选项卡中点击的查询
         this.beginTL[3]=this.beginT
         this.endTL[3]=this.endT
         this.$axios
-        .all([
-          this.$axios.get('/device/batteryList',{
+        .all([ // 获取各个站点电池电量数据
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               macAddress: this.macAddrList[0]
             }
           }),
-          this.$axios.get('/device/batteryList',{
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               macAddress: this.macAddrList[1]
             }
           }),
-          this.$axios.get('/device/batteryList',{
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               macAddress: this.macAddrList[2]
             }
           }),
-          this.$axios.get('/device/batteryList',{
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               macAddress: this.macAddrList[3]
             }
           }),
-          this.$axios.get('/device/batteryList',{
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               macAddress: this.macAddrList[4]
             }
           }),
-          this.$axios.get('/device/batteryList',{
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               macAddress: this.macAddrList[5]
             }
           }),
-          this.$axios.get('/device/batteryList',{
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               macAddress: this.macAddrList[6]
             }
           }),
-          this.$axios.get('/device/batteryList',{
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               macAddress: this.macAddrList[7]
             }
           }),
-          this.$axios.get('/device/batteryList',{
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               macAddress: this.macAddrList[8]
             }
           }),
-          this.$axios.get('/device/batteryList',{
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
               macAddress: this.macAddrList[9]
             }
           }),
-          this.$axios.get('/device/batteryList',{
+          this.$axios.get('/batteryList',{
             params: {
               beginTime: this.beginT,
               endTime: this.endT,
@@ -968,9 +978,9 @@ export default {
         })
       }
     },
-    zoomChange: function (e) {  
+    zoomChange: function (e) { // 图表缩放模式改变
       e.currentTarget.blur()
-      switch(this.activeSign) {
+      switch(this.activeSign) { // 各个选项卡中的图表缩放模式互不影响
         case 0: if(this.optionAir.dataZoom.type=='inside') { this.optionAir.dataZoom.type='slider' }
                 else { this.optionAir.dataZoom.type='inside' }
                 this.airChart.clear()
@@ -993,7 +1003,7 @@ export default {
                 break
       }
     },
-    chooseData:function (x) {
+    chooseData:function (x) { // 选择要激活的选项卡的内容
       this.activeSign=x
       this.beginT=this.beginTL[x]
       this.endT=this.endTL[x]
@@ -1001,7 +1011,7 @@ export default {
         this.airChoose=this.airCL[x]
       }
     },
-    exportExcel() {
+    exportExcel() { // 导出excel文件
         const th = ['监测时间', '绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
         const filterVal = ['time', 'air1', 'air2', 'air3', 'air4', 'air5', 'air6', 'air7', 'air8', 'air9', 'air10', 'air11']
         const data = this.list.map(v => filterVal.map(k => v[k]))
@@ -1011,19 +1021,23 @@ export default {
     }
   },
   mounted () {
+    // 创建charts实例
     this.airChart = this.$echarts.init(document.getElementById('multiSiteAirContrast'))
     this.airContrastChart = this.$echarts.init(document.getElementById('adjustOriginAirContrast'))
     this.airAQIChart = this.$echarts.init(document.getElementById('aqiAirChart'))
     this.batteryChart = this.$echarts.init(document.getElementById('termBatteryChart'))
+    // 设置默认开始日期和结束日期
     this.beginT = this.$moment().subtract(this.N,'days').format("YYYY-MM-DD")
     this.endT = this.$moment().format("YYYY-MM-DD")
     for(var i=0;i<4;i++) {
       this.beginTL[i]=this.beginT
       this.endTL[i]=this.endT
     }
+    // 设置默认选定气体
     for(i=0;i<2;i++) {
       this.airCL[i]=this.airChoose
     }
+    this.searchSth()
   }
 }
 </script>
@@ -1068,6 +1082,15 @@ export default {
 }
 .filter_container span {
   padding-right: 10px;
+}
+.chart-area {
+  position: relative;
+  margin-top: 4px;
+}
+.chart-area div {
+  width: 100%;
+  height: 468px;
+  position: absolute;
 }
 .el-select {
   padding-right: 15px;
