@@ -27,7 +27,7 @@
           <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
         <el-button type="primary" size="mini" v-on:click="getTable">查询</el-button>
-        <el-button v-on:click="exportExcel" size="mini" style="float: right"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
+        <el-button v-on:click="exportExcel($event)" size="mini" style="float: right"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
       </div>
       <!--表格-->
       <div style="margin-top: 10px">
@@ -139,7 +139,8 @@ export default {
       this.currentPage = val
     },
     // 导出为excel
-    exportExcel() {
+    exportExcel(e) {
+      e.currentTarget.blur()
       const th = ['站点名称', '告警时间', '气体类型', '气体值', '异常类型']
       const filterVal = ['macAddress', 'beginTime', 'airType', 'airValue', 'topType']
       const data = this.filtedData.map(v => filterVal.map(k => v[k]))

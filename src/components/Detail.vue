@@ -20,7 +20,7 @@
       <div>
         <el-row type="flex" align="bottom">
           <el-col :span="14" class="term-name">{{ termInfo.remark }}</el-col>
-          <el-col :span="10" class="back-home"><router-link to="/index" style="text-decoration: none;background-color:white;padding:6px 16px 5px 10px;border-radius: 6px"><i class="fa fa-reply" aria-hidden="true"></i>&nbsp;返回首页</router-link></el-col>
+          <el-col :span="10" class="back-home"><router-link to="/index"><i class="fa fa-reply" aria-hidden="true"></i>&nbsp;返回首页</router-link></el-col>
         </el-row>
       </div>
       <div class="term-info">
@@ -37,39 +37,36 @@
         </el-row>
       </div>
       <div class="chart-table">
-        <el-row class="tab" type="flex" align="middle">
-          <el-col :span="3" :class="{active:activeSign==1}"><a href="javascript:void(0)" v-on:click="chooseData(1)">气体浓度</a></el-col>
-          <el-col :span="2" :class="{active:activeSign==2}"><a href="javascript:void(0)" v-on:click="chooseData(2)">气温</a></el-col>
-          <el-col :span="2" :class="{active:activeSign==3}"><a href="javascript:void(0)" v-on:click="chooseData(3)">湿度</a></el-col>
-          <el-col :span="3" :class="{active:activeSign==4}"><a href="javascript:void(0)" v-on:click="chooseData(4)">详细数据</a></el-col>
-          <el-col :span="11" style="text-align:left;color:#999">
-            时间&nbsp;&nbsp;
-            <el-date-picker
-              type="date"
-              v-model="newBeginT"
-              placeholder="开始日期"
-              size="mini"
-              value-format="yyyy-MM-dd"
-              style="width:150px"
-              :editable="false"
-              :clearable="false">
-            </el-date-picker>
-            ～
-            <el-date-picker
-              type="date"
-              v-model="newEndT"
-              placeholder="结束日期"
-              size="mini"
-              value-format="yyyy-MM-dd"
-              style="width:150px"
-              :editable="false"
-              :clearable="false">
-            </el-date-picker>
-            &nbsp;&nbsp;
-            <el-button type="primary" size="mini" @click="searchDate(termInfo.macAddress)"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
-          </el-col>
-          <el-col :span="3" style="text-align:right;font-weight:bold;color:#999"><el-button size="mini" @click="zoomChange($event)" :class="activeSign==1||activeSign==2||activeSign==3?'':goneClass">切换缩放模式</el-button><el-button size="mini" @click="exportExcel" :class="activeSign===4?'':goneClass"><i class="fa fa-download" aria-hidden="true"></i>&nbsp;导出Excel</el-button></el-col>
-        </el-row>
+        <a href="javascript:void(0)" :class="{active:activeSign==4}" v-on:click="chooseData(4)">详细数据</a>
+        <a href="javascript:void(0)" :class="{active:activeSign==1}" v-on:click="chooseData(1)">气体浓度</a>
+        <a href="javascript:void(0)" :class="{active:activeSign==2}" v-on:click="chooseData(2)">气温</a>
+        <a href="javascript:void(0)" :class="{active:activeSign==3}" v-on:click="chooseData(3)" style="margin-right:60px">湿度</a>
+        时间&nbsp;&nbsp;
+        <el-date-picker
+          type="date"
+          v-model="newBeginT"
+          placeholder="开始日期"
+          size="mini"
+          value-format="yyyy-MM-dd"
+          style="width:150px"
+          :editable="false"
+          :clearable="false">
+        </el-date-picker>
+        ～
+        <el-date-picker
+          type="date"
+          v-model="newEndT"
+          placeholder="结束日期"
+          size="mini"
+          value-format="yyyy-MM-dd"
+          style="width:150px"
+          :editable="false"
+          :clearable="false">
+        </el-date-picker>
+        &nbsp;&nbsp;
+        <el-button type="primary" size="mini" @click="searchDate(termInfo.macAddress)"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
+        <el-button size="mini" @click="exportExcel($event)" :class="activeSign===4?'':goneClass" style="float:right"><i class="fa fa-download" aria-hidden="true"></i>&nbsp;导出Excel</el-button>
+        <el-button size="mini" @click="zoomChange($event)" :class="activeSign==1||activeSign==2||activeSign==3?'':goneClass" style="float:right">切换缩放模式</el-button>
         <div class="container">
           <div id="concentration" :style="{ visibility:(activeSign===1?'visible':'hidden') }"></div>
           <div id="temperature" :style="{ visibility:(activeSign===2?'visible':'hidden') }"></div>
@@ -109,7 +106,7 @@ export default {
       termInfo: { macAddress: ' ' }, // 终端信息
       termState: '', // 终端状态
       batteryIcon: '', // 电池图标
-      activeSign: 1, // 选项卡激活项
+      activeSign: 4, // 选项卡激活项
       goneClass: 'sth-gone', // 选项卡内容隐藏
       airChart: '', // 气体图表
       tempChart: '', // 温度图表
@@ -399,7 +396,8 @@ export default {
       this.tempChart.setOption(this.optionTemp)
       this.humidityChart.setOption(this.optionHumidity)
     },
-    exportExcel() { // 导出excel文件
+    exportExcel(e) { // 导出excel文件
+      e.currentTarget.blur()
       const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
       const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
       const data = this.list.map(v => filterVal.map(k => v[k]))
@@ -476,15 +474,13 @@ export default {
 .el-col a {
   text-decoration: none;
   color:#999;
-  padding: 6px 15px;
-  border-radius: 12px;
+  padding:6px 16px 5px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  background-color:white;
 }
 .el-row {
   padding:4px 0;
-}
-.el-row .active a {
-  background-color:#f2f2f2;
-  font-weight: bold;
 }
 .el-row a:hover {
   color:#666;
@@ -520,13 +516,26 @@ export default {
 }
 .chart-table {
   background-color:white;
-  padding: 3px 20px;
+  padding: 6px 20px;
   margin-top: 6px;
+  font-size: 15px;
   border-radius: 6px;
   height: 485px;
 }
-.chart-table .tab .el-col {
+.chart-table a {
+  text-decoration: none;
+  color:#999;
+  padding: 8px 20px;
+  border-radius: 6px;
   font-size: 13px;
+  font-weight: bold;
+  background-color:#f4f4f4;
+}
+.chart-table a.active {
+  background-color:#dddddd;  
+}
+.chart-table a:hover {
+  color:#666;
 }
 .chart-table .container {
   position: relative;

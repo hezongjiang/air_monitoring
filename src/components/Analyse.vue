@@ -33,13 +33,17 @@
         :clearable="false"
         :editable="false">
       </el-date-picker>
+      <span :class="activeSign===1?'':goneClass">站点</span>
+      <el-select @input="contrastMaahMoah" :class="activeSign===1?'':goneClass" size="mini" v-model="termChoose" placeholder="请选择站点" style="width:150px">
+        <el-option v-for="item in termOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+      </el-select>
       <span :class="activeSign===0||activeSign===1?'':goneClass">气体</span>
       <el-select :class="activeSign===0||activeSign===1?'':goneClass" size="mini" v-model="airChoose" placeholder="请选择气体" style="width:150px">
         <el-option v-for="item in airOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
       </el-select>
-      <el-button type="primary" size="mini" v-on:click="searchSth">查询</el-button>
+      <el-button type="primary" size="mini" @click="searchSth">查询</el-button>
       <el-button size="mini" style="float: right" @click="zoomChange($event)">切换缩放模式</el-button>
-      <el-button size="mini" style="float: right" @click="exportExcel" :class="activeSign===0?'':goneClass"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
+      <el-button size="mini" style="float: right" @click="exportExcel($event)"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
     </div>
     <div class="chart-area">
       <div id="multiSiteAirContrast" :style="{ visibility:(activeSign===0?'visible':'hidden') }"></div>
@@ -61,7 +65,7 @@ export default {
       airContrastChart: '', // 校准气体数据与原始气体数据对比的气体图表
       airAQIChart: '', // 空气AQI图表
       batteryChart: '', // 终端电量图表
-      chartX: [], // 横轴数据
+      // chartX: [], // 横轴数据
       beginT: '', // 日期选择器上显示的开始日期
       endT: '', // 日期选择器上显示的结束日期
       beginTL: [], // 存储每个选项卡中的日期选择器上显示的开始日期
@@ -69,9 +73,14 @@ export default {
       activeSign: 0, // 选项卡激活项
       goneClass: 'sth-gone', // 选项卡内容隐藏
       N: 1, // 默认显示昨天至当天的信息
-      list: [],  // 存放要导出为excel文件的数据
+      listMaah: [],  // 存放要导出为excel文件的数据
+      listMaahMoah: [], // 存放要导出为excel文件的数据
+      listMdiaqi: [], // 存放要导出为excel文件的数据
+      listBl: [], // 存放要导出为excel文件的数据
       // 各个站点的mac地址
       macAddrList: ['440604:000:AAA','440604:001:AAB','440604:002:AAC','440604:003:AAD','440604:004:AAE','440604:005:AAF','440604:006:AAG','440604:007:AAH','440604:008:AAI','440604:009:AAJ','440604:010:AAK'],
+      maahData: {},
+      moahData: {},
       airChoose: 'SO2', // 气体选择器默认选定SO2
       airCL: [], // 不同选项卡所显示的选定气体
       airOptions: [{ // 校准气体数据曲线图的设置数据
@@ -90,6 +99,51 @@ export default {
         value: 'PM25',
         label: 'PM2.5'
       }],
+      termChoose: '绿岛湖',
+      termOptions: [{
+        value: '绿岛湖',
+        label: '绿岛湖'
+      },
+      {
+        value: '南庄实验中学',
+        label: '南庄实验中学'
+      },
+      {
+        value: '罗南村委',
+        label: '罗南村委'
+      },
+      {
+        value: '南庄水利所',
+        label: '南庄水利所'
+      },
+      {
+        value: '吉利小学',
+        label: '吉利小学'
+      },
+      {
+        value: '罗格村委',
+        label: '罗格村委'
+      },
+      {
+        value: '龙津老年活动中心',
+        label: '龙津老年活动中心'
+      },
+      {
+        value: '南庄三中',
+        label: '南庄三中'
+      },
+      {
+        value: '吉利社区',
+        label: '吉利社区'
+      },
+      {
+        value: '龙湾大桥',
+        label: '龙湾大桥'
+      },
+      {
+        value: '污水处理厂',
+        label: '污水处理厂'
+      }],
       optionAir: {
         tooltip: {
           show: true
@@ -100,12 +154,12 @@ export default {
         },
         legend: {
           top: 10,
-          right: 10,
+          right: 0,
           data: ['绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
         },
         grid: {
-          left: '33px',
-          right: '15px',
+          left: '38px',
+          right: '38px',
           bottom: '40px',
           top: '40px'
         },
@@ -200,15 +254,15 @@ export default {
           filterMode: 'none'
         },
         legend: {
-          top: 0,
-          left: 300,
-          data: ['绿岛湖','绿岛湖-原始','南庄实验中学','南庄实验中学-原始','罗南村委','罗南村委-原始','南庄水利所','南庄水利所-原始','吉利小学','吉利小学-原始','罗格村委','罗格村委-原始','龙津老年活动中心','龙津老年活动中心-原始','南庄三中','南庄三中-原始','吉利社区','吉利社区-原始','龙湾大桥','龙湾大桥-原始','污水处理厂','污水处理厂-原始']
+          top: 10,
+          right: 0,
+          data: ['校准小时走势', '原始小时走势']
         },
         grid: {
-          left: '33px',
-          right: '15px',
+          left: '38px',
+          right: '38px',
           bottom: '40px',
-          top: '66px'
+          top: '40px'
         },
         xAxis: {
           name: '时间（时）',
@@ -226,133 +280,13 @@ export default {
           axisLabel: { fontSize: 11 }
         },
         series: [{
-          name: '绿岛湖',
+          name: '校准小时走势',
           data: [],
           type: 'line',
           smooth: true
         },
         {
-          name: '南庄实验中学',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '罗南村委',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '南庄水利所',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '吉利小学',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '罗格村委',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '龙津老年活动中心',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '南庄三中',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '吉利社区',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '龙湾大桥',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '污水处理厂',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '绿岛湖-原始',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '南庄实验中学-原始',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '罗南村委-原始',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '南庄水利所-原始',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '吉利小学-原始',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '罗格村委-原始',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '龙津老年活动中心-原始',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '南庄三中-原始',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '吉利社区-原始',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '龙湾大桥-原始',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '污水处理厂-原始',
+          name: '原始小时走势',
           data: [],
           type: 'line',
           smooth: true
@@ -368,7 +302,7 @@ export default {
         },
         legend: {
           top: 10,
-          right: 10,
+          right: 0,
           data: ['绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
         },
         grid: {
@@ -469,12 +403,12 @@ export default {
         },
         legend: {
           top: 10,
-          right: 10,
+          right: 0,
           data: ['绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
         },
         grid: {
-          left: '33px',
-          right: '30px',
+          left: '48px',
+          right: '46px',
           bottom: '40px',
           top: '40px'
         },
@@ -565,37 +499,38 @@ export default {
   methods: {
     searchSth: function () { // 查询
       let that = this
-      this.chartX=[]
+      // this.chartX=[]
       if(this.activeSign == 0) { // 在第一个选项卡中点击的查询
         this.beginTL[0]=this.beginT
         this.endTL[0]=this.endT
         this.airCL[0]=this.airChoose
-        this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
+        // this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
+        this.listMaah=[]
         // 判断结束日期是否为当天，当天和非当天的横轴数据有差异
-        if(new Date().getDate() == this.$moment(this.endT).format("D")) {
-          var endH=new Date().getHours()
-          for(var j=0;j<this.N;j++) {
-            this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
-            for(var i=1;i<24;i++) {
-              this.chartX[24*j+i]=i
-            }
-          }
-          this.chartX[24*j]=new Date().getDate()+'日'
-          for(i=1;i<endH+1;i++) {
-            this.chartX[24*j+i]=i
-          }
-          console.log(this.chartX)
-        }
-        // 结束日期为非当天
-        else {
-          for(var j=0;j<this.N+1;j++) {
-            this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
-            for(var i=1;i<24;i++) {
-              this.chartX[24*j+i]=i
-            }
-          }
-          console.log(this.chartX)
-        }
+        // if(new Date().getDate() == this.$moment(this.endT).format("D")) {
+        //   var endH=new Date().getHours()
+        //   for(var j=0;j<this.N;j++) {
+        //     this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
+        //     for(var i=1;i<24;i++) {
+        //       this.chartX[24*j+i]=i
+        //     }
+        //   }
+        //   this.chartX[24*j]=new Date().getDate()+'日'
+        //   for(i=1;i<endH+1;i++) {
+        //     this.chartX[24*j+i]=i
+        //   }
+        //   console.log(this.chartX)
+        // }
+        // // 结束日期为非当天
+        // else {
+        //   for(var j=0;j<this.N+1;j++) {
+        //     this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
+        //     for(var i=1;i<24;i++) {
+        //       this.chartX[24*j+i]=i
+        //     }
+        //   }
+        //   console.log(this.chartX)
+        // }
         this.$axios.get('/macAllAirHour',{ // 获取校准气体数据
           params: {
             beginTime: this.beginT,
@@ -606,7 +541,8 @@ export default {
         .then( maah => {
           console.log(maah) // 得到校准气体数据
           if(maah.data.successful) {
-            that.list = maah.data.newData
+            that.listMaah = maah.data.newData
+            that.optionAir.xAxis.data = maah.data.data.time
             that.optionAir.series[0].data = maah.data.data.air1
             that.optionAir.series[1].data = maah.data.data.air2
             that.optionAir.series[2].data = maah.data.data.air3
@@ -620,13 +556,10 @@ export default {
             that.optionAir.series[10].data = maah.data.data.air11
           }
           else { // 如果校准气体数据请求失败，则初始化相关信息
-            that.list = []
-            for(var i=0;i<11;i++) {
+            for(let i=0;i<11;i++) {
               that.optionAir.series[i].data = []
             }
           }
-          // 设置横轴数据
-          that.optionAir.xAxis.data=that.chartX
           // 作图
           that.airChart.setOption(that.optionAir)
         })
@@ -638,32 +571,33 @@ export default {
         this.beginTL[1]=this.beginT
         this.endTL[1]=this.endT
         this.airCL[1]=this.airChoose
-        this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
+        // this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
+        this.listMaahMoah=[]
         // 判断结束日期是否为当天，当天和非当天的横轴数据有差异
-        if(new Date().getDate() == this.$moment(this.endT).format("D")) {
-          var endH=new Date().getHours()
-          for(var j=0;j<this.N;j++) {
-            this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
-            for(var i=1;i<24;i++) {
-              this.chartX[24*j+i]=i
-            }
-          }
-          this.chartX[24*j]=new Date().getDate()+'日'
-          for(i=1;i<endH+1;i++) {
-            this.chartX[24*j+i]=i
-          }
-          console.log(this.chartX)
-        }
-        // 结束日期为非当天
-        else {
-          for(var j=0;j<this.N+1;j++) {
-            this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
-            for(var i=1;i<24;i++) {
-              this.chartX[24*j+i]=i
-            }
-          }
-          console.log(this.chartX)
-        }
+        // if(new Date().getDate() == this.$moment(this.endT).format("D")) {
+        //   var endH=new Date().getHours()
+        //   for(var j=0;j<this.N;j++) {
+        //     this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
+        //     for(var i=1;i<24;i++) {
+        //       this.chartX[24*j+i]=i
+        //     }
+        //   }
+        //   this.chartX[24*j]=new Date().getDate()+'日'
+        //   for(i=1;i<endH+1;i++) {
+        //     this.chartX[24*j+i]=i
+        //   }
+        //   console.log(this.chartX)
+        // }
+        // // 结束日期为非当天
+        // else {
+        //   for(var j=0;j<this.N+1;j++) {
+        //     this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
+        //     for(var i=1;i<24;i++) {
+        //       this.chartX[24*j+i]=i
+        //     }
+        //   }
+        //   console.log(this.chartX)
+        // }
         this.$axios
         .all([ // 获取校准气体数据和原始气体数据
           this.$axios.get('/macAllAirHour',{
@@ -683,33 +617,50 @@ export default {
         ])
         .then(this.$axios.spread(function (maah,moah) {
           console.log(maah) // 得到校准气体数据
-          that.optionAirContrast.series[0].data = maah.data.data.air1
-          that.optionAirContrast.series[1].data = maah.data.data.air2
-          that.optionAirContrast.series[2].data = maah.data.data.air3
-          that.optionAirContrast.series[3].data = maah.data.data.air4
-          that.optionAirContrast.series[4].data = maah.data.data.air5
-          that.optionAirContrast.series[5].data = maah.data.data.air6
-          that.optionAirContrast.series[6].data = maah.data.data.air7
-          that.optionAirContrast.series[7].data = maah.data.data.air8
-          that.optionAirContrast.series[8].data = maah.data.data.air9
-          that.optionAirContrast.series[9].data = maah.data.data.air10
-          that.optionAirContrast.series[10].data = maah.data.data.air11
           console.log(moah) // 得到原始气体数据
-          that.optionAirContrast.series[11].data = moah.data.data.air1
-          that.optionAirContrast.series[12].data = moah.data.data.air2
-          that.optionAirContrast.series[13].data = moah.data.data.air3
-          that.optionAirContrast.series[14].data = moah.data.data.air4
-          that.optionAirContrast.series[15].data = moah.data.data.air5
-          that.optionAirContrast.series[16].data = moah.data.data.air6
-          that.optionAirContrast.series[17].data = moah.data.data.air7
-          that.optionAirContrast.series[18].data = moah.data.data.air8
-          that.optionAirContrast.series[19].data = moah.data.data.air9
-          that.optionAirContrast.series[20].data = moah.data.data.air10
-          that.optionAirContrast.series[21].data = moah.data.data.air11
-          // 设置横轴数据
-          that.optionAirContrast.xAxis.data = that.chartX
-          // 作图
-          that.airContrastChart.setOption(that.optionAirContrast)
+          if(maah.data.successful&&moah.data.successful) {
+            that.maahData = maah.data.data
+            that.moahData = moah.data.data
+            // 设置横轴数据
+            that.optionAirContrast.xAxis.data = maah.data.data.time
+            // 作图
+            that.contrastMaahMoah()
+            for(let i=0;i<maah.data.newData.length;i++) {
+              that.listMaahMoah[i]=new Object()
+              that.listMaahMoah[i].time=maah.data.data.time[i]
+              that.listMaahMoah[i].air1=maah.data.data.air1[i]
+              that.listMaahMoah[i].air2=moah.data.data.air1[i]
+              that.listMaahMoah[i].air3=maah.data.data.air2[i]
+              that.listMaahMoah[i].air4=moah.data.data.air2[i]
+              that.listMaahMoah[i].air5=maah.data.data.air3[i]
+              that.listMaahMoah[i].air6=moah.data.data.air3[i]
+              that.listMaahMoah[i].air7=maah.data.data.air4[i]
+              that.listMaahMoah[i].air8=moah.data.data.air4[i]
+              that.listMaahMoah[i].air9=maah.data.data.air5[i]
+              that.listMaahMoah[i].air10=moah.data.data.air5[i]
+              that.listMaahMoah[i].air11=maah.data.data.air6[i]
+              that.listMaahMoah[i].air12=moah.data.data.air6[i]
+              that.listMaahMoah[i].air13=maah.data.data.air7[i]
+              that.listMaahMoah[i].air14=moah.data.data.air7[i]
+              that.listMaahMoah[i].air15=maah.data.data.air8[i]
+              that.listMaahMoah[i].air16=moah.data.data.air8[i]
+              that.listMaahMoah[i].air17=maah.data.data.air9[i]
+              that.listMaahMoah[i].air18=moah.data.data.air9[i]
+              that.listMaahMoah[i].air19=maah.data.data.air10[i]
+              that.listMaahMoah[i].air20=moah.data.data.air10[i]
+              that.listMaahMoah[i].air21=maah.data.data.air11[i]
+              that.listMaahMoah[i].air22=moah.data.data.air11[i]
+            }
+          }
+          else { // 如果校准气体数据请求失败，则初始化相关信息
+            for(let i=0;i<2;i++) {
+              that.optionAirContrast.series[i].data = []
+            }
+            that.maahData = {}
+            that.moahData = {}
+            // 作图
+            that.airContrastChart.setOption(that.optionAirContrast)
+          }
         }))
         .catch(function (error) { // 请求失败处理
           console.log(error)
@@ -718,11 +669,7 @@ export default {
       else if(this.activeSign == 2) { // 在第三个选项卡中点击的查询
         this.beginTL[2]=this.beginT
         this.endTL[2]=this.endT
-        this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
-        // 设置横轴数据
-        for(var i=this.N;i>=0;i--) {
-          that.optionAirAQI.xAxis.data[this.N-i] = this.$moment().subtract(i,'days').format('YYYY-MM-DD')
-        }
+        this.listMdiaqi=[]
         this.$axios
         .all([  // 获取各个站点空气AQI数据
           this.$axios.get('/macDayIAQI',{
@@ -804,29 +751,77 @@ export default {
           })
         ])
         .then( this.$axios.spread(function (mdiaqi1,mdiaqi2,mdiaqi3,mdiaqi4,mdiaqi5,mdiaqi6,mdiaqi7,mdiaqi8,mdiaqi9,mdiaqi10,mdiaqi11) {
-          if(mdiaqi1.data.successful) { that.optionAirAQI.series[0].data = mdiaqi1.data.data.IAQI }
+          if(mdiaqi1.data.successful) {
+            that.optionAirAQI.series[0].data = mdiaqi1.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi1.data.data.time
+          }
           else { that.optionAirAQI.series[0].data = [] }
-          if(mdiaqi2.data.successful) { that.optionAirAQI.series[1].data = mdiaqi2.data.data.IAQI }
+          if(mdiaqi2.data.successful) {
+            that.optionAirAQI.series[1].data = mdiaqi2.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi2.data.data.time
+          }
           else { that.optionAirAQI.series[1].data = [] }
-          if(mdiaqi3.data.successful) { that.optionAirAQI.series[2].data = mdiaqi3.data.data.IAQI }
+          if(mdiaqi3.data.successful) {
+            that.optionAirAQI.series[2].data = mdiaqi3.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi3.data.data.time
+          }
           else { that.optionAirAQI.series[2].data = [] }
-          if(mdiaqi4.data.successful) { that.optionAirAQI.series[3].data = mdiaqi4.data.data.IAQI }
+          if(mdiaqi4.data.successful) {
+            that.optionAirAQI.series[3].data = mdiaqi4.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi4.data.data.time
+          }
           else { that.optionAirAQI.series[3].data = [] }
-          if(mdiaqi5.data.successful) { that.optionAirAQI.series[4].data = mdiaqi5.data.data.IAQI }
+          if(mdiaqi5.data.successful) {
+            that.optionAirAQI.series[4].data = mdiaqi5.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi5.data.data.time
+          }
           else { that.optionAirAQI.series[4].data = [] }
-          if(mdiaqi6.data.successful) { that.optionAirAQI.series[5].data = mdiaqi6.data.data.IAQI }
+          if(mdiaqi6.data.successful) {
+            that.optionAirAQI.series[5].data = mdiaqi6.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi6.data.data.time
+          }
           else { that.optionAirAQI.series[5].data = [] }
-          if(mdiaqi7.data.successful) { that.optionAirAQI.series[6].data = mdiaqi7.data.data.IAQI }
+          if(mdiaqi7.data.successful) {
+            that.optionAirAQI.series[6].data = mdiaqi7.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi7.data.data.time
+          }
           else { that.optionAirAQI.series[6].data = [] }
-          if(mdiaqi8.data.successful) { that.optionAirAQI.series[7].data = mdiaqi8.data.data.IAQI }
+          if(mdiaqi8.data.successful) {
+            that.optionAirAQI.series[7].data = mdiaqi8.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi8.data.data.time  
+          }
           else { that.optionAirAQI.series[7].data = [] }
-          if(mdiaqi9.data.successful) { that.optionAirAQI.series[8].data = mdiaqi9.data.data.IAQI }
+          if(mdiaqi9.data.successful) {
+            that.optionAirAQI.series[8].data = mdiaqi9.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi9.data.data.time
+          }
           else { that.optionAirAQI.series[8].data = [] }
-          if(mdiaqi10.data.successful) { that.optionAirAQI.series[9].data = mdiaqi10.data.data.IAQI }
+          if(mdiaqi10.data.successful) {
+            that.optionAirAQI.series[9].data = mdiaqi10.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi10.data.data.time
+          }
           else { that.optionAirAQI.series[9].data = [] }
-          if(mdiaqi11.data.successful) { that.optionAirAQI.series[10].data = mdiaqi11.data.data.IAQI }
+          if(mdiaqi11.data.successful) {
+            that.optionAirAQI.series[10].data = mdiaqi11.data.data.IAQI
+            that.optionAirAQI.xAxis.data = mdiaqi11.data.data.time
+          }
           else { that.optionAirAQI.series[10].data = [] }
           that.airAQIChart.setOption(that.optionAirAQI)
+          for(let i=0;i<mdiaqi1.data.data.IAQI.length;i++) {
+            that.listMdiaqi[i]=new Object()
+            that.listMdiaqi[i].time=mdiaqi1.data.data.time[i]
+            that.listMdiaqi[i].aqi1=mdiaqi1.data.data.IAQI[i]
+            that.listMdiaqi[i].aqi2=mdiaqi2.data.data.IAQI[i]
+            that.listMdiaqi[i].aqi3=mdiaqi3.data.data.IAQI[i]
+            that.listMdiaqi[i].aqi4=mdiaqi4.data.data.IAQI[i]
+            that.listMdiaqi[i].aqi5=mdiaqi5.data.data.IAQI[i]
+            that.listMdiaqi[i].aqi6=mdiaqi6.data.data.IAQI[i]
+            that.listMdiaqi[i].aqi7=mdiaqi7.data.data.IAQI[i]
+            that.listMdiaqi[i].aqi8=mdiaqi8.data.data.IAQI[i]
+            that.listMdiaqi[i].aqi9=mdiaqi9.data.data.IAQI[i]
+            that.listMdiaqi[i].aqi10=mdiaqi10.data.data.IAQI[i]
+            that.listMdiaqi[i].aqi11=mdiaqi11.data.data.IAQI[i]
+          }
         }))
         .catch(function (error) { // 请求失败处理
           console.log(error)
@@ -835,6 +830,7 @@ export default {
       else if(this.activeSign == 3) { // 在第四个选项卡中点击的查询
         this.beginTL[3]=this.beginT
         this.endTL[3]=this.endT
+        this.listBl=[]
         this.$axios
         .all([ // 获取各个站点电池电量数据
           this.$axios.get('/batteryList',{
@@ -972,6 +968,21 @@ export default {
           }
           else { that.optionBattery.series[10].data = [] }
           that.batteryChart.setOption(that.optionBattery)
+          for(let i=0;i<bl1.data.data.batteryInfo.length;i++) {
+            that.listBl[i]=new Object()
+            that.listBl[i].time=bl1.data.data.beginTime[i]
+            that.listBl[i].batt1=bl1.data.data.batteryInfo[i]
+            that.listBl[i].batt2=bl2.data.data.batteryInfo[i]
+            that.listBl[i].batt3=bl3.data.data.batteryInfo[i]
+            that.listBl[i].batt4=bl4.data.data.batteryInfo[i]
+            that.listBl[i].batt5=bl5.data.data.batteryInfo[i]
+            that.listBl[i].batt6=bl6.data.data.batteryInfo[i]
+            that.listBl[i].batt7=bl7.data.data.batteryInfo[i]
+            that.listBl[i].batt8=bl8.data.data.batteryInfo[i]
+            that.listBl[i].batt9=bl9.data.data.batteryInfo[i]
+            that.listBl[i].batt10=bl10.data.data.batteryInfo[i]
+            that.listBl[i].batt11=bl11.data.data.batteryInfo[i]
+          }
         }))
         .catch(function (error) { // 请求失败处理
           console.log(error)
@@ -1011,13 +1022,89 @@ export default {
         this.airChoose=this.airCL[x]
       }
     },
-    exportExcel() { // 导出excel文件
-        const th = ['监测时间', '绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
-        const filterVal = ['time', 'air1', 'air2', 'air3', 'air4', 'air5', 'air6', 'air7', 'air8', 'air9', 'air10', 'air11']
-        const data = this.list.map(v => filterVal.map(k => v[k]))
-        const fileName = this.beginT + '至' + this.endT + this.airChoose + '数据分析'
-        const [fileType, sheetName] = ['xlsx', '数据分析']
+    contrastMaahMoah:function () {
+      switch (this.termChoose) {
+        case '绿岛湖':
+          this.optionAirContrast.series[0].data = this.maahData.air1
+          this.optionAirContrast.series[1].data = this.moahData.air1
+          break
+        case '南庄实验中学':
+          this.optionAirContrast.series[0].data = this.maahData.air2
+          this.optionAirContrast.series[1].data = this.moahData.air2
+          break
+        case '罗南村委':
+          this.optionAirContrast.series[0].data = this.maahData.air3
+          this.optionAirContrast.series[1].data = this.moahData.air3
+          break
+        case '南庄水利所':
+          this.optionAirContrast.series[0].data = this.maahData.air4
+          this.optionAirContrast.series[1].data = this.moahData.air4
+          break
+        case '吉利小学':
+          this.optionAirContrast.series[0].data = this.maahData.air5
+          this.optionAirContrast.series[1].data = this.moahData.air5
+          break
+        case '罗格村委':
+          this.optionAirContrast.series[0].data = this.maahData.air6
+          this.optionAirContrast.series[1].data = this.moahData.air6
+          break
+        case '龙津老年活动中心':
+          this.optionAirContrast.series[0].data = this.maahData.air7
+          this.optionAirContrast.series[1].data = this.moahData.air7
+          break
+        case '南庄三中':
+          this.optionAirContrast.series[0].data = this.maahData.air8
+          this.optionAirContrast.series[1].data = this.moahData.air8
+          break
+        case '吉利社区':
+          this.optionAirContrast.series[0].data = this.maahData.air9
+          this.optionAirContrast.series[1].data = this.moahData.air9
+          break
+        case '龙湾大桥':
+          this.optionAirContrast.series[0].data = this.maahData.air10
+          this.optionAirContrast.series[1].data = this.moahData.air10
+          break
+        case '污水处理厂':
+          this.optionAirContrast.series[0].data = this.maahData.air11
+          this.optionAirContrast.series[1].data = this.moahData.air11
+          break
+      }
+      this.airContrastChart.setOption(this.optionAirContrast)
+    },
+    exportExcel:function (e) { // 导出excel文件
+      e.currentTarget.blur()
+      if(this.activeSign === 0) {
+        let th = ['监测时间', '绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
+        let filterVal = ['time', 'air1', 'air2', 'air3', 'air4', 'air5', 'air6', 'air7', 'air8', 'air9', 'air10', 'air11']
+        let data = this.listMaah.map(v => filterVal.map(k => v[k]))
+        let fileName = this.beginT + '至' + this.endT + this.airChoose + '数据分析'
+        let [fileType, sheetName] = ['xlsx', '数据分析']
         this.$toExcel({th, data, fileName, fileType, sheetName})
+      }
+      else if(this.activeSign === 1) {
+        let th = ['监测时间', '绿岛湖（校准）', '绿岛湖（原始）', '南庄实验中学（校准）', '南庄实验中学（原始）', '罗南村委（校准）', '罗南村委（原始）', '南庄水利所（校准）', '南庄水利所（原始）', '吉利小学（校准）', '吉利小学（原始）', '罗格村委（校准）', '罗格村委（原始）', '龙津老年活动中心（校准）', '龙津老年活动中心（原始）', '南庄三中（校准）', '南庄三中（原始）', '吉利社区（校准）', '吉利社区（原始）', '龙湾大桥（校准）', '龙湾大桥（原始）', '污水处理厂（校准）', '污水处理厂（原始）']
+        let filterVal = ['time', 'air1', 'air2', 'air3', 'air4', 'air5', 'air6', 'air7', 'air8', 'air9', 'air10', 'air11', 'air12', 'air13', 'air14', 'air15', 'air16', 'air17', 'air18', 'air19', 'air20', 'air21', 'air22']
+        let data = this.listMaahMoah.map(v => filterVal.map(k => v[k]))
+        let fileName = this.beginT + '至' + this.endT + this.airChoose + '数据分析校准原始对比'
+        let [fileType, sheetName] = ['xlsx', '数据分析校准原始对比']
+        this.$toExcel({th, data, fileName, fileType, sheetName})
+      }
+      else if(this.activeSign === 2) {
+        let th = ['监测时间', '绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
+        let filterVal = ['time', 'aqi1', 'aqi2', 'aqi3', 'aqi4', 'aqi5', 'aqi6', 'aqi7', 'aqi8', 'aqi9', 'aqi10', 'aqi11']
+        let data = this.listMdiaqi.map(v => filterVal.map(k => v[k]))
+        let fileName = this.beginT + '至' + this.endT + this.airChoose + '数据分析AQI气体分析'
+        let [fileType, sheetName] = ['xlsx', '数据分析AQI气体分析']
+        this.$toExcel({th, data, fileName, fileType, sheetName})
+      }
+      else if(this.activeSign === 3) {
+        let th = ['监测时间', '绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
+        let filterVal = ['time', 'batt1', 'batt2', 'batt3', 'batt4', 'batt5', 'batt6', 'batt7', 'batt8', 'batt9', 'batt10', 'batt11']
+        let data = this.listBl.map(v => filterVal.map(k => v[k]))
+        let fileName = this.beginT + '至' + this.endT + this.airChoose + '数据分析终端电量'
+        let [fileType, sheetName] = ['xlsx', '数据分析终端电量']
+        this.$toExcel({th, data, fileName, fileType, sheetName})
+      }
     }
   },
   mounted () {
@@ -1029,15 +1116,18 @@ export default {
     // 设置默认开始日期和结束日期
     this.beginT = this.$moment().subtract(this.N,'days').format("YYYY-MM-DD")
     this.endT = this.$moment().format("YYYY-MM-DD")
-    for(var i=0;i<4;i++) {
+    for(let i=0;i<4;i++) {
       this.beginTL[i]=this.beginT
       this.endTL[i]=this.endT
     }
     // 设置默认选定气体
-    for(i=0;i<2;i++) {
+    for(let i=0;i<2;i++) {
       this.airCL[i]=this.airChoose
     }
-    this.searchSth()
+    for(let i=3;i>=0;i--) {
+      this.activeSign = i
+      this.searchSth()
+    }
   }
 }
 </script>
@@ -1046,7 +1136,7 @@ export default {
 .tabtop {
   padding: 6px 0;
 }
-.tabtop a{
+.tabtop a {
   text-decoration: none;
   color:#999;
   padding: 8px 20px;
