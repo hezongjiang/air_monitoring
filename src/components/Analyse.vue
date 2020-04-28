@@ -1,5 +1,5 @@
 <template>
-<div style="margin:10px 70px">
+<div class="container-main">
   <div class="tabtop">
     <a href="javascript:void(0)" :class="{active:activeSign==0}" @click="chooseData(0)">多站点气体数据对比</a>
     <a href="javascript:void(0)" :class="{active:activeSign==1}" @click="chooseData(1)">校准数据与原始数据对比</a>
@@ -46,10 +46,12 @@
       <el-button size="mini" style="float: right" @click="exportExcel($event)"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
     </div>
     <div class="chart-area">
-      <div id="multiSiteAirContrast" :style="{ visibility:(activeSign===0?'visible':'hidden') }"></div>
-      <div id="adjustOriginAirContrast" :style="{ visibility:(activeSign===1?'visible':'hidden') }"></div>
-      <div id="aqiAirChart" :style="{ visibility:(activeSign===2?'visible':'hidden') }"></div>
-      <div id="termBatteryChart" :style="{ visibility:(activeSign===3?'visible':'hidden') }"></div>
+      <div id="multiSiteAirContrast" :style="{ visibility:(activeSign===0?'visible':'hidden'), height:chartHeight }"></div>
+      <div id="adjustOriginAirContrast" :style="{ visibility:(activeSign===1?'visible':'hidden'), height:chartHeight }"></div>
+      <div id="aqiAirChart" :style="{ visibility:(activeSign===2?'visible':'hidden'), height:chartHeight }"></div>
+      <div id="termBatteryChart" :style="{ visibility:(activeSign===3?'visible':'hidden'), height:chartHeight }"></div>
+      <div class="loading-background" :style="{visibility: viewLoading}"></div>
+      <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
     </div>
   </div>
 </div>
@@ -73,7 +75,7 @@ export default {
       activeSign: 0, // 选项卡激活项
       goneClass: 'sth-gone', // 选项卡内容隐藏
       N: 1, // 默认显示昨天至当天的信息
-      listMaah: [],  // 存放要导出为excel文件的数据
+      listMaah: [], // 存放要导出为excel文件的数据
       listMaahMoah: [], // 存放要导出为excel文件的数据
       listMdiaqi: [], // 存放要导出为excel文件的数据
       listBl: [], // 存放要导出为excel文件的数据
@@ -81,6 +83,9 @@ export default {
       macAddrList: ['440604:000:AAA','440604:001:AAB','440604:002:AAC','440604:003:AAD','440604:004:AAE','440604:005:AAF','440604:006:AAG','440604:007:AAH','440604:008:AAI','440604:009:AAJ','440604:010:AAK'],
       maahData: {},
       moahData: {},
+      viewLoading: 'hidden',
+      loadingSign: false,
+      chartHeight: '100%',
       airChoose: 'SO2', // 气体选择器默认选定SO2
       airCL: [], // 不同选项卡所显示的选定气体
       airOptions: [{ // 校准气体数据曲线图的设置数据
@@ -159,12 +164,12 @@ export default {
         },
         grid: {
           left: '38px',
-          right: '38px',
+          right: '39px',
           bottom: '40px',
           top: '40px'
         },
         xAxis: {
-          name: '时间（时）',
+          name: '时间',
           nameLocation: 'middle',
           nameTextStyle: { padding: [10,0,0,0] },
           type: 'category',
@@ -260,12 +265,12 @@ export default {
         },
         grid: {
           left: '38px',
-          right: '38px',
+          right: '39px',
           bottom: '40px',
           top: '40px'
         },
         xAxis: {
-          name: '时间（时）',
+          name: '时间',
           nameLocation: 'middle',
           nameTextStyle: { padding: [10,0,0,0] },
           type: 'category',
@@ -499,6 +504,7 @@ export default {
   methods: {
     searchSth: function () { // 查询
       let that = this
+      this.viewLoading='visible'
       // this.chartX=[]
       if(this.activeSign == 0) { // 在第一个选项卡中点击的查询
         this.beginTL[0]=this.beginT
@@ -562,6 +568,8 @@ export default {
           }
           // 作图
           that.airChart.setOption(that.optionAir)
+          that.viewLoading='hidden'
+          that.loadingSign=true
         })
         .catch(function (error) { // 请求失败处理
           console.log(error)
@@ -660,6 +668,9 @@ export default {
             that.moahData = {}
             // 作图
             that.airContrastChart.setOption(that.optionAirContrast)
+          }
+          if(that.loadingSign) {
+            that.viewLoading='hidden'
           }
         }))
         .catch(function (error) { // 请求失败处理
@@ -822,6 +833,9 @@ export default {
             that.listMdiaqi[i].aqi10=mdiaqi10.data.data.IAQI[i]
             that.listMdiaqi[i].aqi11=mdiaqi11.data.data.IAQI[i]
           }
+          if(that.loadingSign) {
+            that.viewLoading='hidden'
+          }
         }))
         .catch(function (error) { // 请求失败处理
           console.log(error)
@@ -983,6 +997,9 @@ export default {
             that.listBl[i].batt10=bl10.data.data.batteryInfo[i]
             that.listBl[i].batt11=bl11.data.data.batteryInfo[i]
           }
+          if(that.loadingSign) {
+            that.viewLoading='hidden'
+          }
         }))
         .catch(function (error) { // 请求失败处理
           console.log(error)
@@ -1107,6 +1124,15 @@ export default {
       }
     }
   },
+  created () {
+    if(document.body.clientWidth<618) {
+      this.chartHeight="calc(100% - 60px)"
+    }
+    else if(document.body.clientWidth<1055) {
+      this.chartHeight="calc(100% - 30px)"
+    }
+    console.log(this.chartHeight)
+  },
   mounted () {
     // 创建charts实例
     this.airChart = this.$echarts.init(document.getElementById('multiSiteAirContrast'))
@@ -1133,6 +1159,18 @@ export default {
 </script>
 
 <style scoped>
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.container-main {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  padding: 10px 70px;
+  position: absolute;
+}
 .tabtop {
   padding: 6px 0;
 }
@@ -1156,7 +1194,9 @@ export default {
   border-radius: 6px;
   padding: 10px 20px;
   box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-  height: 529px;
+  /* height: 549px; */
+  width: 100%;
+  height: calc(100% - 85px);
 }
 .filter_title i {
   font-size: 25px;
@@ -1173,17 +1213,47 @@ export default {
 .filter_container span {
   padding-right: 10px;
 }
+.el-select {
+  padding-right: 15px;
+}
 .chart-area {
   position: relative;
   margin-top: 4px;
+  /* height: 450px; */
+  height: calc(100% - 60px);
 }
-.chart-area div {
+#multiSiteAirContrast, #adjustOriginAirContrast, #aqiAirChart, #termBatteryChart {
   width: 100%;
-  height: 468px;
+  /* height: 468px; */
   position: absolute;
 }
-.el-select {
-  padding-right: 15px;
+.loading-background {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 472px;
+  border-radius: 6px;
+  background-color: rgb(255,255,255,0.5);
+  z-index: 1001;
+}
+.loading {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  height: 100px;
+  width: 100px;
+  margin: auto;
+  border-radius: 6px;
+  background-color: rgb(70,70,70);
+  z-index: 1002;
+  padding: 20px 0;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  line-height: 25px;
 }
 .sth-gone {
   display: none;

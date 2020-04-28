@@ -5,7 +5,7 @@
       mode="horizontal"
       background-color=rgb(52,58,64)
       active-text-color="white"
-      style="min-width:1200px">
+      style="min-width:1100px;height:50px">
       <img src="@/assets/logo.png" alt="logo">
       <span>大气质量智能监控平台</span>
       <el-menu-item v-for="(item,i) in navList" :key="i" :index="item.name">
@@ -46,12 +46,13 @@
     font-size: 12px;
     color:white;
     float: right;
-    padding: 16px 6px;
+    padding: 0px 6px;
+    line-height: 50px;
     margin-right: 12px
   }
   span {
     pointer-events: none;
-    padding: 12px 0;
+    line-height: 50px;
     margin-right: 180px;
     float: left;
     color:white;
@@ -60,9 +61,9 @@
   }
   i {
     float: right;
-    font-size: 16px;
+    font-size: 14px;
     color:white;
-    padding: 16px 0;
+    line-height: 50px;
   }
   img {
     float: left;
@@ -71,10 +72,10 @@
   }
   .el-menu-item {
     margin: 0 16px;
-    padding: 13px 30px;
-    line-height: 1.5;
+    padding: 0px 30px;
+    line-height: 50px;
     font-size:15px;
-    height:auto;
+    height:50px;
     color: rgba(255,255,255,0.6);
   }
   .el-menu-item:hover {

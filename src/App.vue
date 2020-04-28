@@ -12,6 +12,13 @@ export default {
 </script>
 
 <style>
+body,html {
+	width: 100%;
+  height: 100%;
+	overflow-y: hidden;
+	margin: 0;
+	position: absolute;
+}
 body {
   margin: 0;
   background-color:rgb(245,245,255);

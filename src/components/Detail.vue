@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container-main">
     <div class="navleft">
       <ul>
         <li class="li-head">站点</li>
@@ -68,10 +68,11 @@
         <el-button size="mini" @click="exportExcel($event)" :class="activeSign===4?'':goneClass" style="float:right"><i class="fa fa-download" aria-hidden="true"></i>&nbsp;导出Excel</el-button>
         <el-button size="mini" @click="zoomChange($event)" :class="activeSign==1||activeSign==2||activeSign==3?'':goneClass" style="float:right">切换缩放模式</el-button>
         <div class="container">
-          <div id="concentration" :style="{ visibility:(activeSign===1?'visible':'hidden') }"></div>
-          <div id="temperature" :style="{ visibility:(activeSign===2?'visible':'hidden') }"></div>
-          <div id="humidity" :style="{ visibility:(activeSign===3?'visible':'hidden') }"></div>
+          <div id="concentration" :style="{ visibility:(activeSign===1?'visible':'hidden'), height:chartHeight }"></div>
+          <div id="temperature" :style="{ visibility:(activeSign===2?'visible':'hidden'), height:chartHeight }"></div>
+          <div id="humidity" :style="{ visibility:(activeSign===3?'visible':'hidden'), height:chartHeight }"></div>
           <el-table 
+            id= "detailData"
             :cell-style="{ padding:0, fontSize:'12px'}"
             :header-cell-style="{ padding:0, background:'#dddddd', fontSize:'13px'}"
             :style="{ visibility:(activeSign===4?'visible':'hidden') }"
@@ -79,7 +80,7 @@
             stripe
             highlight-current-row
             border
-            max-height="438px"
+            :height="tableHeight"
             tooltip-effect="dark">
             <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center" width="100"></el-table-column>
             <el-table-column show-overflow-tooltip prop="temp" label="气温（℃）" align="center"></el-table-column>
@@ -91,6 +92,8 @@
             <el-table-column show-overflow-tooltip prop="speed" label="风速（m/s）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="direct" label="风向" align="center"></el-table-column>
           </el-table>
+          <div class="loading-background" :style="{visibility: viewLoading}"></div>
+          <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
         </div>
       </div>
     </div>
@@ -103,8 +106,15 @@ export default {
   name: 'Detail',
   data() {
     return {
-      termInfo: { macAddress: ' ' }, // 终端信息
-      termState: '', // 终端状态
+      termInfo: {
+        macAddress: '未知',
+        remark: '未知',
+        lon: 0,
+        lat: 0,
+        batteryInfo: 0,
+        version: '未知'
+      }, // 终端信息
+      termState: '未知', // 终端状态
       batteryIcon: '', // 电池图标
       activeSign: 4, // 选项卡激活项
       goneClass: 'sth-gone', // 选项卡内容隐藏
@@ -117,6 +127,9 @@ export default {
       newEndT: '', // 日期选择器上显示的结束日期
       beginT: '', // 实际选定了的开始日期
       endT: '', // 实际选定了的结束日期
+      viewLoading: 'hidden',
+      tableHeight: '100%',
+      chartHeight: '100%',
       list: [], // 存放详细数据
       optionAir: { // 气体曲线图的设置数据
         tooltip: {
@@ -132,13 +145,13 @@ export default {
           data: ['SO2', 'NO2', 'PM10', 'PM2.5']
         },
         grid: {
-          left: '35px',
-          right: '11px',
+          left: '38px',
+          right: '39px',
           bottom: '40px',
           top: '40px'
         },
         xAxis: {
-          name: '时间（时）',
+          name: '时间',
           nameLocation: 'middle',
           nameTextStyle: { padding: [10,0,0,0] },
           type: 'category',
@@ -186,13 +199,13 @@ export default {
           filterMode: 'none'
         },
         grid: {
-          left: '30px',
-          right: '11px',
+          left: '38px',
+          right: '39px',
           bottom: '40px',
           top: '40px'
         },
         xAxis: {
-          name: '时间（时）',
+          name: '时间',
           nameLocation: 'middle',
           nameTextStyle: { padding: [10,0,0,0] },
           type: 'category',
@@ -221,13 +234,13 @@ export default {
           filterMode: 'none'
         },
         grid: {
-          left: '30px',
-          right: '11px',
+          left: '38px',
+          right: '39px',
           bottom: '40px',
           top: '40px'
         },
         xAxis: {
-          name: '时间（时）',
+          name: '时间',
           nameLocation: 'middle',
           nameTextStyle: { padding: [10,0,0,0] },
           type: 'category',
@@ -256,21 +269,22 @@ export default {
       this.newBeginT=this.beginT
       this.newEndT=this.endT
       this.list=[]
+      this.viewLoading='visible'
       // 判断结束日期是否为当天，当天和非当天的横轴数据有差异
-      if(new Date().getDate() == this.$moment(this.endT).format("D")) {
-        var endH=new Date().getHours()
-        for(var j=0;j<this.N;j++) {
-          this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
-          for(var i=1;i<24;i++) {
-            this.chartX[24*j+i]=i
-          }
-        }
-        this.chartX[24*j]=new Date().getDate()+'日'
-        for(i=1;i<endH+1;i++) {
-          this.chartX[24*j+i]=i
-        }
-        console.log(this.chartX)
-      }
+      // if(new Date().getDate() == this.$moment(this.endT).format("D")) {
+      //   var endH=new Date().getHours()
+      //   for(var j=0;j<this.N;j++) {
+      //     this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
+      //     for(var i=1;i<24;i++) {
+      //       this.chartX[24*j+i]=i
+      //     }
+      //   }
+      //   this.chartX[24*j]=new Date().getDate()+'日'
+      //   for(i=1;i<endH+1;i++) {
+      //     this.chartX[24*j+i]=i
+      //   }
+      //   console.log(this.chartX)
+      // }
       this.$axios
       .all([this.$axios.get('/'+addr+'/macAirDeviceInfo'), // 获取选定站点的终端信息
             this.$axios.get('/macAirHourHistory',{ // 获取选定站点在一定日期范围内的气体信息
@@ -313,6 +327,7 @@ export default {
               that.optionAir.series[3].data[i]=mahh.data.data[i].PM25
               that.optionTemp.series[0].data[i]=mahh.data.data[i].temp
               that.optionHumidity.series[0].data[i]=mahh.data.data[i].humidity
+              that.chartX[i]=mahh.data.data[i].beginTime
             }
             that.termState = '正常'
           }
@@ -328,7 +343,14 @@ export default {
           }
         }
         else { // 如果选定站点的终端信息请求失败，则初始化相关信息
-          that.termInfo = { macAddress: addr }
+          that.termInfo = {
+            macAddress: addr,
+            remark: '未知',
+            lon: 0,
+            lat: 0,
+            batteryInfo: 0,
+            version: '未知'
+          },
           that.termState='设备异常'
           that.optionAir.series[0].data=[]
           that.optionAir.series[1].data=[]
@@ -345,6 +367,7 @@ export default {
         that.airChart.setOption(that.optionAir)
         that.tempChart.setOption(that.optionTemp)
         that.humidityChart.setOption(that.optionHumidity)
+        that.viewLoading='hidden'
       }))
       .catch(function (error) { // 请求失败处理
         console.log(error)
@@ -364,17 +387,17 @@ export default {
       this.optionTemp.series[0].data=[]
       this.optionHumidity.series[0].data=[]
       this.chartX=[]
-      this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
-      // 判断结束日期是否为非当天，当天和非当天的横轴数据有差异
-      if(!(new Date().getDate() == this.$moment(this.endT).format("D"))) {
-        for(var j=0;j<this.N+1;j++) {
-          this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
-          for(var i=1;i<24;i++) {
-            this.chartX[24*j+i]=i
-          }
-        }
-        console.log(this.chartX)
-      }
+      // this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
+      // // 判断结束日期是否为非当天，当天和非当天的横轴数据有差异
+      // if(!(new Date().getDate() == this.$moment(this.endT).format("D"))) {
+      //   for(var j=0;j<this.N+1;j++) {
+      //     this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
+      //     for(var i=1;i<24;i++) {
+      //       this.chartX[24*j+i]=i
+      //     }
+      //   }
+      //   console.log(this.chartX)
+      // }
       this.focusInfo(x)
     },
     zoomChange: function (e) { // 图表缩放模式改变
@@ -406,6 +429,14 @@ export default {
       this.$toExcel({th, data, fileName, fileType, sheetName})
     }
   },
+  created () {
+    if(document.body.clientWidth<1042) {
+      this.tableHeight="calc(100% - 30px)"
+      this.chartHeight="calc(100% - 30px)"
+    }
+    console.log(this.tableHeight)
+    console.log(this.chartHeight)
+  },
   mounted () {
     // 创建charts实例
     this.airChart = this.$echarts.init(document.getElementById('concentration'))
@@ -417,6 +448,7 @@ export default {
     this.newBeginT=this.beginT
     this.newEndT=this.endT
     this.focusInfo('440604:009:AAJ')
+    console.log(document.body.clientWidth)
   }
 }
 </script>
@@ -427,13 +459,20 @@ export default {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+.container-main {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  position: absolute;
+}
 .navleft {
   width: 13%;
   float: left;
   padding: 10px;
-  height: 586px;
+  /* height: 586px; */
+  height: calc(100% - 50px);
   overflow-y: auto;
-
 }
 .navleft ul {
   background-color:white;
@@ -470,6 +509,7 @@ export default {
   width: 87%;
   padding: 10px;
   float: left;
+  height: calc(100% - 50px);
 }
 .el-col a {
   text-decoration: none;
@@ -520,7 +560,8 @@ export default {
   margin-top: 6px;
   font-size: 15px;
   border-radius: 6px;
-  height: 485px;
+  /* height: 485px; */
+  height: calc(100% - 100px);
 }
 .chart-table a {
   text-decoration: none;
@@ -540,10 +581,50 @@ export default {
 .chart-table .container {
   position: relative;
   margin-top: 4px;
+  /* height: 447px; */
+  height: calc(100% - 30px);
 }
-.chart-table .container div {
+#concentration, #temperature, #humidity {
   width: 100%;
-  height: 432px;
+  /* height: 432px; */
   position: absolute;
+}
+#detailData {
+  width: 100%;
+  /* height: 432px; */
+  position: absolute;
+}
+.loading-background {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 447px;
+  border-radius: 6px;
+  background-color: rgb(255,255,255,0.5);
+  z-index: 1001;
+}
+.loading {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  height: 100px;
+  width: 100px;
+  margin: auto;
+  border-radius: 6px;
+  background-color: rgb(70,70,70);
+  z-index: 1002;
+  padding: 20px 0;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  line-height: 25px;
+}
+@media screen and (min-width: 1980px) {
+    .container-main {
+        background-color: lightgreen;
+    }
 }
 </style>

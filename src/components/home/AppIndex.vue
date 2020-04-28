@@ -1,6 +1,6 @@
 <!--首页-->
 <template>
-  <div>
+  <div class="container">
     <div class="navleft">
       <ul>
         <li class="li-head">站点</li>
@@ -19,7 +19,7 @@
     </div>
     <div class="bdmap">
       <div id="allmap"></div>
-      <div class="winchild1" :style="{visibility: viewInfo}">
+      <div class="winchild1" :style="{visibility: viewInfo, top: winchildTop}">
         <el-row class="state-detail" type="flex" align="bottom">
           <el-col :span="18" class="term-state">{{ termInfo.remark }}<span :style="{color:(termState === '在线' ? '#11aa11' : '#999' )}" style="font-size:13px;color:green;font-weight:normal">&nbsp;&nbsp;{{ termState }}</span></el-col>
           <el-col :span="6" class="view-detail"><router-link to="/detail" style="text-decoration: none; color: blue">查看详情</router-link></el-col>
@@ -69,6 +69,8 @@
         </el-row>
       </div>
       <div id="main" :style="{visibility: viewInfo}"></div>
+      <div class="loading-background" :style="{visibility: viewLoading}"></div>
+      <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
       <div class="win-close-btn" :style="{visibility: viewInfo}"><el-button size="mini" type="danger" plain @click="closeSuspend">关闭悬浮窗口</el-button></div>
       <div class="air-indicator" :style="{visibility: viewInfo}">
         <img src="@/assets/airIndicator.png" width="160" height="88" alt="气体浓度指示图">
@@ -95,7 +97,14 @@ export default {
         '440604:010:AAK': '南庄污水处理厂'
       },
       map: '',
-      termInfo: { macAddress: ' ' }, // 终端信息
+      termInfo: {
+        macAddress: '未知',
+        remark: '未知',
+        lon: 0,
+        lat: 0,
+        batteryInfo: 0,
+        version: '未知'
+      }, // 终端信息
       termState: '', //终端状态
       batteryIcon: '', // 电池图标
       airInfo: '', // 气体信息
@@ -112,15 +121,17 @@ export default {
       chartPM10: [],
       chartPM25: [],
       chartX: [],
-      viewInfo: 'hidden' // 气泡弹窗可见与否，默认为否
+      viewInfo: 'hidden', // 气泡弹窗可见与否，默认为否
+      viewLoading: 'hidden',
+      winchildTop: '17%'
     }
   },
   methods: {
     focusInfo: function (addr) { // 展示选定站点的信息
       let that = this
       var d=new Date()
-      this.viewInfo = 'visible'
       this.termInfo.macAddress = addr
+      this.viewLoading='visible'
       this.$axios
       .all([this.$axios.get('/'+addr+'/macAirDeviceInfo'), // 获取选定站点的终端信息
             this.$axios.get('/macAirList'), // 获取所有站点的空气信息
@@ -185,8 +196,17 @@ export default {
             }
           }
           if(i == mal.data.data.length) { // 如果循环结束了还没找到选定的站点，则初始化相关信息
-            that.airInfo = ''
             that.termState = '离线'
+            that.airInfo = {
+              SO2: 0,
+              NO2: 0,
+              PM10: 0,
+              PM25: 0,
+              temp: 0,
+              humidity: 0,
+              speed: 0,
+              direct: 0
+            }
             that.windSpe = ''
             that.windDir = ''
             that.colorSO2 = 'black'
@@ -216,10 +236,17 @@ export default {
           }
         }
         else { // 如果选定站点的终端信息请求失败，则初始化相关信息
-          that.termInfo = { macAddress: addr }
           that.termState = '离线'
-          that.batteryIcon = ''
-          that.airInfo = ''
+          that.airInfo = {
+            SO2: 0,
+            NO2: 0,
+            PM10: 0,
+            PM25: 0,
+            temp: 0,
+            humidity: 0,
+            speed: 0,
+            direct: 0
+          }
           that.windSpe = ''
           that.windDir = ''
           that.colorSO2 = 'black'
@@ -230,6 +257,15 @@ export default {
           that.chartNO2 = []
           that.chartPM10 = []
           that.chartPM25 = []
+          that.termInfo = {
+            macAddress: addr,
+            remark: '未知',
+            lon: 0,
+            lat: 0,
+            batteryInfo: 0,
+            version: '未知'
+          }, // 终端信息
+          that.batteryIcon = ''
         }
         that.charts.setOption({ // 作24小时气体实时曲线图
           title: {
@@ -291,6 +327,8 @@ export default {
             smooth: true
           }]
         })
+        that.viewInfo = 'visible'
+        that.viewLoading='hidden'
       }))
       .catch(function (error) { // 请求失败处理
         console.log(error)
@@ -326,6 +364,12 @@ export default {
       this.viewInfo='hidden'
       this.termInfo.macAddress = ''
     }
+  },
+  created () {
+    if(document.body.clientWidth<1028) {
+      this.winchildTop="5%"
+    }
+    console.log(this.winchildTop)
   },
   mounted () {
     this.map = new BMap.Map("allmap") // 创建Map实例
@@ -385,13 +429,20 @@ export default {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
+.container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  position: absolute;
+}
 .navleft {
   width: 13%;
   float: left;
-  padding: 10px;
-  height: 586px;
+  padding:10px;
+  /* height: 605px; */
+  height: calc(100% - 50px);
   overflow-y: auto;
-
 }
 .navleft ul {
   background-color:white;
@@ -426,17 +477,24 @@ export default {
 }
 .bdmap {
   width: 87%;
+  height: calc(100% - 50px);
+  /* height: 100%; */
   padding: 10px;
   float: left;
   position: relative;
 }
 #allmap {
-  height: 585px;
+  /* height: 585px; */
   border-radius: 6px;
+  width: calc(100% - 20px);
+	height: calc(100% - 20px);
+  /* height: 100%; */
+	/* overflow: hidden; */
+	margin: 0;
+	position: absolute;
 }
 .winchild1 {
   position: absolute;
-  top: 17%;
   left: 14%;
   z-index: 1;
   background-color:white;
@@ -544,5 +602,33 @@ export default {
   z-index: 1;
   background-color:white;
   padding: 3px 3px 0 3px;
+}
+.loading-background {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 604px;
+  border-radius: 6px;
+  background-color: rgb(255,255,255,0.5);
+  z-index: 1001;
+}
+.loading {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  height: 100px;
+  width: 100px;
+  margin: auto;
+  border-radius: 6px;
+  background-color: rgb(70,70,70);
+  z-index: 1002;
+  padding: 20px 0;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  line-height: 25px;
 }
 </style>
