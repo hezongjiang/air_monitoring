@@ -818,6 +818,9 @@ export default {
           }
           else { that.optionAirAQI.series[10].data = [] }
           that.airAQIChart.setOption(that.optionAirAQI)
+          if(that.loadingSign) {
+            that.viewLoading='hidden'
+          }
           for(let i=0;i<mdiaqi1.data.data.IAQI.length;i++) {
             that.listMdiaqi[i]=new Object()
             that.listMdiaqi[i].time=mdiaqi1.data.data.time[i]
@@ -832,9 +835,6 @@ export default {
             that.listMdiaqi[i].aqi9=mdiaqi9.data.data.IAQI[i]
             that.listMdiaqi[i].aqi10=mdiaqi10.data.data.IAQI[i]
             that.listMdiaqi[i].aqi11=mdiaqi11.data.data.IAQI[i]
-          }
-          if(that.loadingSign) {
-            that.viewLoading='hidden'
           }
         }))
         .catch(function (error) { // 请求失败处理
@@ -982,6 +982,9 @@ export default {
           }
           else { that.optionBattery.series[10].data = [] }
           that.batteryChart.setOption(that.optionBattery)
+          if(that.loadingSign) {
+            that.viewLoading='hidden'
+          }
           for(let i=0;i<bl1.data.data.batteryInfo.length;i++) {
             that.listBl[i]=new Object()
             that.listBl[i].time=bl1.data.data.beginTime[i]
@@ -996,9 +999,6 @@ export default {
             that.listBl[i].batt9=bl9.data.data.batteryInfo[i]
             that.listBl[i].batt10=bl10.data.data.batteryInfo[i]
             that.listBl[i].batt11=bl11.data.data.batteryInfo[i]
-          }
-          if(that.loadingSign) {
-            that.viewLoading='hidden'
           }
         }))
         .catch(function (error) { // 请求失败处理
