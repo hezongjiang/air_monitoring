@@ -823,18 +823,78 @@ export default {
           }
           for(let i=0;i<mdiaqi1.data.data.IAQI.length;i++) {
             that.listMdiaqi[i]=new Object()
-            that.listMdiaqi[i].time=mdiaqi1.data.data.time[i]
-            that.listMdiaqi[i].aqi1=mdiaqi1.data.data.IAQI[i]
-            that.listMdiaqi[i].aqi2=mdiaqi2.data.data.IAQI[i]
-            that.listMdiaqi[i].aqi3=mdiaqi3.data.data.IAQI[i]
-            that.listMdiaqi[i].aqi4=mdiaqi4.data.data.IAQI[i]
-            that.listMdiaqi[i].aqi5=mdiaqi5.data.data.IAQI[i]
-            that.listMdiaqi[i].aqi6=mdiaqi6.data.data.IAQI[i]
-            that.listMdiaqi[i].aqi7=mdiaqi7.data.data.IAQI[i]
-            that.listMdiaqi[i].aqi8=mdiaqi8.data.data.IAQI[i]
-            that.listMdiaqi[i].aqi9=mdiaqi9.data.data.IAQI[i]
-            that.listMdiaqi[i].aqi10=mdiaqi10.data.data.IAQI[i]
-            that.listMdiaqi[i].aqi11=mdiaqi11.data.data.IAQI[i]
+            if(mdiaqi1.data.successful) {
+              that.listMdiaqi[i].time=mdiaqi1.data.data.time[i]
+            }
+            else {
+              that.listMdiaqi[i].time=''
+            }
+            if(mdiaqi1.data.successful) {
+              that.listMdiaqi[i].aqi1=mdiaqi1.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi1=0
+            }
+            if(mdiaqi2.data.successful) {
+              that.listMdiaqi[i].aqi2=mdiaqi2.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi2=0
+            }
+            if(mdiaqi3.data.successful) {
+              that.listMdiaqi[i].aqi3=mdiaqi3.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi3=0
+            }
+            if(mdiaqi4.data.successful) {
+              that.listMdiaqi[i].aqi4=mdiaqi4.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi4=0
+            }
+            if(mdiaqi5.data.successful) {
+              that.listMdiaqi[i].aqi5=mdiaqi5.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi5=0
+            }
+            if(mdiaqi6.data.successful) {
+              that.listMdiaqi[i].aqi6=mdiaqi6.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi6=0
+            }
+            if(mdiaqi7.data.successful) {
+              that.listMdiaqi[i].aqi7=mdiaqi7.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi7=0
+            }
+            if(mdiaqi8.data.successful) {
+              that.listMdiaqi[i].aqi8=mdiaqi8.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi8=0
+            }
+            if(mdiaqi9.data.successful) {
+              that.listMdiaqi[i].aqi9=mdiaqi9.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi9=0
+            }
+            if(mdiaqi10.data.successful) {
+              that.listMdiaqi[i].aqi10=mdiaqi10.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi10=0
+            }
+            if(mdiaqi11.data.successful) {
+              that.listMdiaqi[i].aqi11=mdiaqi11.data.data.IAQI[i]
+            }
+            else {
+              that.listMdiaqi[i].aqi11=0
+            }
           }
         }))
         .catch(function (error) { // 请求失败处理
@@ -987,18 +1047,78 @@ export default {
           }
           for(let i=0;i<bl1.data.data.batteryInfo.length;i++) {
             that.listBl[i]=new Object()
-            that.listBl[i].time=bl1.data.data.beginTime[i]
-            that.listBl[i].batt1=bl1.data.data.batteryInfo[i]
-            that.listBl[i].batt2=bl2.data.data.batteryInfo[i]
-            that.listBl[i].batt3=bl3.data.data.batteryInfo[i]
-            that.listBl[i].batt4=bl4.data.data.batteryInfo[i]
-            that.listBl[i].batt5=bl5.data.data.batteryInfo[i]
-            that.listBl[i].batt6=bl6.data.data.batteryInfo[i]
-            that.listBl[i].batt7=bl7.data.data.batteryInfo[i]
-            that.listBl[i].batt8=bl8.data.data.batteryInfo[i]
-            that.listBl[i].batt9=bl9.data.data.batteryInfo[i]
-            that.listBl[i].batt10=bl10.data.data.batteryInfo[i]
-            that.listBl[i].batt11=bl11.data.data.batteryInfo[i]
+            if(bl1.data.successful) {
+              that.listBl[i].time=bl1.data.data.beginTime[i]
+            }
+            else {
+              that.listBl[i].time=''
+            }
+            if(bl1.data.successful) {
+              that.listBl[i].batt1=bl1.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt1=0
+            }
+            if(bl2.data.successful) {
+              that.listBl[i].batt2=bl2.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt2=0
+            }
+            if(bl3.data.successful) {
+              that.listBl[i].batt3=bl3.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt3=0
+            }
+            if(bl4.data.successful) {
+              that.listBl[i].batt4=bl4.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt4=0
+            }
+            if(bl5.data.successful) {
+              that.listBl[i].batt5=bl5.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt5=0
+            }
+            if(bl6.data.successful) {
+              that.listBl[i].batt6=bl6.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt6=0
+            }
+            if(bl7.data.successful) {
+              that.listBl[i].batt7=bl7.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt7=0
+            }
+            if(bl8.data.successful) {
+              that.listBl[i].batt8=bl8.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt8=0
+            }
+            if(bl9.data.successful) {
+              that.listBl[i].batt9=bl9.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt9=0
+            }
+            if(bl10.data.successful) {
+              that.listBl[i].batt10=bl10.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt10=0
+            }
+            if(bl11.data.successful) {
+              that.listBl[i].batt11=bl11.data.data.batteryInfo[i]
+            }
+            else {
+              that.listBl[i].batt11=0
+            }
           }
         }))
         .catch(function (error) { // 请求失败处理
