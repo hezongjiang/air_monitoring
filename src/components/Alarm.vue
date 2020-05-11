@@ -120,13 +120,13 @@ export default {
   },
   methods: {
     getAddr() { // 获取下拉列表选项
-      this.$axios.get('/macAirList')
+      this.$axios.get('/macAirDeviceList')
       .then(res => {
         let addrArray = res.data.data
         for (let i = 0; i < addrArray.length; i++) {
           this.addrOptions.push({
             value: i + 1,
-            label: addrArray[i].macAddress
+            label: addrArray[i].remark
           })
         }
       })

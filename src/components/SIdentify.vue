@@ -13,7 +13,7 @@ export default {
     },
     fontSizeMin: {
       type: Number,
-      default: 16
+      default: 35
     },
     fontSizeMax: {
       type: Number,
@@ -21,11 +21,11 @@ export default {
     },
     backgroundColorMin: {
       type: Number,
-      default: 180
+      default: 200
     },
     backgroundColorMax: {
       type: Number,
-      default: 240
+      default: 220
     },
     colorMin: {
       type: Number,
@@ -33,11 +33,11 @@ export default {
     },
     colorMax: {
       type: Number,
-      default: 160
+      default: 100
     },
     lineColorMin: {
       type: Number,
-      default: 40
+      default: 150
     },
     lineColorMax: {
       type: Number,
@@ -93,9 +93,9 @@ export default {
       ctx.fillStyle = this.randomColor(this.colorMin, this.colorMax)
       ctx.font =
         this.randomNum(this.fontSizeMin, this.fontSizeMax) + 'px SimHei'
-      var x = (i + 1) * (this.contentWidth / (this.identifyCode.length + 1))
+      var x = (i+0.6) * (this.contentWidth / (this.identifyCode.length + 1))
       var y = this.randomNum(this.fontSizeMax, this.contentHeight - 5)
-      var deg = this.randomNum(-45, 45)
+      var deg = this.randomNum(-5, 5)
       // 修改坐标原点和旋转角度
       ctx.translate(x, y)
       ctx.rotate(deg * Math.PI / 180)
@@ -106,7 +106,7 @@ export default {
     },
     drawLine(ctx) {
       // 绘制干扰线
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 3; i++) {
         ctx.strokeStyle = this.randomColor(
           this.lineColorMin,
           this.lineColorMax
@@ -125,7 +125,7 @@ export default {
     },
     drawDot(ctx) {
       // 绘制干扰点
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 20; i++) {
         ctx.fillStyle = this.randomColor(0, 255)
         ctx.beginPath()
         ctx.arc(

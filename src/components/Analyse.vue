@@ -33,8 +33,8 @@
         :clearable="false"
         :editable="false">
       </el-date-picker>
-      <span :class="activeSign===1?'':goneClass">站点</span>
-      <el-select @input="contrastMaahMoah" :class="activeSign===1?'':goneClass" size="mini" v-model="termChoose" placeholder="请选择站点" style="width:150px">
+      <span :class="activeSign===1||activeSign===3?'':goneClass">站点</span>
+      <el-select @input="contrastOrBattery" :class="activeSign===1||activeSign===3?'':goneClass" size="mini" v-model="termChoose" placeholder="请选择站点" style="width:150px">
         <el-option v-for="item in termOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
       </el-select>
       <span :class="activeSign===0||activeSign===1?'':goneClass">气体</span>
@@ -83,6 +83,7 @@ export default {
       macAddrList: ['440604:000:AAA','440604:001:AAB','440604:002:AAC','440604:003:AAD','440604:004:AAE','440604:005:AAF','440604:006:AAG','440604:007:AAH','440604:008:AAI','440604:009:AAJ','440604:010:AAK'],
       maahData: {},
       moahData: {},
+      blData: [],
       viewLoading: 'hidden',
       loadingSign: false,
       chartHeight: '100%',
@@ -104,7 +105,8 @@ export default {
         value: 'PM25',
         label: 'PM2.5'
       }],
-      termChoose: '绿岛湖',
+      termChoose: '绿岛湖', // 站点选择器默认选定绿岛湖
+      termCL: [], // 不同选项卡所显示的选定站点
       termOptions: [{
         value: '绿岛湖',
         label: '绿岛湖'
@@ -406,11 +408,11 @@ export default {
           type: 'inside',
           filterMode: 'none'
         },
-        legend: {
-          top: 10,
-          right: 0,
-          data: ['绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
-        },
+        // legend: {
+        //   top: 10,
+        //   right: 0,
+        //   data: ['绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
+        // },
         grid: {
           left: '48px',
           right: '46px',
@@ -433,71 +435,71 @@ export default {
           axisLabel: { fontSize: 11 }
         },
         series: [{
-          name: '绿岛湖',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '南庄实验中学',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '罗南村委',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '南庄水利所',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '吉利小学',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '罗格村委',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '龙津老年活动中心',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '南庄三中',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '吉利社区',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '龙湾大桥',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '污水处理厂',
+          // name: '绿岛湖',
           data: [],
           type: 'line',
           smooth: true
         }]
+        // {
+        //   name: '南庄实验中学',
+        //   data: [],
+        //   type: 'line',
+        //   smooth: true
+        // },
+        // {
+        //   name: '罗南村委',
+        //   data: [],
+        //   type: 'line',
+        //   smooth: true
+        // },
+        // {
+        //   name: '南庄水利所',
+        //   data: [],
+        //   type: 'line',
+        //   smooth: true
+        // },
+        // {
+        //   name: '吉利小学',
+        //   data: [],
+        //   type: 'line',
+        //   smooth: true
+        // },
+        // {
+        //   name: '罗格村委',
+        //   data: [],
+        //   type: 'line',
+        //   smooth: true
+        // },
+        // {
+        //   name: '龙津老年活动中心',
+        //   data: [],
+        //   type: 'line',
+        //   smooth: true
+        // },
+        // {
+        //   name: '南庄三中',
+        //   data: [],
+        //   type: 'line',
+        //   smooth: true
+        // },
+        // {
+        //   name: '吉利社区',
+        //   data: [],
+        //   type: 'line',
+        //   smooth: true
+        // },
+        // {
+        //   name: '龙湾大桥',
+        //   data: [],
+        //   type: 'line',
+        //   smooth: true
+        // },
+        // {
+        //   name: '污水处理厂',
+        //   data: [],
+        //   type: 'line',
+        //   smooth: true
+        // }]
       }
     }
   },
@@ -904,6 +906,7 @@ export default {
       else if(this.activeSign == 3) { // 在第四个选项卡中点击的查询
         this.beginTL[3]=this.beginT
         this.endTL[3]=this.endT
+        this.termCL[1]=this.termChoose
         this.listBl=[]
         this.$axios
         .all([ // 获取各个站点电池电量数据
@@ -987,61 +990,61 @@ export default {
         ])
         .then( this.$axios.spread(function (bl1,bl2,bl3,bl4,bl5,bl6,bl7,bl8,bl9,bl10,bl11) {
           if(bl1.data.successful) {
-            that.optionBattery.series[0].data = bl1.data.data.batteryInfo
+            that.blData[0] = bl1.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl1.data.data.beginTime
           }
-          else { that.optionBattery.series[0].data = [] }
+          else { that.blData[0] = [] }
           if(bl2.data.successful) {
-            that.optionBattery.series[1].data = bl2.data.data.batteryInfo
+            that.blData[1] = bl2.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl2.data.data.beginTime
           }
-          else { that.optionBattery.series[1].data = [] }
+          else { that.blData[1] = [] }
           if(bl3.data.successful) {
-            that.optionBattery.series[2].data = bl3.data.data.batteryInfo
+            that.blData[2] = bl3.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl3.data.data.beginTime
           }
-          else { that.optionBattery.series[2].data = [] }
+          else { that.blData[2] = [] }
           if(bl4.data.successful) {
-            that.optionBattery.series[3].data = bl4.data.data.batteryInfo
+            that.blData[3] = bl4.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl4.data.data.beginTime
           }
-          else { that.optionBattery.series[3].data = [] }
+          else { that.blData[3] = [] }
           if(bl5.data.successful) {
-            that.optionBattery.series[4].data = bl5.data.data.batteryInfo
+            that.blData[4] = bl5.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl5.data.data.beginTime
           }
-          else { that.optionBattery.series[4].data = [] }
+          else { that.blData[4] = [] }
           if(bl6.data.successful) {
-            that.optionBattery.series[5].data = bl6.data.data.batteryInfo
+            that.blData[5] = bl6.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl6.data.data.beginTime
           }
-          else { that.optionBattery.series[5].data = [] }
+          else { that.blData[5] = [] }
           if(bl7.data.successful) {
-            that.optionBattery.series[6].data = bl7.data.data.batteryInfo
+            that.blData[6] = bl7.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl7.data.data.beginTime
           }
-          else { that.optionBattery.series[6].data = [] }
+          else { that.blData[6] = [] }
           if(bl8.data.successful) {
-            that.optionBattery.series[7].data = bl8.data.data.batteryInfo
+            that.blData[7] = bl8.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl8.data.data.beginTime
           }
-          else { that.optionBattery.series[7].data = [] }
+          else { that.blData[7] = [] }
           if(bl9.data.successful) {
-            that.optionBattery.series[8].data = bl9.data.data.batteryInfo
+            that.blData[8] = bl9.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl9.data.data.beginTime
           }
-          else { that.optionBattery.series[8].data = [] }
+          else { that.blData[8] = [] }
           if(bl10.data.successful) {
-            that.optionBattery.series[9].data = bl10.data.data.batteryInfo
+            that.blData[9] = bl10.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl10.data.data.beginTime
           }
-          else { that.optionBattery.series[9].data = [] }
+          else { that.blData[9] = [] }
           if(bl11.data.successful) {
-            that.optionBattery.series[10].data = bl11.data.data.batteryInfo
+            that.blData[10] = bl11.data.data.batteryInfo
             that.optionBattery.xAxis.data = bl11.data.data.beginTime
           }
-          else { that.optionBattery.series[10].data = [] }
-          that.batteryChart.setOption(that.optionBattery)
+          else { that.blData[10] = [] }
+          that.termBatteryInfo()
           if(that.loadingSign) {
             that.viewLoading='hidden'
           }
@@ -1155,8 +1158,15 @@ export default {
       this.activeSign=x
       this.beginT=this.beginTL[x]
       this.endT=this.endTL[x]
-      if(x==0||x==1) {
-        this.airChoose=this.airCL[x]
+      if(x==0) {
+        this.airChoose=this.airCL[0]
+      }
+      else if(x==1) {
+        this.airChoose=this.airCL[1]
+        this.termChoose=this.termCL[0]
+      }
+      else if(x==3) {
+        this.termChoose=this.termCL[1]
       }
     },
     contrastMaahMoah:function () {
@@ -1207,6 +1217,54 @@ export default {
           break
       }
       this.airContrastChart.setOption(this.optionAirContrast)
+    },
+    termBatteryInfo:function () {
+      switch (this.termChoose) {
+        case '绿岛湖':
+          this.optionBattery.series[0].data = this.blData[0]
+          break
+        case '南庄实验中学':
+          this.optionBattery.series[0].data = this.blData[1]
+          break
+        case '罗南村委':
+          this.optionBattery.series[0].data = this.blData[2]
+          break
+        case '南庄水利所':
+          this.optionBattery.series[0].data = this.blData[3]
+          break
+        case '吉利小学':
+          this.optionBattery.series[0].data = this.blData[4]
+          break
+        case '罗格村委':
+          this.optionBattery.series[0].data = this.blData[5]
+          break
+        case '龙津老年活动中心':
+          this.optionBattery.series[0].data = this.blData[6]
+          break
+        case '南庄三中':
+          this.optionBattery.series[0].data = this.blData[7]
+          break
+        case '吉利社区':
+          this.optionBattery.series[0].data = this.blData[8]
+          break
+        case '龙湾大桥':
+          this.optionBattery.series[0].data = this.blData[9]
+          break
+        case '污水处理厂':
+          this.optionBattery.series[0].data = this.blData[10]
+          break
+      }
+      this.batteryChart.setOption(this.optionBattery)
+    },
+    contrastOrBattery:function () {
+      if(this.activeSign===1) {
+        this.contrastMaahMoah()
+        this.termCL[0]=this.termChoose
+      }
+      else if(this.activeSign===3) {
+        this.termBatteryInfo()
+        this.termCL[1]=this.termChoose
+      }
     },
     exportExcel:function (e) { // 导出excel文件
       e.currentTarget.blur()
@@ -1269,6 +1327,9 @@ export default {
     // 设置默认选定气体
     for(let i=0;i<2;i++) {
       this.airCL[i]=this.airChoose
+    }
+    for(let i=0;i<2;i++) {
+      this.termCL[i]=this.termChoose
     }
     for(let i=3;i>=0;i--) {
       this.activeSign = i

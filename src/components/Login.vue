@@ -70,7 +70,7 @@ export default {
       else if (this.loginForm.username.length < 4 || this.loginForm.password.length < 4) {
         this.displaySign = 2
       }
-      else if (this.loginForm.verifycode != this.identifyCode) { // 检验是否为空
+      else if (this.loginForm.verifycode.toUpperCase() != this.identifyCode) { // 检验验证码
         this.displaySign = 3
       }
       else {
