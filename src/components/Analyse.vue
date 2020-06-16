@@ -41,6 +41,10 @@
       <el-select :class="activeSign===0||activeSign===1?'':goneClass" size="mini" v-model="airChoose" placeholder="请选择气体" style="width:150px">
         <el-option v-for="item in airOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
       </el-select>
+      <span :class="activeSign===0?'':goneClass">数据</span>
+      <el-select :class="activeSign===0?'':goneClass" size="mini" v-model="dataChoose" placeholder="请选择数据" style="width:150px">
+        <el-option v-for="item in dataOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+      </el-select>
       <el-button type="primary" size="mini" @click="searchSth">查询</el-button>
       <el-button size="mini" style="float: right" @click="zoomChange($event)">切换缩放模式</el-button>
       <el-button size="mini" style="float: right" @click="exportExcel($event)"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
@@ -87,6 +91,16 @@ export default {
       viewLoading: 'hidden',
       loadingSign: false,
       chartHeight: '100%',
+      dataChoose: '校准数据',
+      dataC: '',
+      dataOptions: [{
+        value: '校准数据',
+        label: '校准数据'
+      },
+      {
+        value: '原始数据',
+        label: '原始数据'
+      }],
       airChoose: 'SO2', // 气体选择器默认选定SO2
       airCL: [], // 不同选项卡所显示的选定气体
       airOptions: [{ // 校准气体数据曲线图的设置数据
@@ -165,7 +179,7 @@ export default {
           data: ['绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
         },
         grid: {
-          left: '38px',
+          left: '40px',
           right: '39px',
           bottom: '40px',
           top: '40px'
@@ -266,7 +280,7 @@ export default {
           data: ['校准小时走势', '原始小时走势']
         },
         grid: {
-          left: '38px',
+          left: '40px',
           right: '39px',
           bottom: '40px',
           top: '40px'
@@ -511,6 +525,7 @@ export default {
       if(this.activeSign == 0) { // 在第一个选项卡中点击的查询
         this.beginTL[0]=this.beginT
         this.endTL[0]=this.endT
+        this.dataC=this.dataChoose
         this.airCL[0]=this.airChoose
         // this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
         this.listMaah=[]
@@ -539,7 +554,14 @@ export default {
         //   }
         //   console.log(this.chartX)
         // }
-        this.$axios.get('/macAllAirHour',{ // 获取校准气体数据
+        var dataApi
+        if(this.dataChoose == '校准数据') {
+          dataApi = '/macAllAirHour'
+        }
+        else if(this.dataChoose == '原始数据') {
+          dataApi = '/macOldAirHour'
+        }
+        this.$axios.get(dataApi,{ // 获取校准气体数据
           params: {
             beginTime: this.beginT,
             endTime: this.endT,
@@ -1159,6 +1181,7 @@ export default {
       this.beginT=this.beginTL[x]
       this.endT=this.endTL[x]
       if(x==0) {
+        this.dataChoose=this.dataC
         this.airChoose=this.airCL[0]
       }
       else if(x==1) {
