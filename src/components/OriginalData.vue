@@ -1,9 +1,9 @@
-<!--告警页面-->
+<!--原始数据-->
 <template>
   <div class="container-main">
     <div class="winmain" >
       <div class="filter_title">
-        <span>异常告警</span>
+        <span>原始数据下载</span>
       </div>
       <!--筛选条件-->
       <div class="filter_container">
@@ -23,7 +23,7 @@
           :editable="false">
         </el-date-picker>
         <span>站点</span>
-        <el-select size="mini" v-model="value2" clearable placeholder="请选择站点">
+        <el-select size="mini" v-model="value2" placeholder="请选择站点">
           <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
         <el-button type="primary" size="mini" v-on:click="getTable">查询</el-button>
@@ -36,18 +36,23 @@
           :row-style="{height:'35px'}"
           :cell-style="{ padding:0, fontSize:'12px'}"
           :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
-          :data="filtedData.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
+          :data="list.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
           stripe
           highlight-current-row
           border
           :height= "tableHeight"
           tooltip-effect="dark">
-          <el-table-column show-overflow-tooltip type="index" label="序号" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="macAddress" label="站点名称" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="beginTime" label="告警时间" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="airType" label="气体类型" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="airValue" label="气体值" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="topType" label="异常类型" align="center"></el-table-column>
+          <el-table-column type="index" show-overflow-tooltip label="序号" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="macAddress" label="mac地址" align="center" width="120"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center" width="130"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="temp" label="气温（℃）" align="center" width="90"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="humidity" label="湿度（%R.H.）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="SO2" label="SO2（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="NO2" label="NO2（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="PM10" label="PM10（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="PM25" label="PM2.5（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="speed" label="风速（m/s）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="direct" label="风向" align="center" width="110"></el-table-column>
         </el-table>
         <div class="loading-background" :style="{visibility: viewLoading}"></div>
         <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
@@ -61,14 +66,14 @@
       :current-page="currentPage"
       :page-size="pageSize"
       layout="total, sizes, prev, pager, next"
-      :total="filtedData.length">
+      :total="list.length">
     </el-pagination>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Alarm',
+  name: 'OriginalData',
   data() {
     return {
       pickerOptions: {
@@ -100,13 +105,25 @@ export default {
       },
       addrOptions: [],
       value1: '',
-      value2: '',
-      tableData: [],
-      filtedData: [],
+      value2: '绿岛湖',
+      list: [],
       currentPage: 1,
       pageSize: 20,
       viewLoading: 'hidden',
-      tableHeight: '100%'
+      tableHeight: '100%',
+      siteMap: { // mac地址与站点名称的对应关系
+        '龙湾大桥': '440604:009:AAJ',
+        '罗南村委': '440604:002:AAC',
+        '绿岛湖': '440604:000:AAA',
+        '龙津老年活动中心': '440604:006:AAG',
+        '南庄三中': '440604:007:AAH',
+        '吉利小学': '440604:004:AAE',
+        '罗格村委': '440604:005:AAF',
+        '吉利社区': '440604:008:AAI',
+        '南庄实验中学': '440604:001:AAB',
+        '南庄水利所': '440604:003:AAD',
+        '南庄污水处理厂': '440604:010:AAK'
+      }
     }
   },
   created () {
@@ -127,7 +144,7 @@ export default {
         let addrArray = res.data.data
         for (let i = 0; i < addrArray.length; i++) {
           this.addrOptions.push({
-            value: i + 1,
+            value: addrArray[i].remark,
             label: addrArray[i].remark
           })
         }
@@ -154,12 +171,11 @@ export default {
     // 导出为excel
     exportExcel(e) {
       e.currentTarget.blur()
-      const th = ['站点名称', '告警时间', '气体类型', '气体值', '异常类型']
-      const filterVal = ['macAddress', 'beginTime', 'airType', 'airValue', 'topType']
-      const data = this.filtedData.map(v => filterVal.map(k => v[k]))
-      const addr = (this.value2 === '') ? '所有站点' : this.addrOptions[this.value2 - 1].label
-      const fileName = this.value1[0] + '至' + this.value1[1] + addr + '告警'
-      const [fileType, sheetName] = ['xlsx', '告警数据']
+      const th = ['mac地址','监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
+      const filterVal = ['macAddress','beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
+      const data = this.list.map(v => filterVal.map(k => v[k]))
+      const fileName = this.value1[0] + '至' + this.value1[1] + this.value2 + '原始数据下载'
+      const [fileType, sheetName] = ['xlsx', '原始数据下载']
       this.$toExcel({th, data, fileName, fileType, sheetName})
     },
     // 获取表格数据后并筛选
@@ -167,63 +183,46 @@ export default {
       let date = this.value1 // 日期
       let filter = this.value2 // 站点
       // 定义字典
-      const airTypeMap = {1: 'SO2', 2: 'NO2', 3: 'PM10', 4: 'PM2.5', 5: '温度', 6: '湿度'}
-      const topTypeMap = {1: '异常突变', 2: '正常突变'}
-      this.tableData = []
-      this.filtedData = []
+      this.list = []
       this.currentPage = 1
       this.viewLoading='visible'
-      for (let i = 1; i <= 6; i++) {
-        this.$axios.get('/topAirInfo',
-          {params: {
-              beginTime: date[0],
-              endTime: date[1],
-              airType: i
-            }}
-        ).then(res => {
-          if (res.data.successful) {
-            if (res.data.data.length !== 0) {
-              console.log('有数据')
-              let topData = res.data.data
-              // 获取该日期下的所有数据
-              for (let k = 0; k < topData.length; k++) {
-                this.tableData.push(
-                  {
-                    macAddress: topData[k].macAddress,
-                    beginTime: topData[k].beginTime,
-                    airType: airTypeMap[topData[k].airType],
-                    airValue: topData[k].airValue,
-                    topType: topTypeMap[topData[k].topType]
-                  }
-                )
-              }
-              // 根据下拉框选择的站点进行筛选
-              if (filter) {
-                this.filtedData = this.tableData.filter((item) => {
-                    return item.macAddress === this.addrOptions[filter - 1].label
-                  }
-                )
-                console.log(this.addrOptions[filter - 1].label)
-              } else {
-                this.filtedData = this.tableData
-              }
-              // 数组按告警时间倒序排列
-              this.filtedData.sort(function(a, b) {
-                return new Date(b.beginTime) - new Date(a.beginTime)
-              })
-            } else {
-              console.log('无数据')
-            }
-          } else {
-            console.log('fail')
-          }
-          if(i==6) {
-            this.viewLoading='hidden'
-          }
-        }).catch(error => {
-          console.log(error)
-        })
-      }
+      this.$axios.get('/macAllHistory',
+        {params: {
+            macAddress: this.siteMap[this.value2],
+            beginTime: date[0],
+            endTime: date[1],
+          }}
+      ).then(res => {
+        if (res.data.successful) {
+          this.list = res.data.data
+          for(var i=0;i<this.list.length;i++) {
+          this.list[i].SO2 = parseFloat(this.list[i].SO2).toFixed(2)
+          this.list[i].NO2 = parseFloat(this.list[i].NO2).toFixed(2)
+          this.list[i].PM10 = parseFloat(this.list[i].PM10).toFixed(2)
+          this.list[i].PM25 = parseFloat(this.list[i].PM25).toFixed(2)
+          // 根据风速值选择不同强度的风
+          if(this.list[i].speed >= 10) { this.list[i].speed = this.list[i].speed + '（强风）' }
+          else if(this.list[i].speed >= 6) { this.list[i].speed = this.list[i].speed + '（和风）' }
+          else if(this.list[i].speed > 0) { this.list[i].speed = this.list[i].speed + '（微风）' }
+          else { this.list[i].speed = this.list[i].speed + '（无风）' }
+          // 根据风向值选择不同的风向
+          if(this.list[i].direct >= 348) { this.list[i].direct = this.list[i].direct + '（北风）' }
+          else if(this.list[i].direct >= 282) { this.list[i].direct = this.list[i].direct + '（西北风）' }
+          else if(this.list[i].direct >= 258) { this.list[i].direct = this.list[i].direct + '（西风）' }
+          else if(this.list[i].direct >= 192) { this.list[i].direct = this.list[i].direct + '（西南风）' }
+          else if(this.list[i].direct >= 168) { this.list[i].direct = this.list[i].direct + '（南风）' }
+          else if(this.list[i].direct >= 102) { this.list[i].direct = this.list[i].direct + '（东南风）' }
+          else if(this.list[i].direct >= 78) { this.list[i].direct = this.list[i].direct + '（东风）' }
+          else if(this.list[i].direct >= 12) { this.list[i].direct = this.list[i].direct + '（东北风）' }
+          else { this.list[i].direct = this.list[i].direct + '（北风）' }
+        }
+          this.viewLoading='hidden'
+        } else {
+          console.log('fail')
+        }
+      }).catch(error => {
+        console.log(error)
+      })
     }
   }
 }

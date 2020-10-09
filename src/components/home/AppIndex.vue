@@ -2,27 +2,34 @@
 <template>
   <div class="container">
     <div class="navleft">
+      <div class="li-head">站点总数：11个</div>
+      <div class="li-head1">
+        <span style="font-size:15px;font-weight:normal;color:rgb(7,193,96)">在线：</span>
+        <span style="font-size:15px;font-weight:normal;color:white;background-color:rgb(7,193,96);padding:0 4px">{{ countOL }}个</span><br/>
+        <span style="font-size:15px;font-weight:normal;color:#999">离线：</span>
+        <span style="font-size:15px;font-weight:normal;color:white;background-color:#999;padding:0 4px">{{ 11-countOL }}个</span><br/><br/>
+        站点列表
+      </div>
       <ul>
-        <li class="li-head">站点</li>
-        <li :class="{active: termInfo.macAddress === '440604:009:AAJ'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:009:AAJ')">龙湾大桥</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:002:AAC'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:002:AAC')">罗南村委</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:000:AAA'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:000:AAA')">绿岛湖</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:006:AAG'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:006:AAG')">龙津老年活动中心</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:007:AAH'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:007:AAH')">南庄三中</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:004:AAE'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:004:AAE')">吉利小学</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:005:AAF'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:005:AAF')">罗格村委</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:008:AAI'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:008:AAI')">吉利社区</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:001:AAB'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:001:AAB')">南庄实验中学</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:003:AAD'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:003:AAD')">南庄水利所</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:010:AAK'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:010:AAK')">南庄污水处理厂</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:009:AAJ'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:009:AAJ')">&nbsp;&nbsp;<span :style="{color:(termStateArr[0] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;龙湾大桥</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:002:AAC'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:002:AAC')">&nbsp;&nbsp;<span :style="{color:(termStateArr[1] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;罗南村委</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:000:AAA'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:000:AAA')">&nbsp;&nbsp;<span :style="{color:(termStateArr[2] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;绿岛湖</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:006:AAG'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:006:AAG')">&nbsp;&nbsp;<span :style="{color:(termStateArr[3] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;龙津老年活动中心</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:007:AAH'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:007:AAH')">&nbsp;&nbsp;<span :style="{color:(termStateArr[4] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄三中</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:004:AAE'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:004:AAE')">&nbsp;&nbsp;<span :style="{color:(termStateArr[5] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;吉利小学</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:005:AAF'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:005:AAF')">&nbsp;&nbsp;<span :style="{color:(termStateArr[6] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;罗格村委</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:008:AAI'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:008:AAI')">&nbsp;&nbsp;<span :style="{color:(termStateArr[7] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;吉利社区</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:001:AAB'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:001:AAB')">&nbsp;&nbsp;<span :style="{color:(termStateArr[8] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄实验中学</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:003:AAD'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:003:AAD')">&nbsp;&nbsp;<span :style="{color:(termStateArr[9] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄水利所</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:010:AAK'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:010:AAK')">&nbsp;&nbsp;<span :style="{color:(termStateArr[10] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄污水处理厂</a></li>
       </ul>
     </div>
     <div class="bdmap">
       <div id="allmap"></div>
       <div class="winchild1" :style="{visibility: viewInfo, top: winchildTop}">
         <el-row class="state-detail" type="flex" align="bottom">
-          <el-col :span="18" class="term-state">{{ termInfo.remark }}<span :style="{color:(termState === '在线' ? '#11aa11' : '#999' )}" style="font-size:13px;color:green;font-weight:normal">&nbsp;&nbsp;{{ termState }}</span></el-col>
-          <el-col :span="6" class="view-detail"><router-link to="/detail" style="text-decoration: none; color: blue">查看详情</router-link></el-col>
+          <el-col :span="16" class="term-state">{{ termInfo.remark }}<span :style="{color:(termState === '在线' ? '#11aa11' : '#999' )}" style="font-size:13px;color:green;font-weight:normal">&nbsp;&nbsp;{{ termState }}</span></el-col>
+          <el-col :span="8" class="view-detail"><router-link to="/detail" style="text-decoration: none; color: white; background-color:#ffdf4f;padding:6px 6px 6px 12px">查看详情<i class="el-icon-caret-right"></i></router-link></el-col>
         </el-row>
         <el-row class="air-type" type="flex" align="bottom" style="padding-top:14px">
           <el-col :span="6">SO<span>2&nbsp;μg/m3</span></el-col>
@@ -71,9 +78,12 @@
       <div id="main" :style="{visibility: viewInfo}"></div>
       <div class="loading-background" :style="{visibility: viewLoading}"></div>
       <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
-      <div class="win-close-btn" :style="{visibility: viewInfo}"><el-button size="mini" type="danger" plain @click="closeSuspend">关闭悬浮窗口</el-button></div>
+      <div class="win-close-btn" :style="{visibility: viewInfo}"><el-button type="danger" size="mini" icon="el-icon-error" style="font-size:16px" @click="closeSuspend"><span style="font-size:16px">关闭悬浮窗口</span></el-button></div>
       <div class="air-indicator" :style="{visibility: viewInfo}">
-        <img src="@/assets/airIndicator.png" width="160" height="88" alt="气体浓度指示图">
+        <img src="@/assets/airIndicator.png" width="145" height="136" alt="气体浓度指示图">
+      </div>
+      <div style="position: absolute;bottom: 10px;left: 100px;z-index: 1;background-color:white;padding: 3px 3px 0 3px;">
+
       </div>
     </div>
   </div>
@@ -96,6 +106,20 @@ export default {
         '440604:003:AAD': '南庄水利所',
         '440604:010:AAK': '南庄污水处理厂'
       },
+      siteKV: {
+        '龙湾大桥': 0,
+        '罗南村委': 1,
+        '绿岛湖': 2,
+        '龙津老年活动中心': 3,
+        '南庄三中': 4,
+        '吉利小学': 5,
+        '罗格村委': 6,
+        '吉利社区': 7,
+        '南庄实验中学': 8,
+        '南庄水利所': 9,
+        '南庄污水处理厂': 10
+      },
+      countOL: 0,
       map: '',
       termInfo: {
         macAddress: '未知',
@@ -105,7 +129,8 @@ export default {
         batteryInfo: 0,
         version: '未知'
       }, // 终端信息
-      termState: '', //终端状态
+      termStateArr: ['离线','离线','离线','离线','离线','离线','离线','离线','离线','离线','离线'], //终端状态
+      termState: '',
       batteryIcon: '', // 电池图标
       airInfo: '', // 气体信息
       windSpe: '', // 风速
@@ -148,7 +173,7 @@ export default {
         if(madi.data.successful && madi.data.data.length) {
           that.termInfo = madi.data.data[0]
           var point = new BMap.Point(that.termInfo.lon/100,that.termInfo.lat/100)
-          that.map.centerAndZoom(point, 16)  //设置地图中心点坐标和地图级别
+          that.map.panTo(point, 16)  //设置地图中心点坐标和地图级别
           switch(parseInt(that.termInfo.batteryInfo/10)) { // 根据电池电量值选择不同的电池图标
             case 0: that.batteryIcon="fa fa-battery-0"
             break
@@ -352,11 +377,11 @@ export default {
     setColorPM10: function (x) { this.colorPM10 = this.setColorAir(x) },
     setColorPM25: function (x) { this.colorPM25 = this.setColorAir(x) },
     setColorAir: function (x) {
-      if(x>=251) return '#8c0000'
-      else if(x>=151) return '#993366'
-      else if(x>=101) return '#ff2f2f'
-      else if(x>=61) return '#ff9600'
-      else if(x>=31) return '#ffdf4f'
+      if(x>=301) return '#8c0000'
+      else if(x>=201) return '#993366'
+      else if(x>=151) return '#ff2f2f'
+      else if(x>=101) return '#ff9600'
+      else if(x>=51) return '#ffdf4f'
       else return '#7fcf9f'
     },
     //关闭气泡弹窗
@@ -372,53 +397,61 @@ export default {
     console.log(this.winchildTop)
   },
   mounted () {
+    let that = this
     this.map = new BMap.Map("allmap") // 创建Map实例
+    this.map.addControl(new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT}));
+    this.map.addControl(new BMap.NavigationControl());
     var point=new BMap.Point(113.02, 22.99)
     this.map.centerAndZoom(point, 14) // 设置地图中心点坐标和地图级别
     this.map.enableScrollWheelZoom(true) // 开启鼠标滚轮缩放
     this.$axios
-      .get('/macAirDeviceList') //获取所有站点的终端信息
-      .then(response => {
-        for(var i=0;i<response.data.data.length;i++)
+    .all([this.$axios.get('/macAirDeviceList'),
+          this.$axios.get('/macAirList')]) //获取所有站点的终端信息
+      .then(this.$axios.spread(function(madl, mal) {
+        for(var j=0;j<mal.data.data.length;j++) {
+          that.termStateArr[that.siteKV[mal.data.data[j].macAddress]] = '在线'
+          that.countOL++
+        }
+        for(var i=0;i<madl.data.data.length;i++)
         {
-          console.log(response) // 得到所有站点的终端信息
           // 根据站点坐标设置地图标记
-          var marker=new BMap.Marker(new BMap.Point(response.data.data[i].lon/100,response.data.data[i].lat/100))
+          var marker=new BMap.Marker(new BMap.Point(madl.data.data[i].lon/100,madl.data.data[i].lat/100))
           // 为地图标记设置站点名标签
-          var label = new BMap.Label(response.data.data[i].remark,{offset:new BMap.Size(-10,-20)})
+          var label = new BMap.Label(madl.data.data[i].remark,{offset:new BMap.Size(-10,-20)})
           marker.setLabel(label)
-          switch(response.data.data[i].macAddress) // 为每个地图标记添加它所对应的站点的点击事件
+          switch(madl.data.data[i].macAddress) // 为每个地图标记添加它所对应的站点的点击事件
           {
-            case '440604:009:AAJ': marker.addEventListener("click",this.focusInfo1)
+            case '440604:009:AAJ': marker.addEventListener("click",that.focusInfo1)
             break
-            case '440604:002:AAC': marker.addEventListener("click",this.focusInfo2)
+            case '440604:002:AAC': marker.addEventListener("click",that.focusInfo2)
             break
-            case '440604:000:AAA': marker.addEventListener("click",this.focusInfo3)
+            case '440604:000:AAA': marker.addEventListener("click",that.focusInfo3)
             break
-            case '440604:006:AAG': marker.addEventListener("click",this.focusInfo4)
+            case '440604:006:AAG': marker.addEventListener("click",that.focusInfo4)
             break
-            case '440604:007:AAH': marker.addEventListener("click",this.focusInfo5)
+            case '440604:007:AAH': marker.addEventListener("click",that.focusInfo5)
             break
-            case '440604:004:AAE': marker.addEventListener("click",this.focusInfo6)
+            case '440604:004:AAE': marker.addEventListener("click",that.focusInfo6)
             break
-            case '440604:005:AAF': marker.addEventListener("click",this.focusInfo7)
+            case '440604:005:AAF': marker.addEventListener("click",that.focusInfo7)
             break
-            case '440604:008:AAI': marker.addEventListener("click",this.focusInfo8)
+            case '440604:008:AAI': marker.addEventListener("click",that.focusInfo8)
             break
-            case '440604:001:AAB': marker.addEventListener("click",this.focusInfo9)
+            case '440604:001:AAB': marker.addEventListener("click",that.focusInfo9)
             break
-            case '440604:003:AAD': marker.addEventListener("click",this.focusInfo10)
+            case '440604:003:AAD': marker.addEventListener("click",that.focusInfo10)
             break
-            case '440604:010:AAK': marker.addEventListener("click",this.focusInfo11)
+            case '440604:010:AAK': marker.addEventListener("click",that.focusInfo11)
             break
           }
-          this.map.addOverlay(marker) // 显示地图标记
+          that.map.addOverlay(marker) // 显示地图标记
         }
-      })
+      }))
       .catch(function (error) { // 请求失败处理
         console.log(error)
       })
     this.charts = this.$echarts.init(document.getElementById('main')) // 创建charts实例
+    this.focusInfo('440604:009:AAJ')
   }
 }
 </script>
@@ -439,22 +472,28 @@ export default {
 .navleft {
   width: 13%;
   float: left;
-  padding:10px;
+  padding:10px 0 10px 10px;
   /* height: 605px; */
   height: calc(100% - 50px);
   overflow-y: auto;
 }
 .navleft ul {
   background-color:white;
-  border-radius: 6px;
+  border-radius: 0 0 6px 6px;
   list-style-type: none;
   padding: 0;
   margin: 0;
-  text-align: center;
+  /* text-align: center; */
 }
 .navleft ul li {
-  padding: 4px 0;
+  padding: 5px 0;
 }
+/* .navleft ul li::before {
+  content: "\2022";
+  color: rgb(24,172,24);
+  font-size: 20px;
+  padding: 0 5px 0 10px;
+} */
 .navleft ul a {
   display: block;
   padding: 4px 0;
@@ -471,9 +510,21 @@ export default {
   font-weight: bold;
 }
 .li-head {
-  font-size: 18px;
-  font-weight: bolder;
-  border-bottom: 1px solid #ccc;
+  border-radius: 6px 6px 0 0;
+  font-size: 17px;
+  font-weight: bold;
+  padding: 10px 0 0 10px;
+  color: rgb(40,40,40);
+  /* border-bottom: 1px solid #ccc; */
+  background-color: white;
+}
+.li-head1 {
+  font-size: 17px;
+  font-weight: bold;
+  padding: 10px 0 0 10px;
+  color: rgb(40,40,40);
+  /* border-bottom: 1px solid #ccc; */
+  background-color: white;
 }
 .bdmap {
   width: 87%;
@@ -513,7 +564,8 @@ export default {
   color:black;
 }
 .winchild1 .state-detail .view-detail {
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: bold;
   text-align: right;
 }
 .winchild1 .air-type .el-col {

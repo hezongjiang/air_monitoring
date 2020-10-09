@@ -1,9 +1,9 @@
-<!--告警页面-->
+<!--站点日均IAQI统计页面-->
 <template>
   <div class="container-main">
     <div class="winmain" >
       <div class="filter_title">
-        <span>异常告警</span>
+        <span>站点日均IAQI统计</span>
       </div>
       <!--筛选条件-->
       <div class="filter_container">
@@ -23,52 +23,26 @@
           :editable="false">
         </el-date-picker>
         <span>站点</span>
-        <el-select size="mini" v-model="value2" clearable placeholder="请选择站点">
+        <el-select size="mini" v-model="value2" placeholder="请选择站点">
           <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
         <el-button type="primary" size="mini" v-on:click="getTable">查询</el-button>
+        <el-button size="mini" style="float: right" @click="zoomChange($event)">切换缩放模式</el-button>
         <el-button v-on:click="exportExcel($event)" size="mini" style="float: right"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
       </div>
       <!--表格-->
       <div class="table-container">
-        <el-table
-          id="table"
-          :row-style="{height:'35px'}"
-          :cell-style="{ padding:0, fontSize:'12px'}"
-          :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
-          :data="filtedData.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
-          stripe
-          highlight-current-row
-          border
-          :height= "tableHeight"
-          tooltip-effect="dark">
-          <el-table-column show-overflow-tooltip type="index" label="序号" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="macAddress" label="站点名称" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="beginTime" label="告警时间" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="airType" label="气体类型" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="airValue" label="气体值" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="topType" label="异常类型" align="center"></el-table-column>
-        </el-table>
+        <div id="DayAir" :style="{ height:chartHeight }"></div>
         <div class="loading-background" :style="{visibility: viewLoading}"></div>
         <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
       </div>
     </div>
-    <!--分页器-->
-    <el-pagination
-      align="center"
-      @size-change='handleSizeChange'
-      @current-change='handleCurrentChange'
-      :current-page="currentPage"
-      :page-size="pageSize"
-      layout="total, sizes, prev, pager, next"
-      :total="filtedData.length">
-    </el-pagination>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Alarm',
+  name: 'IAQI',
   data() {
     return {
       pickerOptions: {
@@ -98,15 +72,76 @@ export default {
           }
         }]
       },
+      airChart: '', // 校准气体数据图表
       addrOptions: [],
       value1: '',
-      value2: '',
-      tableData: [],
-      filtedData: [],
-      currentPage: 1,
-      pageSize: 20,
+      value2: '绿岛湖',
+      N: 30,
+      list: [],
+      pageSize: 30,
+      chartHeight: '100%',
       viewLoading: 'hidden',
-      tableHeight: '100%'
+      siteMap: { // mac地址与站点名称的对应关系
+        '龙湾大桥': '440604:009:AAJ',
+        '罗南村委': '440604:002:AAC',
+        '绿岛湖': '440604:000:AAA',
+        '龙津老年活动中心': '440604:006:AAG',
+        '南庄三中': '440604:007:AAH',
+        '吉利小学': '440604:004:AAE',
+        '罗格村委': '440604:005:AAF',
+        '吉利社区': '440604:008:AAI',
+        '南庄实验中学': '440604:001:AAB',
+        '南庄水利所': '440604:003:AAD',
+        '南庄污水处理厂': '440604:010:AAK'
+      },
+      optionAir: {
+        tooltip: {
+          show: true,
+          trigger: 'axis'
+        },
+        dataZoom: { 
+          type: 'inside',
+          filterMode: 'none'
+        },
+        legend: {
+          top: 10,
+          right: 0,
+          data: ['IAQI', 'PM2.5']
+        },
+        grid: {
+          left: '40px',
+          right: '39px',
+          bottom: '40px',
+          top: '40px'
+        },
+        xAxis: {
+          name: '时间',
+          nameLocation: 'middle',
+          nameTextStyle: { padding: [10,0,0,0] },
+          type: 'category',
+          boundaryGap: false,
+          data: [],
+          axisLabel: { fontSize: 11 }
+        },
+        yAxis: {
+          name: '浓度（μg/m³）',
+          nameTextStyle: { padding: [0,0,0,20] },
+          type: 'value',
+          axisLabel: { fontSize: 11 }
+        },
+        series: [{
+          name: 'IAQI',
+          data: [],
+          type: 'line',
+          smooth: true
+        },
+        {
+          name: 'PM2.5',
+          data: [],
+          type: 'line',
+          smooth: true
+        }]
+      }
     }
   },
   created () {
@@ -116,6 +151,8 @@ export default {
     console.log(this.tableHeight)
   },
   mounted() {
+    // 创建charts实例
+    this.airChart = this.$echarts.init(document.getElementById('DayAir'))
     this.getAddr() // 获取站点选择下拉列表的选项
     this.defaultDate() // 默认日期选择昨天零点到今天
     this.getTable() // 默认获取昨天零点到今天的数据
@@ -127,7 +164,7 @@ export default {
         let addrArray = res.data.data
         for (let i = 0; i < addrArray.length; i++) {
           this.addrOptions.push({
-            value: i + 1,
+            value: addrArray[i].remark,
             label: addrArray[i].remark
           })
         }
@@ -139,27 +176,26 @@ export default {
     defaultDate() {
       let end = new Date()
       let start = new Date()
-      start.setTime(end.getTime() - 3600 * 1000 * 24)
+      start.setTime(end.getTime() - (this.N-1) * 3600 * 1000 * 24)
       start = start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate()
       end = end.getFullYear() + '-' + (end.getMonth() + 1) + '-' + end.getDate()
       this.value1 = [start, end]
     },
-    // 分页器
-    handleSizeChange(val) {
-      this.pageSize = val
-    },
-    handleCurrentChange(val) {
-      this.currentPage = val
+    zoomChange: function (e) { // 图表缩放模式改变
+      e.currentTarget.blur()
+      if(this.optionAir.dataZoom.type=='inside') { this.optionAir.dataZoom.type='slider' }
+      else { this.optionAir.dataZoom.type='inside' }
+      this.airChart.clear()
+      this.airChart.setOption(this.optionAir)
     },
     // 导出为excel
     exportExcel(e) {
       e.currentTarget.blur()
-      const th = ['站点名称', '告警时间', '气体类型', '气体值', '异常类型']
-      const filterVal = ['macAddress', 'beginTime', 'airType', 'airValue', 'topType']
-      const data = this.filtedData.map(v => filterVal.map(k => v[k]))
-      const addr = (this.value2 === '') ? '所有站点' : this.addrOptions[this.value2 - 1].label
-      const fileName = this.value1[0] + '至' + this.value1[1] + addr + '告警'
-      const [fileType, sheetName] = ['xlsx', '告警数据']
+      const th = ['监测时间', 'IAQI', 'PM2.5（μg/m³）']
+      const filterVal = ['time', 'IAQI', 'PM25']
+      const data = this.list.map(v => filterVal.map(k => v[k]))
+      const fileName = this.value1[0] + '至' + this.value1[1] + this.value2 + '站点日均IAQI统计'
+      const [fileType, sheetName] = ['xlsx', '站点日均IAQI统计']
       this.$toExcel({th, data, fileName, fileType, sheetName})
     },
     // 获取表格数据后并筛选
@@ -167,63 +203,40 @@ export default {
       let date = this.value1 // 日期
       let filter = this.value2 // 站点
       // 定义字典
-      const airTypeMap = {1: 'SO2', 2: 'NO2', 3: 'PM10', 4: 'PM2.5', 5: '温度', 6: '湿度'}
-      const topTypeMap = {1: '异常突变', 2: '正常突变'}
-      this.tableData = []
-      this.filtedData = []
-      this.currentPage = 1
+      this.list = []
       this.viewLoading='visible'
-      for (let i = 1; i <= 6; i++) {
-        this.$axios.get('/topAirInfo',
-          {params: {
-              beginTime: date[0],
-              endTime: date[1],
-              airType: i
-            }}
-        ).then(res => {
-          if (res.data.successful) {
-            if (res.data.data.length !== 0) {
-              console.log('有数据')
-              let topData = res.data.data
-              // 获取该日期下的所有数据
-              for (let k = 0; k < topData.length; k++) {
-                this.tableData.push(
-                  {
-                    macAddress: topData[k].macAddress,
-                    beginTime: topData[k].beginTime,
-                    airType: airTypeMap[topData[k].airType],
-                    airValue: topData[k].airValue,
-                    topType: topTypeMap[topData[k].topType]
-                  }
-                )
-              }
-              // 根据下拉框选择的站点进行筛选
-              if (filter) {
-                this.filtedData = this.tableData.filter((item) => {
-                    return item.macAddress === this.addrOptions[filter - 1].label
-                  }
-                )
-                console.log(this.addrOptions[filter - 1].label)
-              } else {
-                this.filtedData = this.tableData
-              }
-              // 数组按告警时间倒序排列
-              this.filtedData.sort(function(a, b) {
-                return new Date(b.beginTime) - new Date(a.beginTime)
-              })
-            } else {
-              console.log('无数据')
-            }
-          } else {
-            console.log('fail')
+      this.$axios.get('/macDayIAQI',
+        {params: {
+            macAddress: this.siteMap[this.value2],
+            beginTime: date[0],
+            endTime: date[1],
+          }}
+      ).then(mdi => {
+        if (mdi.data.successful) {
+          for(let i=0;i<mdi.data.data.time.length;i++) {
+            this.list[i] = new Object()
+            this.list[i].IAQI = mdi.data.data.IAQI[i]
+            this.list[i].PM25 = mdi.data.data.PM25[i]
+            this.list[i].time = mdi.data.data.time[i]
           }
-          if(i==6) {
-            this.viewLoading='hidden'
+          for(let i=0;i<this.list.length;i++) {
+            this.optionAir.xAxis.data = mdi.data.data.time
+            this.optionAir.series[0].data = mdi.data.data.IAQI
+            this.optionAir.series[1].data = mdi.data.data.PM25
           }
-        }).catch(error => {
-          console.log(error)
-        })
-      }
+        }
+        else {
+          this.list = []
+          this.optionAir.xAxis.data = []
+          this.optionAir.series[0].data = []
+          this.optionAir.series[1].data = []
+        }
+        // 作图
+        this.airChart.setOption(this.optionAir)
+        this.viewLoading='hidden'
+      }).catch(error => {
+        console.log(error)
+      })
     }
   }
 }
@@ -274,6 +287,11 @@ export default {
   margin-top: 10px;
   /* height: 460px; */
   height: calc(100% - 70px);
+}
+#DayAir {
+  width: 100%;
+  /* height: 468px; */
+  position: absolute;
 }
 #table {
   width: 100%;

@@ -1,27 +1,12 @@
-<!--告警页面-->
+<!--站点维护记录页面-->
 <template>
   <div class="container-main">
     <div class="winmain" >
       <div class="filter_title">
-        <span>异常告警</span>
+        <span>站点维护记录</span>
       </div>
       <!--筛选条件-->
       <div class="filter_container">
-        <span>时间</span>
-        <el-date-picker
-          style="width:300px;margin-right:50px"
-          size="mini"
-          v-model="value1"
-          value-format="yyyy-MM-dd"
-          type="daterange"
-          align="left"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :picker-options="pickerOptions"
-          :clearable="false"
-          :editable="false">
-        </el-date-picker>
         <span>站点</span>
         <el-select size="mini" v-model="value2" clearable placeholder="请选择站点">
           <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
@@ -43,11 +28,12 @@
           :height= "tableHeight"
           tooltip-effect="dark">
           <el-table-column show-overflow-tooltip type="index" label="序号" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="macAddress" label="站点名称" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="beginTime" label="告警时间" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="airType" label="气体类型" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="airValue" label="气体值" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="topType" label="异常类型" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="macAddress" label="mac地址" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="beginTime" label="检修时间" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="person" label="操作员" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="airTime" label="空气传感器下次检修时间" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="pmTime" label="pm下次检修时间" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="remark" label="检修内容" align="center"></el-table-column>
         </el-table>
         <div class="loading-background" :style="{visibility: viewLoading}"></div>
         <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
@@ -97,6 +83,19 @@ export default {
             picker.$emit('pick', [start, end])
           }
         }]
+      },
+      siteMark: { // mac地址与站点名称的对应关系
+        '440604:009:AAJ': '龙湾大桥',
+        '440604:002:AAC': '罗南村委',
+        '440604:000:AAA': '绿岛湖',
+        '440604:006:AAG': '龙津老年活动中心',
+        '440604:007:AAH': '南庄三中',
+        '440604:004:AAE': '吉利小学',
+        '440604:005:AAF': '罗格村委',
+        '440604:008:AAI': '吉利社区',
+        '440604:001:AAB': '南庄实验中学',
+        '440604:003:AAD': '南庄水利所',
+        '440604:010:AAK': '南庄污水处理厂'
       },
       addrOptions: [],
       value1: '',
@@ -167,63 +166,44 @@ export default {
       let date = this.value1 // 日期
       let filter = this.value2 // 站点
       // 定义字典
-      const airTypeMap = {1: 'SO2', 2: 'NO2', 3: 'PM10', 4: 'PM2.5', 5: '温度', 6: '湿度'}
-      const topTypeMap = {1: '异常突变', 2: '正常突变'}
       this.tableData = []
       this.filtedData = []
       this.currentPage = 1
       this.viewLoading='visible'
-      for (let i = 1; i <= 6; i++) {
-        this.$axios.get('/topAirInfo',
-          {params: {
-              beginTime: date[0],
-              endTime: date[1],
-              airType: i
-            }}
-        ).then(res => {
-          if (res.data.successful) {
-            if (res.data.data.length !== 0) {
-              console.log('有数据')
-              let topData = res.data.data
-              // 获取该日期下的所有数据
-              for (let k = 0; k < topData.length; k++) {
-                this.tableData.push(
-                  {
-                    macAddress: topData[k].macAddress,
-                    beginTime: topData[k].beginTime,
-                    airType: airTypeMap[topData[k].airType],
-                    airValue: topData[k].airValue,
-                    topType: topTypeMap[topData[k].topType]
-                  }
-                )
-              }
-              // 根据下拉框选择的站点进行筛选
-              if (filter) {
-                this.filtedData = this.tableData.filter((item) => {
-                    return item.macAddress === this.addrOptions[filter - 1].label
-                  }
-                )
-                console.log(this.addrOptions[filter - 1].label)
-              } else {
-                this.filtedData = this.tableData
-              }
-              // 数组按告警时间倒序排列
-              this.filtedData.sort(function(a, b) {
-                return new Date(b.beginTime) - new Date(a.beginTime)
-              })
-            } else {
-              console.log('无数据')
+      this.$axios.get('/siteInfoList',
+      ).then(res => {
+        if (res.data.successful) {
+          if (res.data.data.length !== 0) {
+            console.log('有数据')
+            // 获取所有数据
+            this.tableData = res.data.data
+            for(let i=0;i<this.tableData.length;i++) {
+              this.tableData[i].macAddress = this.siteMark[this.tableData[i].macAddress]
             }
+            // 根据下拉框选择的站点进行筛选
+            if (filter) {
+              this.filtedData = this.tableData.filter((item) => {
+                  return item.macAddress === this.addrOptions[filter - 1].label
+                }
+              )
+              console.log(this.addrOptions[filter - 1].label)
+            } else {
+              this.filtedData = this.tableData
+            }
+            // 数组按维护时间倒序排列
+            this.filtedData.sort(function(a, b) {
+              return new Date(b.beginTime) - new Date(a.beginTime)
+            })
           } else {
-            console.log('fail')
+            console.log('无数据')
           }
-          if(i==6) {
-            this.viewLoading='hidden'
-          }
-        }).catch(error => {
-          console.log(error)
-        })
-      }
+        } else {
+          console.log('fail')
+        }
+        this.viewLoading='hidden'
+      }).catch(error => {
+        console.log(error)
+      })
     }
   }
 }

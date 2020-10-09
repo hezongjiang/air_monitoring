@@ -1,19 +1,26 @@
 <template>
   <div class="container-main">
     <div class="navleft">
+      <div class="li-head">站点总数：11个</div>
+      <div class="li-head1">
+        <span style="font-size:15px;font-weight:normal;color:rgb(7,193,96)">在线：</span>
+        <span style="font-size:15px;font-weight:normal;color:white;background-color:rgb(7,193,96);padding:0 4px">{{ countOL }}个</span><br/>
+        <span style="font-size:15px;font-weight:normal;color:#999">离线：</span>
+        <span style="font-size:15px;font-weight:normal;color:white;background-color:#999;padding:0 4px">{{ 11-countOL }}个</span><br/><br/>
+        站点列表
+      </div>
       <ul>
-        <li class="li-head">站点</li>
-        <li :class="{active: termInfo.macAddress === '440604:009:AAJ'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:009:AAJ')">龙湾大桥</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:002:AAC'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:002:AAC')">罗南村委</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:000:AAA'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:000:AAA')">绿岛湖</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:006:AAG'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:006:AAG')">龙津老年活动中心</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:007:AAH'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:007:AAH')">南庄三中</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:004:AAE'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:004:AAE')">吉利小学</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:005:AAF'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:005:AAF')">罗格村委</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:008:AAI'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:008:AAI')">吉利社区</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:001:AAB'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:001:AAB')">南庄实验中学</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:003:AAD'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:003:AAD')">南庄水利所</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:010:AAK'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:010:AAK')">南庄污水处理厂</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:009:AAJ'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:009:AAJ')">&nbsp;&nbsp;<span :style="{color:(termStateArr[0] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;龙湾大桥</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:002:AAC'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:002:AAC')">&nbsp;&nbsp;<span :style="{color:(termStateArr[1] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;罗南村委</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:000:AAA'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:000:AAA')">&nbsp;&nbsp;<span :style="{color:(termStateArr[2] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;绿岛湖</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:006:AAG'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:006:AAG')">&nbsp;&nbsp;<span :style="{color:(termStateArr[3] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;龙津老年活动中心</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:007:AAH'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:007:AAH')">&nbsp;&nbsp;<span :style="{color:(termStateArr[4] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄三中</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:004:AAE'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:004:AAE')">&nbsp;&nbsp;<span :style="{color:(termStateArr[5] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;吉利小学</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:005:AAF'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:005:AAF')">&nbsp;&nbsp;<span :style="{color:(termStateArr[6] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;罗格村委</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:008:AAI'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:008:AAI')">&nbsp;&nbsp;<span :style="{color:(termStateArr[7] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;吉利社区</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:001:AAB'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:001:AAB')">&nbsp;&nbsp;<span :style="{color:(termStateArr[8] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄实验中学</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:003:AAD'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:003:AAD')">&nbsp;&nbsp;<span :style="{color:(termStateArr[9] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄水利所</a></li>
+        <li :class="{active: termInfo.macAddress === '440604:010:AAK'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:010:AAK')">&nbsp;&nbsp;<span :style="{color:(termStateArr[10] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄污水处理厂</a></li>
       </ul>
     </div>
     <div class="winmain">
@@ -73,8 +80,9 @@
           <div id="humidity" :style="{ visibility:(activeSign===3?'visible':'hidden'), height:chartHeight }"></div>
           <el-table 
             id= "detailData"
+            :row-style="{height:'35px'}"
             :cell-style="{ padding:0, fontSize:'12px'}"
-            :header-cell-style="{ padding:0, background:'#dddddd', fontSize:'13px'}"
+            :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
             :style="{ visibility:(activeSign===4?'visible':'hidden') }"
             :data="list"
             stripe
@@ -114,7 +122,22 @@ export default {
         batteryInfo: 0,
         version: '未知'
       }, // 终端信息
+      siteKV: {
+        '龙湾大桥': 0,
+        '罗南村委': 1,
+        '绿岛湖': 2,
+        '龙津老年活动中心': 3,
+        '南庄三中': 4,
+        '吉利小学': 5,
+        '罗格村委': 6,
+        '吉利社区': 7,
+        '南庄实验中学': 8,
+        '南庄水利所': 9,
+        '南庄污水处理厂': 10
+      },
+      countOL: 0,
       termState: '未知', // 终端状态
+      termStateArr: ['离线','离线','离线','离线','离线','离线','离线','离线','离线','离线','离线'], //终端状态
       batteryIcon: '', // 电池图标
       activeSign: 4, // 选项卡激活项
       goneClass: 'sth-gone', // 选项卡内容隐藏
@@ -447,6 +470,17 @@ export default {
     this.endT=this.$moment().format("YYYY-MM-DD")
     this.newBeginT=this.beginT
     this.newEndT=this.endT
+    this.$axios
+    .get('/macAirList') //获取所有站点的终端信息
+    .then( mal => {
+      for(var j=0;j<mal.data.data.length;j++) {
+        this.termStateArr[this.siteKV[mal.data.data[j].macAddress]] = '在线'
+        this.countOL++
+      }
+    })
+    .catch(function (error) { // 请求失败处理
+      console.log(error)
+    })
     this.focusInfo('440604:009:AAJ')
     console.log(document.body.clientWidth)
   }
@@ -469,7 +503,7 @@ export default {
 .navleft {
   width: 13%;
   float: left;
-  padding: 10px;
+  padding: 10px 0 10px 10px;
   /* height: 586px; */
   height: calc(100% - 50px);
   overflow-y: auto;
@@ -480,10 +514,10 @@ export default {
   list-style-type: none;
   padding: 0;
   margin: 0;
-  text-align: center;
+  /* text-align: center; */
 }
 .navleft ul li {
-  padding: 4px 0;
+  padding: 5px 0;
 }
 .navleft ul a {
   display: block;
@@ -501,9 +535,21 @@ export default {
   font-weight: bold;
 }
 .li-head {
-  font-size: 18px;
-  font-weight: bolder;
-  border-bottom: 1px solid #ccc;
+  border-radius: 6px 6px 0 0;
+  font-size: 17px;
+  font-weight: bold;
+  padding: 10px 0 0 10px;
+  color: rgb(40,40,40);
+  /* border-bottom: 1px solid #ccc; */
+  background-color: white;
+}
+.li-head1 {
+  font-size: 17px;
+  font-weight: bold;
+  padding: 10px 0 0 10px;
+  color: rgb(40,40,40);
+  /* border-bottom: 1px solid #ccc; */
+  background-color: white;
 }
 .winmain {
   width: 87%;

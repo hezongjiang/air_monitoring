@@ -1311,7 +1311,7 @@ export default {
         let th = ['监测时间', '绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
         let filterVal = ['time', 'aqi1', 'aqi2', 'aqi3', 'aqi4', 'aqi5', 'aqi6', 'aqi7', 'aqi8', 'aqi9', 'aqi10', 'aqi11']
         let data = this.listMdiaqi.map(v => filterVal.map(k => v[k]))
-        let fileName = this.beginT + '至' + this.endT + this.airChoose + '数据分析AQI气体分析'
+        let fileName = this.beginT + '至' + this.endT + '数据分析AQI气体分析'
         let [fileType, sheetName] = ['xlsx', '数据分析AQI气体分析']
         this.$toExcel({th, data, fileName, fileType, sheetName})
       }
@@ -1319,7 +1319,7 @@ export default {
         let th = ['监测时间', '绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
         let filterVal = ['time', 'batt1', 'batt2', 'batt3', 'batt4', 'batt5', 'batt6', 'batt7', 'batt8', 'batt9', 'batt10', 'batt11']
         let data = this.listBl.map(v => filterVal.map(k => v[k]))
-        let fileName = this.beginT + '至' + this.endT + this.airChoose + '数据分析终端电量'
+        let fileName = this.beginT + '至' + this.endT + '数据分析终端电量'
         let [fileType, sheetName] = ['xlsx', '数据分析终端电量']
         this.$toExcel({th, data, fileName, fileType, sheetName})
       }
