@@ -4,13 +4,10 @@
       router
       active-text-color="rgb(44,148,255)"
       mode="horizontal"
-      style="min-width:1360px;height:50px">
+      style="border-bottom:1px solid rgb(195,225,255);min-width:1360px;height:50px;background-color:rgb(255,255,255);">
       <img src="@/assets/logo.png" alt="logo">
       <span class="title">大气质量智能监控平台</span>
-      <!-- <el-menu-item v-for="(item,i) in navList" :key="i" :index="item.name">
-        {{ item.navItem }}
-      </el-menu-item> -->
-      <el-menu-item index="/index">首页</el-menu-item>
+      <el-menu-item index="/index"><i class="fa fa-home" aria-hidden="true" style="float:left;"></i>&nbsp;首页</el-menu-item>
       <el-menu-item index="/quality">空气质量管理</el-menu-item>
       <el-submenu index="1">
         <template slot="title">历史数据</template>
@@ -54,14 +51,6 @@
     name: 'NavMenu',
     data () {
       return {
-        navList: [
-          {name: '/index', navItem: '首页'},
-          {name: '/quality', navItem: '空气质量管理'},
-          {name: '/history', navItem: '历史数据'},
-          {name: '/original', navItem: '原始数据'},
-          {name: '/alarm', navItem: '小时报表'},
-          {name: '/analyse', navItem: '站点监测'}
-        ],
         username: window.sessionStorage.getItem('username')
       }
     },
@@ -75,45 +64,51 @@
 </script>
 
 <style scoped>
-  a {
-    text-decoration: none;
-    font-size: 12px;
-    color:rgb(88,88,88);
-    float: right;
-    padding: 0px 6px;
-    line-height: 50px;
-    margin-right: 12px
-  }
-  .title {
-    pointer-events: none;
-    line-height: 50px;
-    margin-right: 50px;
-    float: left;
-    color:rgb(40,40,40);
-    font-size: 17px;
-    font-weight: bold;
-  }
-  i {
-    float: right;
-    font-size: 14px;
-    color:rgb(88,88,88);
-    line-height: 50px;
-  }
-  img {
-    float: left;
-    width: 50px;
-    padding:0 12px
-  }
-  .el-menu-item {
-    margin: 0 15px;
-    padding: 0px 25px;
-    line-height: 50px;
-    font-size:15px;
-    height:50px;
-    color: rgba(88,88,88,0.6);
-  }
-  .el-menu-item:hover {
-    background-color: inherit !important;
-    color: rgba(88,88,88,0.8) !important;
-  }
+a {
+  text-decoration: none;
+  font-size: 12px;
+  color: rgb(88,88,88);
+  float: right;
+  padding: 0px 6px;
+  line-height: 50px;
+  margin-right: 12px
+}
+.title {
+  pointer-events: none;
+  line-height: 50px;
+  margin: 0 40px 0 5px;
+  float: left;
+  color: black;
+  font-size: 18px;
+  font-weight: bold;
+}
+i {
+  float: right;
+  font-size: 14px;
+  color:rgb(88,88,88);
+  line-height: 50px;
+}
+img {
+  float: left;
+  width: 50px;
+  padding:0 12px;
+  margin-right:10px;
+  background-color:rgb(155,225,255);
+}
+.el-menu-item {
+  margin: 0 12px;
+  padding: 0px 25px;
+  height: 50px;
+  line-height: 50px;
+  font-size: 15px;
+  color: rgb(88,88,88) !important;
+}
+.el-menu-item:focus, .el-menu-item:hover {
+  color: #409EFF !important;
+  background-color: rgb(245,250,255) !important;
+}
+.el-menu-item.is-active {
+  color: #409EFF !important;
+  background-color: rgb(245,250,255) !important;
+}
 </style>

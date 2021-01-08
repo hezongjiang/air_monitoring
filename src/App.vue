@@ -21,7 +21,7 @@ body,html {
 }
 body {
   margin: 0;
-  background-color:rgb(245,245,255);
+  background-color:rgb(245,250,255);
 }
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -34,14 +34,31 @@ body {
 .anchorBL {
   display: none;
 }
-/* 解决element-ui表格表头和内容对不齐的问题*/
-/* .el-table th.gutter{
-  display: table-cell!important;
-} */
 /* 修改分页器的样式 */
 .el-pager li,.el-pager li.active,.el-pager li:hover,
 .el-pagination .btn-prev,.el-pagination .btn-next,
 .el-pagination .btn-prev:disabled,.el-pagination .btn-next:disabled {
-  background-color: transparent;
+  background-color: transparent !important;
+}
+/*导航栏el-submenu的样式*/
+.el-menu--horizontal>.el-submenu .el-submenu__title {
+  margin: 0 12px !important;
+  padding: 0 15px 0 25px !important;
+  height: 50px !important;
+  line-height: 50px !important;
+  font-size: 15px !important;
+  color: rgb(88,88,88) !important;
+}
+.el-menu--horizontal>.el-submenu:focus .el-submenu__title,
+.el-menu--horizontal>.el-submenu:hover .el-submenu__title {
+  color: #409EFF !important;
+  background-color: rgb(245,250,255) !important;
+}
+.el-menu--horizontal>.el-submenu.is-active .el-submenu__title {
+  color: #409EFF !important;
+  background-color: rgb(245,250,255) !important;
+}
+.el-menu--horizontal>.el-submenu.is-active .el-submenu__title i {
+  color: #409EFF !important;
 }
 </style>

@@ -11,13 +11,13 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/device':{
-        target: 'http://api.aisensing.cn',   //前端请求默认发送到这里，注意修改
-        changeOrigin: true,                  //是否跨域
-        pathRewrite:{                        //端口重写
-          '^/device':''
-        }
-      }
+      // '/device':{
+      //   target: 'http://api.aisensing.cn',   //前端请求默认发送到这里，注意修改
+      //   changeOrigin: true,                  //是否跨域
+      //   pathRewrite:{                        //端口重写
+      //     '^/device':'/device'
+      //   }
+      // }
     },
 
     // Various Dev Server settings

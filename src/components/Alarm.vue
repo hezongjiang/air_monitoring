@@ -9,7 +9,7 @@
       <div class="filter_container">
         <span>时间</span>
         <el-date-picker
-          style="width:300px;margin-right:50px"
+          style="width:250px;margin-right:20px"
           size="mini"
           v-model="value1"
           value-format="yyyy-MM-dd"
@@ -26,8 +26,8 @@
         <el-select size="mini" v-model="value2" clearable placeholder="请选择站点">
           <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
-        <el-button type="primary" size="mini" v-on:click="getTable">查询</el-button>
-        <el-button v-on:click="exportExcel($event)" size="mini" style="float: right"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
+        <el-button type="primary" size="mini" v-on:click="getTable"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
+        <el-button type="success" plain v-on:click="exportExcel($event)" size="mini" style="float: right"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
       </div>
       <!--表格-->
       <div class="table-container">
@@ -49,7 +49,6 @@
           <el-table-column show-overflow-tooltip prop="airValue" label="气体值" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="topType" label="异常类型" align="center"></el-table-column>
         </el-table>
-        <div class="loading-background" :style="{visibility: viewLoading}"></div>
         <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
       </div>
     </div>
@@ -106,7 +105,7 @@ export default {
       currentPage: 1,
       pageSize: 20,
       viewLoading: 'hidden',
-      tableHeight: '100%'
+      tableHeight: 'calc(100% - 10px)'
     }
   },
   created () {
@@ -245,11 +244,15 @@ export default {
 .winmain {
   margin: 10px 10px;
   background: white;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 10px 20px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
   /* min-height: 549px; */
   height: calc(100% - 105px);
+  box-shadow: 0 0 2px 1px #ddd;
+}
+.filter_title {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
 }
 .filter_title i {
   font-size: 25px;
@@ -258,6 +261,7 @@ export default {
 .filter_title span {
   font-weight: bold;
   font-size: 18px;
+  color: black;
 }
 .filter_container {
   margin-top: 10px;
@@ -267,7 +271,8 @@ export default {
   padding-right: 10px;
 }
 .el-select {
-  padding-right: 15px;
+  padding-right: 20px;
+  width: 150px;
 }
 .table-container {
   position: relative;
@@ -280,16 +285,6 @@ export default {
   /* height: 432px; */
   position: absolute;
 }
-.loading-background {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 465px;
-  border-radius: 6px;
-  background-color: rgb(255,255,255,0.5);
-  z-index: 1001;
-}
 .loading {
   position: absolute;
   top: 0px;
@@ -299,7 +294,7 @@ export default {
   height: 100px;
   width: 100px;
   margin: auto;
-  border-radius: 6px;
+  border-radius: 4px;
   background-color: rgb(70,70,70);
   z-index: 1002;
   padding: 20px 0;

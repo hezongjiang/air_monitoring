@@ -1,90 +1,77 @@
 <template>
   <div class="container-main">
     <div class="navleft">
-      <div class="li-head">站点总数：11个</div>
+      <div class="li-head">站点总数：{{ countSite }}个</div>
       <div class="li-head1">
         <span style="font-size:15px;font-weight:normal;color:rgb(7,193,96)">在线：</span>
         <span style="font-size:15px;font-weight:normal;color:white;background-color:rgb(7,193,96);padding:0 4px">{{ countOL }}个</span><br/>
         <span style="font-size:15px;font-weight:normal;color:#999">离线：</span>
-        <span style="font-size:15px;font-weight:normal;color:white;background-color:#999;padding:0 4px">{{ 11-countOL }}个</span><br/><br/>
+        <span style="font-size:15px;font-weight:normal;color:white;background-color:#999;padding:0 4px">{{ countSite - countOL }}个</span>
+        <br/>
+      </div>
+      <div class="li-head2">
         站点列表
       </div>
       <ul>
-        <li :class="{active: termInfo.macAddress === '440604:009:AAJ'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:009:AAJ')">&nbsp;&nbsp;<span :style="{color:(termStateArr[0] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;龙湾大桥</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:002:AAC'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:002:AAC')">&nbsp;&nbsp;<span :style="{color:(termStateArr[1] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;罗南村委</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:000:AAA'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:000:AAA')">&nbsp;&nbsp;<span :style="{color:(termStateArr[2] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;绿岛湖</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:006:AAG'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:006:AAG')">&nbsp;&nbsp;<span :style="{color:(termStateArr[3] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;龙津老年活动中心</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:007:AAH'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:007:AAH')">&nbsp;&nbsp;<span :style="{color:(termStateArr[4] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄三中</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:004:AAE'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:004:AAE')">&nbsp;&nbsp;<span :style="{color:(termStateArr[5] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;吉利小学</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:005:AAF'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:005:AAF')">&nbsp;&nbsp;<span :style="{color:(termStateArr[6] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;罗格村委</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:008:AAI'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:008:AAI')">&nbsp;&nbsp;<span :style="{color:(termStateArr[7] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;吉利社区</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:001:AAB'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:001:AAB')">&nbsp;&nbsp;<span :style="{color:(termStateArr[8] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄实验中学</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:003:AAD'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:003:AAD')">&nbsp;&nbsp;<span :style="{color:(termStateArr[9] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄水利所</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:010:AAK'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:010:AAK')">&nbsp;&nbsp;<span :style="{color:(termStateArr[10] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄污水处理厂</a></li>
+        <li v-for='item in liList' :class="{active: termInfo.macAddress === item.macAddress}"><a href="javascript:void(0)" v-on:click="focusInfo(item.macAddress, item.remark)">&nbsp;&nbsp;<span :style="{color:(termStateObj[item.remark] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;{{ item.remark }}</a></li>
       </ul>
     </div>
     <div class="winmain">
       <div>
         <el-row type="flex" align="bottom">
-          <el-col :span="14" class="term-name">{{ termInfo.remark }}</el-col>
+          <el-col :span="14" class="term-name">{{ termInfo.remark }}<span :style="{color:(termState === '在线' ? '#11aa11' : '#999' )}" style="font-size:13px;color:green;font-weight:normal">&nbsp;&nbsp;{{ termState }}</span></el-col>
           <el-col :span="10" class="back-home"><router-link to="/index"><i class="fa fa-reply" aria-hidden="true"></i>&nbsp;返回首页</router-link></el-col>
         </el-row>
       </div>
       <div class="term-info">
         <el-row type="flex" align="bottom">
-          <el-col :span="6">设备状态&nbsp;&nbsp;&nbsp;&nbsp;<span :style="{color:(termState === '正常' ? '#11aa11' : '#aa1111' )}">{{ termState }}</span></el-col>
-          <el-col :span="6">经度&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ parseFloat(termInfo.lon/100).toFixed(6) }}</span></el-col>
-          <el-col :span="6">设备编号&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ termInfo.macAddress }}</span></el-col>
-          <el-col :span="6">固件版本&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ termInfo.version }}</span></el-col>
+          <el-col :span="8">经度&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ parseFloat(termInfo.lon/100).toFixed(6) }}</span></el-col>
+          <el-col :span="8">设备编号&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ termInfo.macAddress }}</span></el-col>
+          <el-col :span="8">设备电量&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></span></el-col>
         </el-row>
         <el-row type="flex" align="bottom">
-          <el-col :span="6">设备电量&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></span></el-col>
-          <el-col :span="6">纬度&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ parseFloat(termInfo.lat/100).toFixed(6) }}</span></el-col>
-          <el-col :span="6">设备备注名&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ termInfo.remark }}</span></el-col>
+          <el-col :span="8">纬度&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ parseFloat(termInfo.lat/100).toFixed(6) }}</span></el-col>
+          <el-col :span="8">站点名称&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ termInfo.remark }}</span></el-col>
+          <el-col :span="8">固件版本&nbsp;&nbsp;&nbsp;&nbsp;<span>{{ termInfo.version }}</span></el-col>
         </el-row>
       </div>
       <div class="chart-table">
-        <a href="javascript:void(0)" :class="{active:activeSign==4}" v-on:click="chooseData(4)">详细数据</a>
-        <a href="javascript:void(0)" :class="{active:activeSign==1}" v-on:click="chooseData(1)">气体浓度</a>
-        <a href="javascript:void(0)" :class="{active:activeSign==2}" v-on:click="chooseData(2)">气温</a>
-        <a href="javascript:void(0)" :class="{active:activeSign==3}" v-on:click="chooseData(3)" style="margin-right:60px">湿度</a>
+        <a href="javascript:void(0)" :class="{active:activeSign==1}" v-on:click="chooseData(1)">详细数据</a>
+        <a href="javascript:void(0)" :class="{active:activeSign==2}" v-on:click="chooseData(2)">气体浓度</a>
+        <a href="javascript:void(0)" :class="{active:activeSign==3}" v-on:click="chooseData(3)">气温</a>
+        <a href="javascript:void(0)" :class="{active:activeSign==4}" v-on:click="chooseData(4)" style="margin-right:60px">湿度</a>
         时间&nbsp;&nbsp;
         <el-date-picker
           type="date"
-          v-model="newBeginT"
+          v-model="beginT"
           placeholder="开始日期"
           size="mini"
           value-format="yyyy-MM-dd"
-          style="width:150px"
+          style="width:130px"
           :editable="false"
           :clearable="false">
         </el-date-picker>
         ～
         <el-date-picker
           type="date"
-          v-model="newEndT"
+          v-model="endT"
           placeholder="结束日期"
           size="mini"
           value-format="yyyy-MM-dd"
-          style="width:150px"
+          style="width:130px;margin-right:20px"
           :editable="false"
           :clearable="false">
         </el-date-picker>
-        &nbsp;&nbsp;
-        <el-button type="primary" size="mini" @click="searchDate(termInfo.macAddress)"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
-        <el-button size="mini" @click="exportExcel($event)" :class="activeSign===4?'':goneClass" style="float:right"><i class="fa fa-download" aria-hidden="true"></i>&nbsp;导出Excel</el-button>
-        <el-button size="mini" @click="zoomChange($event)" :class="activeSign==1||activeSign==2||activeSign==3?'':goneClass" style="float:right">切换缩放模式</el-button>
+        <el-button type="primary" size="mini" @click="focusInfo(termInfo.macAddress, termInfo.remark)"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
+        <el-button type="success" plain size="mini" @click="exportExcel($event)" :style="{ visibility:(activeSign===1?'visible':'hidden') }" style="float:right"><i class="fa fa-download" aria-hidden="true"></i>&nbsp;导出Excel</el-button>
         <div class="container">
-          <div id="concentration" :style="{ visibility:(activeSign===1?'visible':'hidden'), height:chartHeight }"></div>
-          <div id="temperature" :style="{ visibility:(activeSign===2?'visible':'hidden'), height:chartHeight }"></div>
-          <div id="humidity" :style="{ visibility:(activeSign===3?'visible':'hidden'), height:chartHeight }"></div>
-          <el-table 
+          <el-table
             id= "detailData"
             :row-style="{height:'35px'}"
             :cell-style="{ padding:0, fontSize:'12px'}"
             :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
-            :style="{ visibility:(activeSign===4?'visible':'hidden') }"
-            :data="list"
+            :style="{ visibility:(activeSign===1?'visible':'hidden') }"
+            :data="tbList"
             stripe
             highlight-current-row
             border
@@ -100,7 +87,9 @@
             <el-table-column show-overflow-tooltip prop="speed" label="风速（m/s）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="direct" label="风向" align="center"></el-table-column>
           </el-table>
-          <div class="loading-background" :style="{visibility: viewLoading}"></div>
+          <div id="concentration" :style="{ visibility:(activeSign===2?'visible':'hidden'), height:chartHeight }"></div>
+          <div id="temperature" :style="{ visibility:(activeSign===3?'visible':'hidden'), height:chartHeight }"></div>
+          <div id="humidity" :style="{ visibility:(activeSign===4?'visible':'hidden'), height:chartHeight }"></div>
           <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
         </div>
       </div>
@@ -114,51 +103,30 @@ export default {
   name: 'Detail',
   data() {
     return {
-      termInfo: {
-        macAddress: '未知',
-        remark: '未知',
-        lon: 0,
-        lat: 0,
-        batteryInfo: 0,
-        version: '未知'
-      }, // 终端信息
-      siteKV: {
-        '龙湾大桥': 0,
-        '罗南村委': 1,
-        '绿岛湖': 2,
-        '龙津老年活动中心': 3,
-        '南庄三中': 4,
-        '吉利小学': 5,
-        '罗格村委': 6,
-        '吉利社区': 7,
-        '南庄实验中学': 8,
-        '南庄水利所': 9,
-        '南庄污水处理厂': 10
-      },
-      countOL: 0,
-      termState: '未知', // 终端状态
-      termStateArr: ['离线','离线','离线','离线','离线','离线','离线','离线','离线','离线','离线'], //终端状态
+      liList: [], // 左侧站点列表
+      countSite: 0, // 站点总数
+      countOL: 0, // 站点在线数
+      termStateObj: {}, // 终端在线状态对象
+      termInfo: {}, // 终端信息对象
+      termState: '', // 终端在线状态
       batteryIcon: '', // 电池图标
-      activeSign: 4, // 选项卡激活项
-      goneClass: 'sth-gone', // 选项卡内容隐藏
+      activeSign: 1, // 选项卡激活项
       airChart: '', // 气体图表
       tempChart: '', // 温度图表
       humidityChart: '', // 湿度图表
-      chartX: [], // 横轴数据
       N: 2, // 默认显示前2天至当天的信息
-      newBeginT: '', // 日期选择器上显示的开始日期
-      newEndT: '', // 日期选择器上显示的结束日期
-      beginT: '', // 实际选定了的开始日期
-      endT: '', // 实际选定了的结束日期
-      viewLoading: 'hidden',
-      tableHeight: '100%',
-      chartHeight: '100%',
-      list: [], // 存放详细数据
-      optionAir: { // 气体曲线图的设置数据
+      beginT: '', // 开始日期
+      endT: '', // 结束日期
+      viewLoading: 'hidden', // 窗口可见性
+      tableHeight: '100%', // 表格高度
+      chartHeight: '100%', // 图表高度
+      tbList: [], // 存放详细表格数据
+      optionAir: { // 气体曲线图配置
         tooltip: {
-          show: true
+          show: true,
+          trigger: 'axis'
         },
-        dataZoom: { 
+        dataZoom: {
           type: 'inside',
           filterMode: 'none'
         },
@@ -176,7 +144,7 @@ export default {
         xAxis: {
           name: '时间',
           nameLocation: 'middle',
-          nameTextStyle: { padding: [10,0,0,0] },
+          nameTextStyle: { padding: [10, 0, 0, 0] },
           type: 'category',
           boundaryGap: false,
           data: [],
@@ -184,7 +152,7 @@ export default {
         },
         yAxis: {
           name: '浓度（μg/m³）',
-          nameTextStyle: { padding: [0,0,0,20] },
+          nameTextStyle: { padding: [0, 0, 0, 20] },
           type: 'value',
           axisLabel: { fontSize: 11 }
         },
@@ -215,9 +183,10 @@ export default {
       },
       optionTemp: { // 温度曲线图的设置数据
         tooltip: {
-          show: true
+          show: true,
+          trigger: 'axis'
         },
-        dataZoom: { 
+        dataZoom: {
           type: 'inside',
           filterMode: 'none'
         },
@@ -230,7 +199,7 @@ export default {
         xAxis: {
           name: '时间',
           nameLocation: 'middle',
-          nameTextStyle: { padding: [10,0,0,0] },
+          nameTextStyle: { padding: [10, 0, 0, 0] },
           type: 'category',
           boundaryGap: false,
           data: [],
@@ -238,7 +207,7 @@ export default {
         },
         yAxis: {
           name: '温度（℃）',
-          nameTextStyle: { padding: [0,0,0,20] },
+          nameTextStyle: { padding: [0, 0, 0, 20] },
           type: 'value',
           axisLabel: { fontSize: 11 }
         },
@@ -250,9 +219,10 @@ export default {
       },
       optionHumidity: { // 湿度曲线图的设置数据
         tooltip: {
-          show: true
+          show: true,
+          trigger: 'axis'
         },
-        dataZoom: { 
+        dataZoom: {
           type: 'inside',
           filterMode: 'none'
         },
@@ -265,7 +235,7 @@ export default {
         xAxis: {
           name: '时间',
           nameLocation: 'middle',
-          nameTextStyle: { padding: [10,0,0,0] },
+          nameTextStyle: { padding: [10, 0, 0, 0] },
           type: 'category',
           boundaryGap: false,
           data: [],
@@ -273,7 +243,7 @@ export default {
         },
         yAxis: {
           name: '湿度（%R.H.）',
-          nameTextStyle: { padding: [0,0,0,20] },
+          nameTextStyle: { padding: [0, 0, 0, 20] },
           type: 'value',
           axisLabel: { fontSize: 11 }
         },
@@ -286,31 +256,14 @@ export default {
     }
   },
   methods: {
-    focusInfo: function (addr) { // 展示选定站点的信息
-      let that = this
-      this.termInfo.macAddress = addr
-      this.newBeginT=this.beginT
-      this.newEndT=this.endT
-      this.list=[]
-      this.viewLoading='visible'
-      // 判断结束日期是否为当天，当天和非当天的横轴数据有差异
-      // if(new Date().getDate() == this.$moment(this.endT).format("D")) {
-      //   var endH=new Date().getHours()
-      //   for(var j=0;j<this.N;j++) {
-      //     this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
-      //     for(var i=1;i<24;i++) {
-      //       this.chartX[24*j+i]=i
-      //     }
-      //   }
-      //   this.chartX[24*j]=new Date().getDate()+'日'
-      //   for(i=1;i<endH+1;i++) {
-      //     this.chartX[24*j+i]=i
-      //   }
-      //   console.log(this.chartX)
-      // }
+    focusInfo(addr, remark) { // 展示选定站点的信息
+      let that = this // this拷贝，防止后续因层级关系无法调用this
+      this.viewLoading = 'visible' // 显示加载标志
+      this.termInfo.macAddress = addr // 提前赋值，使左侧站点列表选中反应达到最快，增加用户体验
       this.$axios
-      .all([this.$axios.get('/'+addr+'/macAirDeviceInfo'), // 获取选定站点的终端信息
-            this.$axios.get('/macAirHourHistory',{ // 获取选定站点在一定日期范围内的气体信息
+      .all([this.$axios.get('/' + addr + '/macAirDeviceInfo'), // 获取选定站点的终端信息
+            this.$axios.get('/macAirList'), // 获取所有站点的空气信息
+            this.$axios.get('/macAirHourHistory', { // 获取选定站点在一定日期范围内的气体信息
               params: {
                 macAddress: addr,
                 beginTime: this.beginT,
@@ -318,171 +271,168 @@ export default {
               }
             })
       ])
-      .then(this.$axios.spread(function (madi, mahh) {
-        console.log(madi) // 得到选定站点的终端信息
-        if(madi.data.successful && madi.data.data.length) {
+      .then(this.$axios.spread(function (madi, mal, mahh) {
+        if (madi.data.successful && madi.data.data.length) {
           that.termInfo = madi.data.data[0]
-          switch(parseInt(that.termInfo.batteryInfo/10)) { // 根据电池电量值选择不同的电池图标
-            case 0: that.batteryIcon="fa fa-battery-0"
-            break
+          switch (Math.round(parseInt(that.termInfo.batteryInfo) / 10)) { // 根据电池电量值选择不同的电池图标
+            case 0:
+              that.batteryIcon = 'fa fa-battery-0'
+              break
             case 1:
             case 2:
-            case 3: that.batteryIcon="fa fa-battery-1"
-            break
+            case 3:
+              that.batteryIcon = 'fa fa-battery-1'
+              break
             case 4:
-            case 5: that.batteryIcon="fa fa-battery-2"
-            break
+            case 5:
+              that.batteryIcon = 'fa fa-battery-2'
+              break
             case 6:
             case 7:
-            case 8: that.batteryIcon="fa fa-battery-3"
-            break
+            case 8:
+              that.batteryIcon = 'fa fa-battery-3'
+              break
             case 9:
-            case 10: that.batteryIcon="fa fa-battery"
-            break
+            case 10:
+              that.batteryIcon = 'fa fa-battery'
+              break
+            default:
+              that.batteryIcon = 'fa fa-battery'
           }
-          console.log(mahh) // 得到选定站点在一定日期范围内的气体信息
-          if(mahh.data.successful) {
-            that.list=mahh.data.data
-            for(var i=0;i<mahh.data.data.length;i++) {
-              that.optionAir.series[0].data[i]=mahh.data.data[i].SO2
-              that.optionAir.series[1].data[i]=mahh.data.data[i].NO2
-              that.optionAir.series[2].data[i]=mahh.data.data[i].PM10
-              that.optionAir.series[3].data[i]=mahh.data.data[i].PM25
-              that.optionTemp.series[0].data[i]=mahh.data.data[i].temp
-              that.optionHumidity.series[0].data[i]=mahh.data.data[i].humidity
-              that.chartX[i]=mahh.data.data[i].beginTime
-            }
-            that.termState = '正常'
-          }
-          else {  // 如果选定站点在一定日期范围内的气体信息的请求失败，则初始化相关信息
-            that.termState='查询异常'
-            that.optionAir.series[0].data=[]
-            that.optionAir.series[1].data=[]
-            that.optionAir.series[2].data=[]
-            that.optionAir.series[3].data=[]
-            that.optionTemp.series[0].data=[]
-            that.optionHumidity.series[0].data=[]
-            that.list=[]
-          }
-        }
-        else { // 如果选定站点的终端信息请求失败，则初始化相关信息
+        } else {
           that.termInfo = {
-            macAddress: addr,
-            remark: '未知',
-            lon: 0,
-            lat: 0,
-            batteryInfo: 0,
-            version: '未知'
-          },
-          that.termState='设备异常'
-          that.optionAir.series[0].data=[]
-          that.optionAir.series[1].data=[]
-          that.optionAir.series[2].data=[]
-          that.optionAir.series[3].data=[]
-          that.optionTemp.series[0].data=[]
-          that.optionHumidity.series[0].data=[]
-          that.list=[]
+            'macAddress': addr,
+            'beginTime': '',
+            'batteryInfo': 0,
+            'lon': 0,
+            'lat': 0,
+            'errorCode': '',
+            'remark': remark,
+            'version': ''
+          }
+          that.batteryIcon = 'fa fa-battery-0'
         }
-        // 设置横轴数据，作曲线图
-        that.optionAir.xAxis.data=that.chartX
-        that.optionTemp.xAxis.data=that.chartX
-        that.optionHumidity.xAxis.data=that.chartX
+        if (mal.data.successful && mal.data.data.length) {
+          that.countSite = mal.data.data.length // 站点总数
+          that.countOL = 0
+          for (let i = 0; i < mal.data.data.length; i++) { // 站点在线状态
+            if (parseInt(Date.now() / 1000) - that.$moment(mal.data.data[i].beginTime).unix() < 1800) {
+              that.termStateObj[mal.data.data[i].macAddress] = '在线'
+              that.countOL++
+            } else {
+              that.termStateObj[mal.data.data[i].macAddress] = '离线'
+            }
+          }
+          that.termState = that.termStateObj[remark]
+        } else {
+          that.countSite = 0 // 站点总数
+          that.countOL = 0 // 在线站点数
+          for (let key in that.termStateObj) {
+            that.termStateObj[key] = '离线'
+          }
+          that.termState = '离线' // 终端在线状态
+        }
+        if (mahh.data.successful && mahh.data.data.length) {
+          that.tbList = mahh.data.data
+          // 图表数据初始化，因为赋值过程是一位一位地修改的，所以当长时间变短时间时，长时间多出的部分仍然可见，这是不对的
+          that.optionAir.series[0].data = []
+          that.optionAir.series[1].data = []
+          that.optionAir.series[2].data = []
+          that.optionAir.series[3].data = []
+          that.optionTemp.series[0].data = []
+          that.optionHumidity.series[0].data = []
+          that.optionAir.xAxis.data = []
+          that.optionTemp.xAxis.data = []
+          that.optionHumidity.xAxis.data = []
+          // 图表数据赋值
+          for (let i = 0; i < mahh.data.data.length; i++) {
+            that.optionAir.series[0].data[i] = mahh.data.data[i].SO2
+            that.optionAir.series[1].data[i] = mahh.data.data[i].NO2
+            that.optionAir.series[2].data[i] = mahh.data.data[i].PM10
+            that.optionAir.series[3].data[i] = mahh.data.data[i].PM25
+            that.optionTemp.series[0].data[i] = mahh.data.data[i].temp
+            that.optionHumidity.series[0].data[i] = mahh.data.data[i].humidity
+            that.optionAir.xAxis.data[i] = mahh.data.data[i].beginTime
+            that.optionTemp.xAxis.data[i] = mahh.data.data[i].beginTime
+            that.optionHumidity.xAxis.data[i] = mahh.data.data[i].beginTime
+          }
+        } else {
+          that.tbList = []
+          that.optionAir.series[0].data = []
+          that.optionAir.series[1].data = []
+          that.optionAir.series[2].data = []
+          that.optionAir.series[3].data = []
+          that.optionTemp.series[0].data = []
+          that.optionHumidity.series[0].data = []
+          that.optionAir.xAxis.data = []
+          that.optionTemp.xAxis.data = []
+          that.optionHumidity.xAxis.data = []
+        }
+        // 作曲线图
         that.airChart.setOption(that.optionAir)
         that.tempChart.setOption(that.optionTemp)
         that.humidityChart.setOption(that.optionHumidity)
-        that.viewLoading='hidden'
+        that.viewLoading = 'hidden'
       }))
       .catch(function (error) { // 请求失败处理
         console.log(error)
       })
     },
-    chooseData:function (x) { // 选择要激活的选项卡的内容
-      this.activeSign=x
-    },
-    searchDate:function (x) { // 点击查询按钮后展示选定站点的信息
-      this.beginT=this.newBeginT
-      this.endT=this.newEndT
-      // 初始化图表数据
-      this.optionAir.series[0].data=[]
-      this.optionAir.series[1].data=[]
-      this.optionAir.series[2].data=[]
-      this.optionAir.series[3].data=[]
-      this.optionTemp.series[0].data=[]
-      this.optionHumidity.series[0].data=[]
-      this.chartX=[]
-      // this.N=this.$moment(this.endT).diff(this.$moment(this.beginT),'days')
-      // // 判断结束日期是否为非当天，当天和非当天的横轴数据有差异
-      // if(!(new Date().getDate() == this.$moment(this.endT).format("D"))) {
-      //   for(var j=0;j<this.N+1;j++) {
-      //     this.chartX[24*j]=this.$moment(this.beginT).add(j,'days').format("D")+'日'
-      //     for(var i=1;i<24;i++) {
-      //       this.chartX[24*j+i]=i
-      //     }
-      //   }
-      //   console.log(this.chartX)
-      // }
-      this.focusInfo(x)
-    },
-    zoomChange: function (e) { // 图表缩放模式改变
-      e.currentTarget.blur()
-      if(this.optionAir.dataZoom.type=='inside') {
-        this.optionAir.dataZoom.type='slider'
-        this.optionTemp.dataZoom.type='slider'
-        this.optionHumidity.dataZoom.type='slider'
-      }
-      else {
-        this.optionAir.dataZoom.type='inside'
-        this.optionTemp.dataZoom.type='inside'
-        this.optionHumidity.dataZoom.type='inside'
-      }
-      this.airChart.clear()
-      this.tempChart.clear()
-      this.humidityChart.clear()
-      this.airChart.setOption(this.optionAir)
-      this.tempChart.setOption(this.optionTemp)
-      this.humidityChart.setOption(this.optionHumidity)
+    chooseData(x) { // 选择要激活的选项卡的内容
+      this.activeSign = x
     },
     exportExcel(e) { // 导出excel文件
       e.currentTarget.blur()
       const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
       const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
-      const data = this.list.map(v => filterVal.map(k => v[k]))
+      const data = this.tbList.map(v => filterVal.map(k => v[k]))
       const fileName = this.beginT + '至' + this.endT + this.termInfo.remark + '详情'
       const [fileType, sheetName] = ['xlsx', '详情数据']
       this.$toExcel({th, data, fileName, fileType, sheetName})
     }
   },
   created () {
-    if(document.body.clientWidth<1042) {
-      this.tableHeight="calc(100% - 30px)"
-      this.chartHeight="calc(100% - 30px)"
+    console.log(document.body.clientWidth)
+    if (document.body.clientWidth < 1042) { // 如果浏览器窗口比较小则元素会被挤压多出一层从而占用表格和图表的高度，需作适当让步
+      this.tableHeight = 'calc(100% - 30px)'
+      this.chartHeight = 'calc(100% - 30px)'
     }
-    console.log(this.tableHeight)
-    console.log(this.chartHeight)
   },
   mounted () {
-    // 创建charts实例
-    this.airChart = this.$echarts.init(document.getElementById('concentration'))
-    this.tempChart = this.$echarts.init(document.getElementById('temperature'))
-    this.humidityChart = this.$echarts.init(document.getElementById('humidity'))
-    // 设置默认开始日期和结束日期
-    this.beginT=this.$moment().subtract(this.N,'days').format("YYYY-MM-DD")
-    this.endT=this.$moment().format("YYYY-MM-DD")
-    this.newBeginT=this.beginT
-    this.newEndT=this.endT
+    // this拷贝，防止后续因层级关系无法调用this
+    let that = this
+    // 显示加载标志
+    this.viewLoading = 'visible'
+    // 开始日期和结束日期初始化
+    this.beginT = this.$moment().subtract(this.N, 'days').format('YYYY-MM-DD')
+    this.endT = this.$moment().format('YYYY-MM-DD')
+    // 其它初始化（在线状态、站点标签及其点击事件等）
     this.$axios
-    .get('/macAirList') //获取所有站点的终端信息
-    .then( mal => {
-      for(var j=0;j<mal.data.data.length;j++) {
-        this.termStateArr[this.siteKV[mal.data.data[j].macAddress]] = '在线'
-        this.countOL++
+    .all([this.$axios.get('/macAirDeviceList'), this.$axios.get('/macAirList')]) // 获取所有站点的终端信息
+    .then(this.$axios.spread(function(madl, mal) {
+      // 创建图表实例
+      that.airChart = that.$echarts.init(document.getElementById('concentration'))
+      that.tempChart = that.$echarts.init(document.getElementById('temperature'))
+      that.humidityChart = that.$echarts.init(document.getElementById('humidity'))
+      if (mal.data.successful && mal.data.data.length) {
+        that.countSite = mal.data.data.length // 站点总数
+        for (let i = 0; i < mal.data.data.length; i++) { // 站点在线状态
+          if (parseInt(Date.now() / 1000) - that.$moment(mal.data.data[i].beginTime).unix() < 1800) {
+            that.termStateObj[mal.data.data[i].macAddress] = '在线'
+            that.countOL++
+          } else {
+            that.termStateObj[mal.data.data[i].macAddress] = '离线'
+          }
+        }
       }
-    })
+      if (madl.data.successful && madl.data.data.length) {
+        that.liList = madl.data.data // 左侧栏列表
+        that.focusInfo(madl.data.data[0].macAddress, madl.data.data[0].remark)
+      }
+    }))
     .catch(function (error) { // 请求失败处理
       console.log(error)
     })
-    this.focusInfo('440604:009:AAJ')
-    console.log(document.body.clientWidth)
   }
 }
 </script>
@@ -504,17 +454,18 @@ export default {
   width: 13%;
   float: left;
   padding: 10px 0 10px 10px;
-  /* height: 586px; */
   height: calc(100% - 50px);
   overflow-y: auto;
 }
 .navleft ul {
-  background-color:white;
-  border-radius: 6px;
+  background-color: white;
+  border-radius: 0 0 4px 4px;
   list-style-type: none;
   padding: 0;
   margin: 0;
-  /* text-align: center; */
+  border-bottom: 2px solid #eee;
+  border-left: 2px solid #eee;
+  border-right: 2px solid #eee;
 }
 .navleft ul li {
   padding: 5px 0;
@@ -523,33 +474,48 @@ export default {
   display: block;
   padding: 4px 0;
   font-size: 15px;
-  color:#999;
+  color: #999;
   text-decoration: none;
 }
 .navleft ul a:hover {
-  color:#666;
+  color: #666;
 }
 .navleft .active a {
-  border-left:4px solid rgb(253,216,69);
-  color:#000;
+  border-left: 4px solid rgb(253,216,69);
+  color: #000;
+  font-weight: bold;
+}
+.navleft a:hover {
+  border-left: 4px solid rgb(253,216,69);
+  color: #000;
   font-weight: bold;
 }
 .li-head {
-  border-radius: 6px 6px 0 0;
+  border-radius: 4px 4px 0 0;
   font-size: 17px;
   font-weight: bold;
   padding: 10px 0 0 10px;
   color: rgb(40,40,40);
-  /* border-bottom: 1px solid #ccc; */
   background-color: white;
+  border-top: 2px solid #eee;
+  border-left: 2px solid #eee;
+  border-right: 2px solid #eee;
 }
 .li-head1 {
+  padding: 10px 0 10px 10px;
+  border-bottom: 1px solid #eee;
+  background-color: white;
+  border-left: 2px solid #eee;
+  border-right: 2px solid #eee;
+}
+.li-head2 {
   font-size: 17px;
   font-weight: bold;
-  padding: 10px 0 0 10px;
+  padding: 10px 0 6px 10px;
   color: rgb(40,40,40);
-  /* border-bottom: 1px solid #ccc; */
   background-color: white;
+  border-left: 2px solid #eee;
+  border-right: 2px solid #eee;
 }
 .winmain {
   width: 87%;
@@ -559,96 +525,87 @@ export default {
 }
 .el-col a {
   text-decoration: none;
-  color:#999;
-  padding:6px 16px 5px 10px;
-  border-radius: 6px;
-  font-weight: bold;
-  background-color:white;
+  color: rgb(70, 160, 255);
+  padding: 6px 16px 5px 10px;
+  border-radius: 4px;
+  background-color: rgb(235, 245, 255);
+  border: 1px solid rgb(155, 225, 255);
+}
+.el-col a:hover {
+  background-color: rgb(155, 225, 255);
 }
 .el-row {
-  padding:4px 0;
+  padding: 4px 0;
 }
 .el-row a:hover {
-  color:#666;
+  color: #666;
 }
 .term-name {
   text-align: left;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: bold;
-  color:black;
+  color: black;
 }
 .back-home {
   text-align: right;
   font-size: 13px;
-  color:#999;
-}
-.sth-gone {
-  display: none;
+  color: #999;
 }
 .term-info {
-  background-color:white;
+  background-color: white;
   padding: 3px 20px;
   margin-top: 6px;
-  border-radius: 6px;
+  border-radius: 4px;
+  box-shadow: 0 0 2px 1px #ddd;
 }
 .term-info .el-col {
   text-align: left;
   font-size: 13px;
   font-weight: bold;
-  color:#999;
+  color: #999;
 }
 .term-info .el-col span {
-  color:black;
+  color: black;
 }
 .chart-table {
-  background-color:white;
+  background-color: white;
   padding: 6px 20px;
   margin-top: 6px;
   font-size: 15px;
-  border-radius: 6px;
-  /* height: 485px; */
+  border-radius: 4px;
   height: calc(100% - 100px);
+  box-shadow: 0 0 2px 1px #ddd;
 }
 .chart-table a {
   text-decoration: none;
-  color:#999;
+  color: #999;
   padding: 8px 20px;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 13px;
   font-weight: bold;
-  background-color:#f4f4f4;
+  background-color: #f4f4f4;
+  box-shadow: 0 0 2px 1px #ddd;
 }
 .chart-table a.active {
-  background-color:#dddddd;  
+  color: black;
+  background-color: #dddddd;
 }
 .chart-table a:hover {
-  color:#666;
+  color: black;
+  background-color: #dddddd;
 }
 .chart-table .container {
   position: relative;
   margin-top: 4px;
-  /* height: 447px; */
   height: calc(100% - 30px);
 }
 #concentration, #temperature, #humidity {
   width: 100%;
-  /* height: 432px; */
   position: absolute;
 }
 #detailData {
   width: 100%;
-  /* height: 432px; */
   position: absolute;
-}
-.loading-background {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 447px;
-  border-radius: 6px;
-  background-color: rgb(255,255,255,0.5);
-  z-index: 1001;
 }
 .loading {
   position: absolute;
@@ -659,7 +616,7 @@ export default {
   height: 100px;
   width: 100px;
   margin: auto;
-  border-radius: 6px;
+  border-radius: 4px;
   background-color: rgb(70,70,70);
   z-index: 1002;
   padding: 20px 0;
@@ -669,8 +626,8 @@ export default {
   line-height: 25px;
 }
 @media screen and (min-width: 1980px) {
-    .container-main {
-        background-color: lightgreen;
-    }
+  .container-main {
+    background-color: lightgreen;
+  }
 }
 </style>

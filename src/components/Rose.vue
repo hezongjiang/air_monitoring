@@ -13,7 +13,7 @@
         placeholder="开始日期"
         size="mini"
         value-format="yyyy-MM-dd"
-        style="width:150px"
+        style="width:130px"
         :clearable="false"
         :editable="false">
       </el-date-picker>
@@ -24,7 +24,7 @@
         placeholder="结束日期"
         size="mini"
         value-format="yyyy-MM-dd"
-        style="width:150px;margin-right:50px"
+        style="width:130px;margin-right:20px"
         :clearable="false"
         :editable="false">
       </el-date-picker>
@@ -32,11 +32,10 @@
       <el-select size="mini" v-model="termChoose" placeholder="请选择站点" style="width:150px">
         <el-option v-for="item in termOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
       </el-select>
-      <el-button type="primary" size="mini" @click="searchSth">查询</el-button>
+      <el-button type="primary" size="mini" @click="searchSth"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
     </div>
     <div class="chart-area">
       <div id="RoseChart" :style="{ height:chartHeight }"></div>
-      <div class="loading-background" :style="{visibility: viewLoading}"></div>
       <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
     </div>
   </div>
@@ -67,8 +66,8 @@ export default {
         '南庄污水处理厂': '440604:010:AAK'
       },
       viewLoading: 'hidden',
-      chartHeight: '100%',
-      termChoose: '绿岛湖', // 站点选择器默认选定绿岛湖
+      chartHeight: 'calc(100% - 10px)',
+      termChoose: '吉利社区', // 站点选择器默认选定绿岛湖
       termOptions: [{
         value: '绿岛湖',
         label: '绿岛湖'
@@ -939,12 +938,16 @@ export default {
 .winmain {
   margin: 10px 10px;
   background: white;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 10px 20px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
   /* height: 549px; */
   /* width: 100%; */
   height: calc(100% - 105px);
+  box-shadow: 0 0 2px 1px #ddd;
+}
+.filter_title {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
 }
 .filter_title i {
   font-size: 25px;
@@ -953,6 +956,7 @@ export default {
 .filter_title span {
   font-weight: bold;
   font-size: 18px;
+  color: black;
 }
 .filter_container {
   margin-top: 10px;
@@ -962,7 +966,8 @@ export default {
   padding-right: 10px;
 }
 .el-select {
-  padding-right: 15px;
+  padding-right: 20px;
+  width: 150px;
 }
 .chart-area {
   position: relative;
@@ -975,16 +980,6 @@ export default {
   /* height: 468px; */
   position: absolute;
 }
-.loading-background {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 472px;
-  border-radius: 6px;
-  background-color: rgb(255,255,255,0.5);
-  z-index: 1001;
-}
 .loading {
   position: absolute;
   top: 0px;
@@ -994,7 +989,7 @@ export default {
   height: 100px;
   width: 100px;
   margin: auto;
-  border-radius: 6px;
+  border-radius: 4px;
   background-color: rgb(70,70,70);
   z-index: 1002;
   padding: 20px 0;

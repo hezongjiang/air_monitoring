@@ -2,88 +2,67 @@
 <template>
   <div class="container">
     <div class="navleft">
-      <div class="li-head">站点总数：11个</div>
+      <div class="li-head">站点总数：{{ countSite }}个</div>
       <div class="li-head1">
         <span style="font-size:15px;font-weight:normal;color:rgb(7,193,96)">在线：</span>
         <span style="font-size:15px;font-weight:normal;color:white;background-color:rgb(7,193,96);padding:0 4px">{{ countOL }}个</span><br/>
         <span style="font-size:15px;font-weight:normal;color:#999">离线：</span>
-        <span style="font-size:15px;font-weight:normal;color:white;background-color:#999;padding:0 4px">{{ 11-countOL }}个</span><br/><br/>
+        <span style="font-size:15px;font-weight:normal;color:white;background-color:#999;padding:0 4px">{{ countSite - countOL }}个</span>
+        <br/>
+      </div>
+      <div class="li-head2">
         站点列表
       </div>
       <ul>
-        <li :class="{active: termInfo.macAddress === '440604:009:AAJ'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:009:AAJ')">&nbsp;&nbsp;<span :style="{color:(termStateArr[0] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;龙湾大桥</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:002:AAC'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:002:AAC')">&nbsp;&nbsp;<span :style="{color:(termStateArr[1] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;罗南村委</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:000:AAA'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:000:AAA')">&nbsp;&nbsp;<span :style="{color:(termStateArr[2] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;绿岛湖</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:006:AAG'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:006:AAG')">&nbsp;&nbsp;<span :style="{color:(termStateArr[3] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;龙津老年活动中心</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:007:AAH'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:007:AAH')">&nbsp;&nbsp;<span :style="{color:(termStateArr[4] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄三中</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:004:AAE'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:004:AAE')">&nbsp;&nbsp;<span :style="{color:(termStateArr[5] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;吉利小学</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:005:AAF'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:005:AAF')">&nbsp;&nbsp;<span :style="{color:(termStateArr[6] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;罗格村委</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:008:AAI'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:008:AAI')">&nbsp;&nbsp;<span :style="{color:(termStateArr[7] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;吉利社区</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:001:AAB'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:001:AAB')">&nbsp;&nbsp;<span :style="{color:(termStateArr[8] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄实验中学</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:003:AAD'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:003:AAD')">&nbsp;&nbsp;<span :style="{color:(termStateArr[9] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄水利所</a></li>
-        <li :class="{active: termInfo.macAddress === '440604:010:AAK'}"><a href="javascript:void(0)" v-on:click="focusInfo('440604:010:AAK')">&nbsp;&nbsp;<span :style="{color:(termStateArr[10] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;南庄污水处理厂</a></li>
+        <li v-for='item in liList' :class="{active: termInfo.macAddress === item.macAddress}"><a href="javascript:void(0)" v-on:click="focusInfo(item.macAddress, item.remark)">&nbsp;&nbsp;<span :style="{color:(termStateObj[item.remark] === '在线' ? 'greenyellow' : '#999' )}">●</span>&nbsp;{{ item.remark }}</a></li>
       </ul>
     </div>
     <div class="bdmap">
       <div id="allmap"></div>
-      <div class="winchild1" :style="{visibility: viewInfo, top: winchildTop}">
+      <div class="winchild1" :style="{visibility: viewInfo}">
         <el-row class="state-detail" type="flex" align="bottom">
-          <el-col :span="16" class="term-state">{{ termInfo.remark }}<span :style="{color:(termState === '在线' ? '#11aa11' : '#999' )}" style="font-size:13px;color:green;font-weight:normal">&nbsp;&nbsp;{{ termState }}</span></el-col>
-          <el-col :span="8" class="view-detail"><router-link to="/detail" style="text-decoration: none; color: white; background-color:#ffdf4f;padding:6px 6px 6px 12px">查看详情<i class="el-icon-caret-right"></i></router-link></el-col>
+          <el-col :span="16" class="term-state">{{ termInfo.remark }}<span :style="{color:(termState === '在线' ? '#11aa11' : '#999' )}" style="font-size:13px;color:green;font-weight:normal">&nbsp;&nbsp;{{ termState }}</span><span style="font-size:13px;color:#999;font-weight:normal">&nbsp;&nbsp;监测时间：{{ airInfo.beginTime }}</span></el-col>
+          <el-col :span="8" class="view-detail"><router-link to="/detail">查看详情<i class="el-icon-caret-right"></i></router-link></el-col>
         </el-row>
         <el-row class="air-type" type="flex" align="bottom" style="padding-top:14px">
-          <el-col :span="6">SO<span>2&nbsp;μg/m3</span></el-col>
-          <el-col :span="6">NO<span>2&nbsp;μg/m3</span></el-col>
-          <el-col :span="6">PM10<span>&nbsp;μg/m3</span></el-col>
-          <el-col :span="6">PM2.5<span>&nbsp;μg/m3</span></el-col>
+          <el-col :span="3">SO<span>2&nbsp;μg/m3</span></el-col>
+          <el-col :span="3">NO<span>2&nbsp;μg/m3</span></el-col>
+          <el-col :span="3">PM10<span>&nbsp;μg/m3</span></el-col>
+          <el-col :span="3">PM2.5<span>&nbsp;μg/m3</span></el-col>
+          <el-col :span="3">经度</el-col>
+          <el-col :span="3" :offset="3">纬度</el-col>
+          <el-col :span="3" style="text-align:right;font-size:13px;color:black">{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></el-col>
         </el-row>
         <el-row class="air-value" type="flex" align="bottom" style="padding-top:3px">
-          <el-col :span="6" :style="{color:colorSO2}">{{ parseFloat(airInfo.SO2).toFixed(2) }}</el-col>
-          <el-col :span="6" :style="{color:colorNO2}">{{ parseFloat(airInfo.NO2).toFixed(2) }}</el-col>
-          <el-col :span="6" :style="{color:colorPM10}">{{ parseFloat(airInfo.PM10).toFixed(2) }}</el-col>
-          <el-col :span="6" :style="{color:colorPM25}">{{ parseFloat(airInfo.PM25).toFixed(2) }}</el-col>
+          <el-col :span="3" :style="{color:colorSO2}">{{ parseFloat(airInfo.SO2).toFixed(2) }}</el-col>
+          <el-col :span="3" :style="{color:colorNO2}">{{ parseFloat(airInfo.NO2).toFixed(2) }}</el-col>
+          <el-col :span="3" :style="{color:colorPM10}">{{ parseFloat(airInfo.PM10).toFixed(2) }}</el-col>
+          <el-col :span="3" :style="{color:colorPM25}">{{ parseFloat(airInfo.PM25).toFixed(2) }}</el-col>
+          <el-col :span="6">{{ parseFloat(termInfo.lon/100).toFixed(6) }}</el-col>
+          <el-col :span="6">{{ parseFloat(termInfo.lat/100).toFixed(6) }}</el-col>
         </el-row>
         <el-row class="other-item" type="flex" align="bottom" style="padding-top:14px">
-          <el-col :span="6">温度<span>&nbsp;℃</span></el-col>
-          <el-col :span="6">湿度<span>&nbsp;%R.H.</span></el-col>
-          <el-col :span="6">风速<span>&nbsp;m/s</span></el-col>
-          <el-col :span="6">风向</el-col>
+          <el-col :span="3">温度<span>&nbsp;℃</span></el-col>
+          <el-col :span="3">湿度<span>&nbsp;%R.H.</span></el-col>
+          <el-col :span="3">风速<span>&nbsp;m/s</span></el-col>
+          <el-col :span="3">风向</el-col>
+          <el-col :span="6">设备编号</el-col>
+          <el-col :span="6">固件版本</el-col>
         </el-row>
         <el-row class="other-value" type="flex" align="bottom" style="padding-top:3px">
-          <el-col :span="6">{{ airInfo.temp }}</el-col>
-          <el-col :span="6">{{ airInfo.humidity }}</el-col>
-          <el-col :span="6">{{ airInfo.speed }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windSpe }}</span></el-col>
-          <el-col :span="6">{{ airInfo.direct }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windDir }}</span></el-col>
-        </el-row>
-      </div>
-      <div class="winchild2" :style="{visibility: viewInfo}">
-        <el-row class="info1" type="flex" align="bottom">
-          <el-col :span="6">经度</el-col>
-          <el-col :span="6" :offset="6">纬度</el-col>
-          <el-col :span="6" style="text-align:right;font-size:13px;color:black">{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></el-col>
-        </el-row>
-        <el-row class="info1-value" type="flex" align="bottom" style="padding-top:3px">
-          <el-col :span="12">{{ parseFloat(termInfo.lon/100).toFixed(6) }}</el-col>
-          <el-col :span="12">{{ parseFloat(termInfo.lat/100).toFixed(6) }}</el-col>
-        </el-row>
-        <el-row class="info2" type="flex" align="bottom" style="padding-top:10px">
-          <el-col :span="12">设备编号</el-col>
-          <el-col :span="12">固件版本</el-col>
-        </el-row>
-        <el-row class="info2-value" type="flex" align="bottom" style="padding-top:3px">
-          <el-col :span="12">{{ termInfo.macAddress }}</el-col>
-          <el-col :span="12">{{ termInfo.version }}</el-col>
+          <el-col :span="3">{{ airInfo.temp }}</el-col>
+          <el-col :span="3">{{ airInfo.humidity }}</el-col>
+          <el-col :span="3">{{ airInfo.speed }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windSpe }}</span></el-col>
+          <el-col :span="3">{{ airInfo.direct }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windDir }}</span></el-col>
+          <el-col :span="6">{{ termInfo.macAddress }}</el-col>
+          <el-col :span="6">{{ termInfo.version }}</el-col>
         </el-row>
       </div>
       <div id="main" :style="{visibility: viewInfo}"></div>
-      <div class="loading-background" :style="{visibility: viewLoading}"></div>
       <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
-      <div class="win-close-btn" :style="{visibility: viewInfo}"><el-button type="danger" size="mini" icon="el-icon-error" style="font-size:16px" @click="closeSuspend"><span style="font-size:16px">关闭悬浮窗口</span></el-button></div>
+      <div class="win-close-btn" :style="{visibility: viewInfo}"><el-button type="danger" size="mini" icon="el-icon-error" style="font-size:16px" @click="closeSuspend"><span style="font-size:15px">关闭悬浮窗口</span></el-button></div>
       <div class="air-indicator" :style="{visibility: viewInfo}">
         <img src="@/assets/airIndicator.png" width="145" height="136" alt="气体浓度指示图">
-      </div>
-      <div style="position: absolute;bottom: 10px;left: 100px;z-index: 1;background-color:white;padding: 3px 3px 0 3px;">
-
       </div>
     </div>
   </div>
@@ -93,365 +72,321 @@ export default {
   name: 'AppIndex',
   data () {
     return {
-      siteMark: { // mac地址与站点名称的对应关系
-        '440604:009:AAJ': '龙湾大桥',
-        '440604:002:AAC': '罗南村委',
-        '440604:000:AAA': '绿岛湖',
-        '440604:006:AAG': '龙津老年活动中心',
-        '440604:007:AAH': '南庄三中',
-        '440604:004:AAE': '吉利小学',
-        '440604:005:AAF': '罗格村委',
-        '440604:008:AAI': '吉利社区',
-        '440604:001:AAB': '南庄实验中学',
-        '440604:003:AAD': '南庄水利所',
-        '440604:010:AAK': '南庄污水处理厂'
-      },
-      siteKV: {
-        '龙湾大桥': 0,
-        '罗南村委': 1,
-        '绿岛湖': 2,
-        '龙津老年活动中心': 3,
-        '南庄三中': 4,
-        '吉利小学': 5,
-        '罗格村委': 6,
-        '吉利社区': 7,
-        '南庄实验中学': 8,
-        '南庄水利所': 9,
-        '南庄污水处理厂': 10
-      },
-      countOL: 0,
-      map: '',
-      termInfo: {
-        macAddress: '未知',
-        remark: '未知',
-        lon: 0,
-        lat: 0,
-        batteryInfo: 0,
-        version: '未知'
-      }, // 终端信息
-      termStateArr: ['离线','离线','离线','离线','离线','离线','离线','离线','离线','离线','离线'], //终端状态
-      termState: '',
+      liList: [], // 左侧站点列表
+      countSite: 0, // 站点总数
+      countOL: 0, // 站点在线数
+      termStateObj: {}, // 终端在线状态对象
+      map: '', // 用于实例化百度地图
+      termInfo: {}, // 终端信息对象
+      termState: '', // 终端在线状态
       batteryIcon: '', // 电池图标
-      airInfo: '', // 气体信息
-      windSpe: '', // 风速
-      windDir: '', // 风向
-      colorSO2: 'black',
-      colorNO2: 'black',
-      colorPM10: 'black',
-      colorPM25: 'black',
-      charts: '',
-      // 气体曲线图数据
-      chartSO2: [],
-      chartNO2: [],
-      chartPM10: [],
-      chartPM25: [],
-      chartX: [],
-      viewInfo: 'hidden', // 气泡弹窗可见与否，默认为否
-      viewLoading: 'hidden',
-      winchildTop: '17%'
-    }
-  },
-  methods: {
-    focusInfo: function (addr) { // 展示选定站点的信息
-      let that = this
-      var d=new Date()
-      this.termInfo.macAddress = addr
-      this.viewLoading='visible'
-      this.$axios
-      .all([this.$axios.get('/'+addr+'/macAirDeviceInfo'), // 获取选定站点的终端信息
-            this.$axios.get('/macAirList'), // 获取所有站点的空气信息
-            this.$axios.get('/macAirHourHistory',{ // 获取选定站点在一定日期范围内的气体信息
-              params: {
-                macAddress: addr,
-                beginTime: this.$moment().subtract(1,'days').format("YYYY-M-D"), // 昨天
-                endTime: this.$moment().format("YYYY-M-D") // 当天
-              }
-            })
-      ])
-      .then(this.$axios.spread(function (madi, mal, mahh) {
-        console.log(madi) // 得到选定站点的终端信息
-        if(madi.data.successful && madi.data.data.length) {
-          that.termInfo = madi.data.data[0]
-          var point = new BMap.Point(that.termInfo.lon/100,that.termInfo.lat/100)
-          that.map.panTo(point, 16)  //设置地图中心点坐标和地图级别
-          switch(parseInt(that.termInfo.batteryInfo/10)) { // 根据电池电量值选择不同的电池图标
-            case 0: that.batteryIcon="fa fa-battery-0"
-            break
-            case 1:
-            case 2:
-            case 3: that.batteryIcon="fa fa-battery-1"
-            break
-            case 4:
-            case 5: that.batteryIcon="fa fa-battery-2"
-            break
-            case 6:
-            case 7:
-            case 8: that.batteryIcon="fa fa-battery-3"
-            break
-            case 9:
-            case 10: that.batteryIcon="fa fa-battery"
-            break
-          }
-          console.log(mal) // 得到所有站点的空气信息
-          for(var i=0;i<mal.data.data.length;i++) { // 循环检索选定站点的空气信息
-            if(mal.data.data[i].macAddress === that.siteMark[addr]) { //判断是否找到了选定的站点
-              that.airInfo = mal.data.data[i]
-              that.termState = '在线'
-              // 根据风速值选择不同强度的风
-              if(that.airInfo.speed >= 10) { that.windSpe = '强风' }
-              else if(that.airInfo.speed >= 6) { that.windSpe = '和风' }
-              else if(that.airInfo.speed > 0) { that.windSpe = '微风' }
-              else { that.windSpe = '无风' }
-              // 根据风向值选择不同的风向
-              if(that.airInfo.direct >= 348) { that.windDir = '北风' }
-              else if(that.airInfo.direct >= 282) { that.windDir = '西北风' }
-              else if(that.airInfo.direct >= 258) { that.windDir = '西风' }
-              else if(that.airInfo.direct >= 192) { that.windDir = '西南风' }
-              else if(that.airInfo.direct >= 168) { that.windDir = '南风' }
-              else if(that.airInfo.direct >= 102) { that.windDir = '东南风' }
-              else if(that.airInfo.direct >= 78) { that.windDir = '东风' }
-              else if(that.airInfo.direct >= 12) { that.windDir = '东北风' }
-              else { that.windDir = '北风' }
-              // 根据气体值选择不同的颜色
-              that.setColorSO2(that.airInfo.SO2)
-              that.setColorNO2(that.airInfo.NO2)
-              that.setColorPM10(that.airInfo.PM10)
-              that.setColorPM25(that.airInfo.PM25)
-              break // 一旦找到了选定的站点则跳出循环
-            }
-          }
-          if(i == mal.data.data.length) { // 如果循环结束了还没找到选定的站点，则初始化相关信息
-            that.termState = '离线'
-            that.airInfo = {
-              SO2: 0,
-              NO2: 0,
-              PM10: 0,
-              PM25: 0,
-              temp: 0,
-              humidity: 0,
-              speed: 0,
-              direct: 0
-            }
-            that.windSpe = ''
-            that.windDir = ''
-            that.colorSO2 = 'black'
-            that.colorNO2 = 'black'
-            that.colorPM10 = 'black'
-            that.colorPM25 = 'black'
-          }
-          console.log(mahh) // 得到选定站点在一定日期范围内的气体信息
-          if(mahh.data.successful) {
-            for(var i=0, beginH=d.getHours()+1 ;i<24;i++) { // 只取最近24小时的气体信息
-              that.chartSO2[i]=mahh.data.data[mahh.data.data.length-24+i].SO2
-              that.chartNO2[i]=mahh.data.data[mahh.data.data.length-24+i].NO2
-              that.chartPM10[i]=mahh.data.data[mahh.data.data.length-24+i].PM10
-              that.chartPM25[i]=mahh.data.data[mahh.data.data.length-24+i].PM25
-              // 设置横轴数据
-              that.chartX[i]=beginH+i
-              if( that.chartX[i] >23 ) { that.chartX[i] -= 24 }
-              if( that.chartX[i] === 0) { that.chartX[i] = d.getDate()+'日' }
-            }
-            console.log(that.chartX)
-          }
-          else { // 如果选定站点在一定日期范围内的气体信息的请求失败，则初始化相关信息
-            that.chartSO2=[]
-            that.chartNO2=[]
-            that.chartPM10=[]
-            that.chartPM25=[]
-          }
-        }
-        else { // 如果选定站点的终端信息请求失败，则初始化相关信息
-          that.termState = '离线'
-          that.airInfo = {
-            SO2: 0,
-            NO2: 0,
-            PM10: 0,
-            PM25: 0,
-            temp: 0,
-            humidity: 0,
-            speed: 0,
-            direct: 0
-          }
-          that.windSpe = ''
-          that.windDir = ''
-          that.colorSO2 = 'black'
-          that.colorNO2 = 'black'
-          that.colorPM10 = 'black'
-          that.colorPM25 = 'black'
-          that.chartSO2 = []
-          that.chartNO2 = []
-          that.chartPM10 = []
-          that.chartPM25 = []
-          that.termInfo = {
-            macAddress: addr,
-            remark: '未知',
-            lon: 0,
-            lat: 0,
-            batteryInfo: 0,
-            version: '未知'
-          }, // 终端信息
-          that.batteryIcon = ''
-        }
-        that.charts.setOption({ // 作24小时气体实时曲线图
-          title: {
-            text: '24小时气体实时曲线',
-            textStyle:{ color: 'black' },
-            padding: [16,0,0,8]
-          },
-          tooltip: {
-            show: true
-          },
-          legend: {
-            top: 15,
-            right: 10,
-            data: ['SO2', 'NO2', 'PM10', 'PM2.5']
-          },
-          grid: {
-            top: '70px',
-            left: '40px',
-            right: '20px',
-            bottom: '42px'
-          },
-          xAxis: {
-            name: '时间（时）',
-            nameLocation: 'middle',
-            nameTextStyle: { padding: [10,0,0,0] },
-            type: 'category',
-            boundaryGap: false,
-            data: that.chartX,
-            axisLabel: { fontSize: 11, interval: 0 }
-          },
-          yAxis: {
-            name: '浓度（μg/m³）',
-            nameTextStyle: { padding: [0,0,0,20] },
-            type: 'value',
-            axisLabel: { fontSize: 11 }
-          },
-          series: [{
-            name: 'SO2',
-            data: that.chartSO2,
-            type: 'line',
-            smooth: true
-          },
+      airInfo: {}, // 气体信息对象
+      colorSO2: 'black', // SO2颜色
+      colorNO2: 'black', // NO2颜色
+      colorPM10: 'black', // PM10颜色
+      colorPM25: 'black', // PM2.5颜色
+      windSpe: '', // 风速文字描述
+      windDir: '', // 风向文字描述
+      charts: '', // 用于实例化24小时曲线图表
+      viewInfo: 'hidden', // 悬浮窗口可见性
+      viewLoading: 'hidden', // 加载标志可见性
+      optionAir: { // 24小时曲线图配置
+        title: {
+          text: '24小时气体实时曲线',
+          textStyle: { color: 'black' }
+        },
+        tooltip: {
+          show: true,
+          trigger: 'axis'
+        },
+        legend: {
+          right: 0,
+          data: ['SO2', 'NO2', 'PM10', 'PM2.5']
+        },
+        grid: {
+          top: '60px',
+          left: '40px',
+          right: '20px',
+          bottom: '36px'
+        },
+        xAxis: {
+          name: '时间',
+          nameLocation: 'middle',
+          nameTextStyle: { padding: [10, 0, 0, 0] },
+          type: 'category',
+          boundaryGap: false,
+          data: [],
+          axisLabel: { fontSize: 11 }
+        },
+        yAxis: {
+          name: '浓度（μg/m³）',
+          nameTextStyle: { padding: [0, 0, 0, 12] },
+          type: 'value',
+          axisLabel: { fontSize: 11 }
+        },
+        series: [{
+          name: 'SO2',
+          data: [],
+          type: 'line',
+          smooth: true
+        },
           {
             name: 'NO2',
-            data: that.chartNO2,
+            data: [],
             type: 'line',
             smooth: true
           },
           {
             name: 'PM10',
-            data: that.chartPM10,
+            data: [],
             type: 'line',
             smooth: true
           },
           {
             name: 'PM2.5',
-            data: that.chartPM25,
+            data: [],
             type: 'line',
             smooth: true
           }]
-        })
-        that.viewInfo = 'visible'
-        that.viewLoading='hidden'
+      }
+    }
+  },
+  methods: {
+    focusInfo(addr, remark) { // 展示选定站点的信息
+      let that = this // this拷贝，防止后续因层级关系无法调用this
+      this.viewLoading = 'visible' // 显示加载标志
+      this.termInfo.macAddress = addr // 提前赋值，使左侧站点列表选中反应达到最快，增加用户体验
+      this.$axios
+      .all([this.$axios.get('/' + addr + '/macAirDeviceInfo'), // 获取选定站点的终端信息
+            this.$axios.get('/macAirList'), // 获取所有站点的空气信息
+            this.$axios.get('/macAirHourHistory', { // 获取选定站点在一定日期范围内的气体信息
+              params: {
+                macAddress: addr,
+                beginTime: this.$moment().subtract(1, 'days').format('YYYY-M-D'), // 昨天
+                endTime: this.$moment().format('YYYY-M-D') // 当天
+              }
+            })
+      ])
+      .then(this.$axios.spread(function (madi, mal, mahh) {
+        if (madi.data.successful && madi.data.data.length) {
+          that.termInfo = madi.data.data[0] // 站点信息对象
+          that.map.panTo(new BMap.Point(madi.data.data[0].lon / 100, madi.data.data[0].lat / 100)) // 设置地图中心点坐标
+          switch (Math.round(parseInt(madi.data.data[0].batteryInfo) / 10)) { // 根据电池电量值选择不同的电池图标
+            case 0:
+              that.batteryIcon = 'fa fa-battery-0'
+              break
+            case 1:
+            case 2:
+            case 3:
+              that.batteryIcon = 'fa fa-battery-1'
+              break
+            case 4:
+            case 5:
+              that.batteryIcon = 'fa fa-battery-2'
+              break
+            case 6:
+            case 7:
+            case 8:
+              that.batteryIcon = 'fa fa-battery-3'
+              break
+            case 9:
+            case 10:
+              that.batteryIcon = 'fa fa-battery'
+              break
+            default:
+              that.batteryIcon = 'fa fa-battery'
+          }
+        } else {
+          that.termInfo = {
+            'macAddress': addr,
+            'beginTime': '',
+            'batteryInfo': 0,
+            'lon': 0,
+            'lat': 0,
+            'errorCode': '',
+            'remark': remark,
+            'version': ''
+          }
+          this.map.panTo(new BMap.Point(113.02, 22.99)) // 设置地图中心点坐标
+          that.batteryIcon = 'fa fa-battery-0'
+        }
+        if (mal.data.successful && mal.data.data.length) {
+          that.countSite = mal.data.data.length // 站点总数
+          that.countOL = 0
+          for (let i = 0; i < mal.data.data.length; i++) { // 站点在线状态
+            if (parseInt(Date.now() / 1000) - that.$moment(mal.data.data[i].beginTime).unix() < 1800) {
+              that.termStateObj[mal.data.data[i].macAddress] = '在线'
+              that.countOL++
+            } else {
+              that.termStateObj[mal.data.data[i].macAddress] = '离线'
+            }
+          }
+          for (let i = 0; i < mal.data.data.length; i++) { // 循环检索选定站点的空气信息
+            if (mal.data.data[i].macAddress === remark) { // 判断是否找到了选定的站点
+              that.airInfo = mal.data.data[i] // 空气信息对象
+              that.termState = that.termStateObj[remark]
+              // 根据风速值选择不同强度的风
+              if (that.airInfo.speed >= 10) {
+                that.windSpe = '强风'
+              } else if (that.airInfo.speed >= 6) {
+                that.windSpe = '和风'
+              } else if (that.airInfo.speed > 0) {
+                that.windSpe = '微风'
+              } else {
+                that.windSpe = '无风'
+              }
+              // 根据风向值选择不同的风向
+              if (that.airInfo.direct >= 348) {
+                that.windDir = '北风'
+              } else if (that.airInfo.direct >= 282) {
+                that.windDir = '西北风'
+              } else if (that.airInfo.direct >= 258) {
+                that.windDir = '西风'
+              } else if (that.airInfo.direct >= 192) {
+                that.windDir = '西南风'
+              } else if (that.airInfo.direct >= 168) {
+                that.windDir = '南风'
+              } else if (that.airInfo.direct >= 102) {
+                that.windDir = '东南风'
+              } else if (that.airInfo.direct >= 78) {
+                that.windDir = '东风'
+              } else if (that.airInfo.direct >= 12) {
+                that.windDir = '东北风'
+              } else {
+                that.windDir = '北风'
+              }
+              // 根据气体值选择不同的颜色
+              that.setColorAir('SO2', that.airInfo.SO2)
+              that.setColorAir('NO2', that.airInfo.NO2)
+              that.setColorAir('PM10', that.airInfo.PM10)
+              that.setColorAir('PM25', that.airInfo.PM25)
+              break // 一旦找到了选定的站点则跳出循环
+            }
+          }
+        } else {
+          that.countSite = 0 // 站点总数
+          that.countOL = 0 // 在线站点数
+          for (let key in that.termStateObj) {
+            that.termStateObj[key] = '离线'
+          }
+          that.airInfo = { // 空气信息对象
+            'macAddress': remark,
+            'beginTime': '',
+            'SO2': 0,
+            'NO2': 0,
+            'PM10': 0,
+            'PM25': 0,
+            'speed': 0,
+            'direct': 0,
+            'temp': 0,
+            'humidity': 0
+          }
+          that.termState = '离线' // 终端在线状态
+          that.windSpe = '' // 风速文字描述
+          that.winDir = '' // 风向文字描述
+          that.colorSO2 = 'black' // SO2颜色
+          that.colorNO2 = 'black' // NO2颜色
+          that.colorPM10 = 'black' // PM10颜色
+          that.colorPM25 = 'black' // PM2.5颜色
+        }
+        if (mahh.data.successful && mahh.data.data.length) {
+          for (let i = 0; i < 24; i++) { // 只取最近24小时的气体信息
+            that.optionAir.series[0].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].SO2
+            that.optionAir.series[1].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].NO2
+            that.optionAir.series[2].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].PM10
+            that.optionAir.series[3].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].PM25
+            that.optionAir.xAxis.data[i] = mahh.data.data[mahh.data.data.length - 24 + i].beginTime
+          }
+        } else {
+          that.optionAir.series[0].data = []
+          that.optionAir.series[1].data = []
+          that.optionAir.series[2].data = []
+          that.optionAir.series[3].data = []
+          that.optionAir.xAxis.data = []
+        }
+        that.charts.setOption(that.optionAir) // 作24小时曲线图
+        that.viewInfo = 'visible' // 显示悬浮窗口
+        that.viewLoading = 'hidden' // 隐藏加载标志
       }))
       .catch(function (error) { // 请求失败处理
         console.log(error)
       })
     },
-    // 地图上的每个站点的标记点击事件
-    focusInfo1: function () { this.focusInfo('440604:009:AAJ') },
-    focusInfo2: function () { this.focusInfo('440604:002:AAC') },
-    focusInfo3: function () { this.focusInfo('440604:000:AAA') },
-    focusInfo4: function () { this.focusInfo('440604:006:AAG') },
-    focusInfo5: function () { this.focusInfo('440604:007:AAH') },
-    focusInfo6: function () { this.focusInfo('440604:004:AAE') },
-    focusInfo7: function () { this.focusInfo('440604:005:AAF') },
-    focusInfo8: function () { this.focusInfo('440604:008:AAI') },
-    focusInfo9: function () { this.focusInfo('440604:001:AAB') },
-    focusInfo10: function () { this.focusInfo('440604:003:AAD') },
-    focusInfo11: function () { this.focusInfo('440604:010:AAK') },
-    // 根据气体值选择不同的颜色
-    setColorSO2: function (x) { this.colorSO2 = this.setColorAir(x) },
-    setColorNO2: function (x) { this.colorNO2 = this.setColorAir(x) },
-    setColorPM10: function (x) { this.colorPM10 = this.setColorAir(x) },
-    setColorPM25: function (x) { this.colorPM25 = this.setColorAir(x) },
-    setColorAir: function (x) {
-      if(x>=301) return '#8c0000'
-      else if(x>=201) return '#993366'
-      else if(x>=151) return '#ff2f2f'
-      else if(x>=101) return '#ff9600'
-      else if(x>=51) return '#ffdf4f'
+    setColorAir(air, value) { // 根据气体值选择不同的颜色
+      switch (air) {
+        case 'SO2':
+          this.colorSO2 = this.setColor(value)
+          break
+        case 'NO2':
+          this.colorNO2 = this.setColor(value)
+          break
+        case 'PM10':
+          this.colorPM10 = this.setColor(value)
+          break
+        case 'PM25':
+          this.colorPM25 = this.setColor(value)
+          break
+      }
+    },
+    setColor(value) { // 设置气体颜色
+      if (value >= 301) return '#8c0000'
+      else if (value >= 201) return '#993366'
+      else if (value >= 151) return '#ff2f2f'
+      else if (value >= 101) return '#ff9600'
+      else if (value >= 51) return '#ffdf4f'
       else return '#7fcf9f'
     },
-    //关闭气泡弹窗
-    closeSuspend: function () {
-      this.viewInfo='hidden'
-      this.termInfo.macAddress = ''
+    closeSuspend() { // 关闭悬浮窗口
+      this.viewInfo = 'hidden' // 隐藏悬浮窗口
+      this.termInfo.macAddress = '' // 去掉左侧列表选中标志
     }
-  },
-  created () {
-    if(document.body.clientWidth<1028) {
-      this.winchildTop="5%"
-    }
-    console.log(this.winchildTop)
   },
   mounted () {
+    // this拷贝，防止后续因层级关系无法调用this
     let that = this
-    this.map = new BMap.Map("allmap") // 创建Map实例
-    this.map.addControl(new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT}));
-    this.map.addControl(new BMap.NavigationControl());
-    var point=new BMap.Point(113.02, 22.99)
-    this.map.centerAndZoom(point, 14) // 设置地图中心点坐标和地图级别
+    // 显示加载标志
+    this.viewLoading = 'visible'
+    // 百度地图初始化
+    this.map = new BMap.Map('allmap') // 创建Map实例
+    this.map.addControl(new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT})) // 添加比例尺
+    this.map.addControl(new BMap.NavigationControl()) // 添加缩放控件
+    this.map.centerAndZoom(new BMap.Point(113.02, 22.99), 14) // 设置地图中心点坐标和地图缩放级别
     this.map.enableScrollWheelZoom(true) // 开启鼠标滚轮缩放
+    // 其它初始化（在线状态、站点标签及其点击事件等）
     this.$axios
-    .all([this.$axios.get('/macAirDeviceList'),
-          this.$axios.get('/macAirList')]) //获取所有站点的终端信息
-      .then(this.$axios.spread(function(madl, mal) {
-        for(var j=0;j<mal.data.data.length;j++) {
-          that.termStateArr[that.siteKV[mal.data.data[j].macAddress]] = '在线'
-          that.countOL++
+    .all([this.$axios.get('/macAirDeviceList'), this.$axios.get('/macAirList')]) // 获取所有站点的终端信息
+    .then(this.$axios.spread(function(madl, mal) {
+      if (madl.data.successful && madl.data.data.length) {
+        that.liList = madl.data.data // 左侧栏列表
+        for (let i = 0; i < madl.data.data.length; i++) { // 设置站点地图标记
+          var marker = new BMap.Marker(new BMap.Point(madl.data.data[i].lon / 100, madl.data.data[i].lat / 100)) // 站点标记
+          var label = new BMap.Label(madl.data.data[i].remark, {offset: new BMap.Size(20, 0)}) // 标记标签
+          marker.setLabel(label) // 为站点标记绑定标签
+          marker.addEventListener('click', function () {
+            that.focusInfo(madl.data.data[i].macAddress, madl.data.data[i].remark)
+          }) // 为站点标记添加点击事件
+          that.map.addOverlay(marker) // 在地图上添加站点标记
         }
-        for(var i=0;i<madl.data.data.length;i++)
-        {
-          // 根据站点坐标设置地图标记
-          var marker=new BMap.Marker(new BMap.Point(madl.data.data[i].lon/100,madl.data.data[i].lat/100))
-          // 为地图标记设置站点名标签
-          var label = new BMap.Label(madl.data.data[i].remark,{offset:new BMap.Size(-10,-20)})
-          marker.setLabel(label)
-          switch(madl.data.data[i].macAddress) // 为每个地图标记添加它所对应的站点的点击事件
-          {
-            case '440604:009:AAJ': marker.addEventListener("click",that.focusInfo1)
-            break
-            case '440604:002:AAC': marker.addEventListener("click",that.focusInfo2)
-            break
-            case '440604:000:AAA': marker.addEventListener("click",that.focusInfo3)
-            break
-            case '440604:006:AAG': marker.addEventListener("click",that.focusInfo4)
-            break
-            case '440604:007:AAH': marker.addEventListener("click",that.focusInfo5)
-            break
-            case '440604:004:AAE': marker.addEventListener("click",that.focusInfo6)
-            break
-            case '440604:005:AAF': marker.addEventListener("click",that.focusInfo7)
-            break
-            case '440604:008:AAI': marker.addEventListener("click",that.focusInfo8)
-            break
-            case '440604:001:AAB': marker.addEventListener("click",that.focusInfo9)
-            break
-            case '440604:003:AAD': marker.addEventListener("click",that.focusInfo10)
-            break
-            case '440604:010:AAK': marker.addEventListener("click",that.focusInfo11)
-            break
+      }
+      if (mal.data.successful && mal.data.data.length) {
+        that.countSite = mal.data.data.length // 站点总数
+        for (let i = 0; i < mal.data.data.length; i++) { // 站点在线状态
+          if (parseInt(Date.now() / 1000) - that.$moment(mal.data.data[i].beginTime).unix() < 1800) {
+            that.termStateObj[mal.data.data[i].macAddress] = '在线'
+            that.countOL++
+          } else {
+            that.termStateObj[mal.data.data[i].macAddress] = '离线'
           }
-          that.map.addOverlay(marker) // 显示地图标记
         }
-      }))
-      .catch(function (error) { // 请求失败处理
-        console.log(error)
-      })
-    this.charts = this.$echarts.init(document.getElementById('main')) // 创建charts实例
-    this.focusInfo('440604:009:AAJ')
+      }
+      // 隐藏加载标志
+      that.viewLoading = 'hidden'
+    }))
+    .catch(function (error) { // 请求失败处理
+      console.log(error)
+    })
+    // 创建charts图表实例
+    this.charts = this.$echarts.init(document.getElementById('main'))
   }
 }
 </script>
@@ -479,21 +414,18 @@ export default {
 }
 .navleft ul {
   background-color:white;
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 4px 4px;
   list-style-type: none;
   padding: 0;
   margin: 0;
   /* text-align: center; */
+  border-bottom:2px solid #eee;
+  border-left:2px solid #eee;
+  border-right:2px solid #eee;
 }
 .navleft ul li {
   padding: 5px 0;
 }
-/* .navleft ul li::before {
-  content: "\2022";
-  color: rgb(24,172,24);
-  font-size: 20px;
-  padding: 0 5px 0 10px;
-} */
 .navleft ul a {
   display: block;
   padding: 4px 0;
@@ -509,22 +441,38 @@ export default {
   color:#000;
   font-weight: bold;
 }
+.navleft a:hover {
+  border-left:4px solid rgb(253,216,69);
+  color:#000;
+  font-weight: bold;
+}
 .li-head {
-  border-radius: 6px 6px 0 0;
+  border-radius: 4px 4px 0 0;
   font-size: 17px;
   font-weight: bold;
   padding: 10px 0 0 10px;
   color: rgb(40,40,40);
   /* border-bottom: 1px solid #ccc; */
   background-color: white;
+  border-top:2px solid #eee;
+  border-left:2px solid #eee;
+  border-right:2px solid #eee;
 }
 .li-head1 {
+  padding: 10px 0 10px 10px;
+  border-bottom: 1px solid #eee;
+  background-color: white;
+  border-left:2px solid #eee;
+  border-right:2px solid #eee;
+}
+.li-head2 {
   font-size: 17px;
   font-weight: bold;
-  padding: 10px 0 0 10px;
+  padding: 10px 0 6px 10px;
   color: rgb(40,40,40);
-  /* border-bottom: 1px solid #ccc; */
   background-color: white;
+  border-left:2px solid #eee;
+  border-right:2px solid #eee;
 }
 .bdmap {
   width: 87%;
@@ -535,23 +483,23 @@ export default {
   position: relative;
 }
 #allmap {
-  /* height: 585px; */
-  border-radius: 6px;
+  border-radius: 4px;
   width: calc(100% - 20px);
 	height: calc(100% - 20px);
-  /* height: 100%; */
-	/* overflow: hidden; */
 	margin: 0;
 	position: absolute;
+  border: 2px solid #eee;
 }
 .winchild1 {
   position: absolute;
   left: 14%;
+  top: calc(50% - 200px);
   z-index: 1;
-  background-color:white;
+  background-color:rgba(255,255,255,0.9);
   padding: 12px 16px;
-  border-radius: 6px;
-  width: 34%;
+  border-radius: 4px;
+  width: 73%;
+  box-shadow: 0 0 2px 1px #ddd;
 }
 .winchild1 .state-detail {
   border-bottom: 1px solid #ccc;
@@ -597,49 +545,27 @@ export default {
   font-size: 18px;
   color:black;
 }
-.winchild2 {
-  position: absolute;
-  top: 49.2%;
-  left: 14%;
-  z-index: 1;
-  background-color:white;
-  padding: 12px 16px;
-  border-radius: 6px;
-  width:34%; 
+.el-col a {
+  color: white;
+  background-color:#ffdf4f;
+  padding:6px 6px 6px 12px;
+  text-decoration: none;
+  border-radius: 4px;
 }
-.winchild2 .info1 .el-col {
-  font-weight: bold;
-  text-align: left;
-  font-size: 15px;
-  color:#999;
-}
-.winchild2 .info1-value .el-col {
-  font-weight: bold;
-  text-align: left;
-  font-size: 18px;
-  color:black;
-}
-.winchild2 .info2 .el-col {
-  font-weight: bold;
-  text-align: left;
-  font-size: 15px;
-  color:#999;
-}
-.winchild2 .info2-value .el-col {
-  font-weight: bold;
-  text-align: left;
-  font-size: 18px;
-  color:black;
+.el-col a:hover {
+  background-color:#ffef6f;
 }
 #main {
-  width: 46%;
-  height: 52.5%;
+  width: 73%;
+  height: 40%;
   position: absolute;
-  top: 17%;
-  left: 52%;
+  top: 50%;
+  left: 14%;
+  padding: 12px 12px;
   z-index: 1;
-  background-color:white;
-  border-radius: 6px; 
+  background-color:rgba(255,255,255,0.9);
+  border-radius: 4px;
+  box-shadow: 0 0 2px 1px #ddd;
 }
 .win-close-btn {
   position: absolute;
@@ -651,19 +577,11 @@ export default {
   position: absolute;
   bottom: 10px;
   left: 10px;
-  z-index: 1;
+  z-index: 0;
   background-color:white;
   padding: 3px 3px 0 3px;
-}
-.loading-background {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 604px;
-  border-radius: 6px;
-  background-color: rgb(255,255,255,0.5);
-  z-index: 1001;
+  border-radius: 4px;
+  box-shadow: 0 0 2px 1px #ddd;
 }
 .loading {
   position: absolute;
@@ -674,7 +592,7 @@ export default {
   height: 100px;
   width: 100px;
   margin: auto;
-  border-radius: 6px;
+  border-radius: 4px;
   background-color: rgb(70,70,70);
   z-index: 1002;
   padding: 20px 0;

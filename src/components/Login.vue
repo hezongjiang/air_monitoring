@@ -48,7 +48,7 @@ export default {
       tip3: '验证码错误',
       displaySign: 0,
       goneClass: 'sth-gone',
-      identifyCodes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R','S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+      identifyCodes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R','S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
       identifyCode: '',
       loginRules: { // 绑定在form表单中的验证规则
         username: [{ required: true, message: '账号不能为空', trigger: 'blur' },

@@ -9,7 +9,7 @@
       <div class="filter_container">
         <span>时间</span>
         <el-date-picker
-          style="width:300px;margin-right:50px"
+          style="width:250px;margin-right:20px"
           size="mini"
           v-model="value1"
           value-format="yyyy-MM-dd"
@@ -30,15 +30,13 @@
         <el-select size="mini" v-model="chartSign" placeholder="请选择参数">
           <el-option v-for="item in paraOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
-        <el-button type="primary" size="mini" v-on:click="getTable">查询</el-button>
-        <el-button size="mini" style="float: right" @click="zoomChange($event)">切换缩放模式</el-button>
+        <el-button type="primary" size="mini" v-on:click="getTable"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
       </div>
       <!--表格-->
       <div class="table-container">
         <div id="TempHour" :style="{ visibility:(chartSign===1?'visible':'hidden'), height:chartHeight }"></div>
         <div id="HumidityHour" :style="{ visibility:(chartSign===2?'visible':'hidden'), height:chartHeight }"></div>
         <div id="SpeedHour" :style="{ visibility:(chartSign===3?'visible':'hidden'), height:chartHeight }"></div>
-        <div class="loading-background" :style="{visibility: viewLoading}"></div>
         <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
       </div>
     </div>
@@ -82,10 +80,10 @@ export default {
       speedChart: '', // 风速小时报表
       addrOptions: [],
       value1: '',
-      value2: '绿岛湖',
+      value2: '吉利社区',
       N: 2,
       chartSign: 1,
-      chartHeight: '100%',
+      chartHeight: 'calc(100% - 10px)',
       viewLoading: 'hidden',
       paraOptions: [
         {
@@ -119,7 +117,7 @@ export default {
           show: true,
           trigger: 'axis'
         },
-        dataZoom: { 
+        dataZoom: {
           type: 'inside',
           filterMode: 'none'
         },
@@ -173,7 +171,7 @@ export default {
           show: true,
           trigger: 'axis'
         },
-        dataZoom: { 
+        dataZoom: {
           type: 'inside',
           filterMode: 'none'
         },
@@ -227,7 +225,7 @@ export default {
           show: true,
           trigger: 'axis'
         },
-        dataZoom: { 
+        dataZoom: {
           type: 'inside',
           filterMode: 'none'
         },
@@ -305,25 +303,6 @@ export default {
       end = end.getFullYear() + '-' + (end.getMonth() + 1) + '-' + end.getDate()
       this.value1 = [start, end]
     },
-    zoomChange: function (e) { // 图表缩放模式改变
-      e.currentTarget.blur()
-      if(this.optionTemp.dataZoom.type=='inside') {
-        this.optionTemp.dataZoom.type='slider'
-        this.optionHumidity.dataZoom.type='slider'
-        this.optionSpeed.dataZoom.type='slider'
-      }
-      else {
-        this.optionTemp.dataZoom.type='inside'
-        this.optionHumidity.dataZoom.type='inside'
-        this.optionSpeed.dataZoom.type='inside'
-      }
-      this.tempChart.clear()
-      this.humidityChart.clear()
-      this.speedChart.clear()
-      this.tempChart.setOption(this.optionTemp)
-      this.humidityChart.setOption(this.optionHumidity)
-      this.speedChart.setOption(this.optionSpeed)
-    },
     // 获取表格数据后并筛选
     getTable() {
       let date = this.value1 // 日期
@@ -392,11 +371,15 @@ export default {
 .winmain {
   margin: 10px 10px;
   background: white;
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 10px 20px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
   /* min-height: 549px; */
   height: calc(100% - 105px);
+  box-shadow: 0 0 2px 1px #ddd;
+}
+.filter_title {
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
 }
 .filter_title i {
   font-size: 25px;
@@ -405,6 +388,7 @@ export default {
 .filter_title span {
   font-weight: bold;
   font-size: 18px;
+  color: black;
 }
 .filter_container {
   margin-top: 10px;
@@ -414,7 +398,8 @@ export default {
   padding-right: 10px;
 }
 .el-select {
-  padding-right: 15px;
+  padding-right: 20px;
+  width: 150px;
 }
 .table-container {
   position: relative;
@@ -427,16 +412,6 @@ export default {
   /* height: 468px; */
   position: absolute;
 }
-.loading-background {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 465px;
-  border-radius: 6px;
-  background-color: rgb(255,255,255,0.5);
-  z-index: 1001;
-}
 .loading {
   position: absolute;
   top: 0px;
@@ -446,7 +421,7 @@ export default {
   height: 100px;
   width: 100px;
   margin: auto;
-  border-radius: 6px;
+  border-radius: 4px;
   background-color: rgb(70,70,70);
   z-index: 1002;
   padding: 20px 0;
