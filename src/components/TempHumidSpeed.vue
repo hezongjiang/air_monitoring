@@ -2,16 +2,15 @@
 <template>
   <div class="container-main">
     <div class="winmain" >
-      <div class="filter_title">
+      <div class="title-filter">
         <span>气温/湿度/风速小时报表</span>
       </div>
-      <!--筛选条件-->
-      <div class="filter_container">
+      <div class="container-filter">
         <span>时间</span>
         <el-date-picker
           style="width:250px;margin-right:20px"
           size="mini"
-          v-model="value1"
+          v-model="beginEndT"
           value-format="yyyy-MM-dd"
           type="daterange"
           align="left"
@@ -23,17 +22,16 @@
           :editable="false">
         </el-date-picker>
         <span>站点</span>
-        <el-select size="mini" v-model="value2" placeholder="请选择站点">
+        <el-select size="mini" v-model="addrChoose" placeholder="请选择站点">
           <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
         <span>温度/湿度/风速</span>
         <el-select size="mini" v-model="chartSign" placeholder="请选择参数">
           <el-option v-for="item in paraOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
-        <el-button type="primary" size="mini" v-on:click="getTable"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
+        <el-button type="primary" size="mini" v-on:click="searchSth"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
       </div>
-      <!--表格-->
-      <div class="table-container">
+      <div class="container-chart">
         <div id="TempHour" :style="{ visibility:(chartSign===1?'visible':'hidden'), height:chartHeight }"></div>
         <div id="HumidityHour" :style="{ visibility:(chartSign===2?'visible':'hidden'), height:chartHeight }"></div>
         <div id="SpeedHour" :style="{ visibility:(chartSign===3?'visible':'hidden'), height:chartHeight }"></div>
@@ -48,7 +46,7 @@ export default {
   name: 'TempHumidSpeed',
   data() {
     return {
-      pickerOptions: {
+      pickerOptions: { // 日期快捷选项
         shortcuts: [{
           text: '最近一周',
           onClick(picker) {
@@ -75,17 +73,17 @@ export default {
           }
         }]
       },
-      tempChart: '', // 温度小时报表
-      humidityChart: '', // 湿度小时报表
-      speedChart: '', // 风速小时报表
-      addrOptions: [],
-      value1: '',
-      value2: '吉利社区',
-      N: 2,
-      chartSign: 1,
-      chartHeight: 'calc(100% - 10px)',
-      viewLoading: 'hidden',
-      paraOptions: [
+      tempChart: '', // 温度图表
+      humidityChart: '', // 湿度图表
+      speedChart: '', // 风速图表
+      addrOptions: [], // 站点选项
+      addrChoose: '', // 站点选择
+      beginEndT: '', // 开始结束日期
+      N: 1, // 默认显示N天前至当天的信息
+      chartSign: 1, // 图表标志
+      chartHeight: 'calc(100% - 10px)', // 图表高度
+      viewLoading: 'hidden', // 加载标志可见性
+      paraOptions: [ // 参数选项
         {
           value: 1,
           label: '温度'
@@ -99,20 +97,7 @@ export default {
           label: '风速'
         }
       ],
-      siteMap: { // mac地址与站点名称的对应关系
-        '龙湾大桥': '440604:009:AAJ',
-        '罗南村委': '440604:002:AAC',
-        '绿岛湖': '440604:000:AAA',
-        '龙津老年活动中心': '440604:006:AAG',
-        '南庄三中': '440604:007:AAH',
-        '吉利小学': '440604:004:AAE',
-        '罗格村委': '440604:005:AAF',
-        '吉利社区': '440604:008:AAI',
-        '南庄实验中学': '440604:001:AAB',
-        '南庄水利所': '440604:003:AAD',
-        '南庄污水处理厂': '440604:010:AAK'
-      },
-      optionTemp: {
+      optionTemp: { // 温度图表配置
         tooltip: {
           show: true,
           trigger: 'axis'
@@ -135,7 +120,7 @@ export default {
         xAxis: {
           name: '时间',
           nameLocation: 'middle',
-          nameTextStyle: { padding: [10,0,0,0] },
+          nameTextStyle: { padding: [10, 0, 0, 0] },
           type: 'category',
           boundaryGap: false,
           data: [],
@@ -143,7 +128,7 @@ export default {
         },
         yAxis: {
           name: '温度（℃）',
-          nameTextStyle: { padding: [0,0,0,20] },
+          nameTextStyle: { padding: [0, 0, 0, 20] },
           type: 'value',
           axisLabel: { fontSize: 11 }
         },
@@ -166,7 +151,7 @@ export default {
           smooth: true
         }]
       },
-      optionHumidity: {
+      optionHumidity: { // 湿度图表配置
         tooltip: {
           show: true,
           trigger: 'axis'
@@ -189,7 +174,7 @@ export default {
         xAxis: {
           name: '时间',
           nameLocation: 'middle',
-          nameTextStyle: { padding: [10,0,0,0] },
+          nameTextStyle: { padding: [10, 0, 0, 0] },
           type: 'category',
           boundaryGap: false,
           data: [],
@@ -197,7 +182,7 @@ export default {
         },
         yAxis: {
           name: '湿度（%R.H.）',
-          nameTextStyle: { padding: [0,0,0,20] },
+          nameTextStyle: { padding: [0, 0, 0, 20] },
           type: 'value',
           axisLabel: { fontSize: 11 }
         },
@@ -220,7 +205,7 @@ export default {
           smooth: true
         }]
       },
-      optionSpeed: {
+      optionSpeed: { // 风速图表配置
         tooltip: {
           show: true,
           trigger: 'axis'
@@ -243,7 +228,7 @@ export default {
         xAxis: {
           name: '时间',
           nameLocation: 'middle',
-          nameTextStyle: { padding: [10,0,0,0] },
+          nameTextStyle: { padding: [10, 0, 0, 0] },
           type: 'category',
           boundaryGap: false,
           data: [],
@@ -251,7 +236,7 @@ export default {
         },
         yAxis: {
           name: '风速（m/s）',
-          nameTextStyle: { padding: [0,0,0,20] },
+          nameTextStyle: { padding: [0, 0, 0, 20] },
           type: 'value',
           axisLabel: { fontSize: 11 }
         },
@@ -264,93 +249,79 @@ export default {
       }
     }
   },
-  created () {
-    if(document.body.clientWidth<891) {
-      this.tableHeight="calc(100% - 30px)"
-    }
-    console.log(this.tableHeight)
-  },
-  mounted() {
-    // 创建charts实例
-    this.tempChart = this.$echarts.init(document.getElementById('TempHour'))
-    this.humidityChart = this.$echarts.init(document.getElementById('HumidityHour'))
-    this.speedChart = this.$echarts.init(document.getElementById('SpeedHour'))
-    this.getAddr() // 获取站点选择下拉列表的选项
-    this.defaultDate() // 默认日期选择昨天零点到今天
-    this.getTable() // 默认获取昨天零点到今天的数据
-  },
   methods: {
-    getAddr() { // 获取下拉列表选项
-      this.$axios.get('/macAirDeviceList')
-      .then(res => {
-        let addrArray = res.data.data
-        for (let i = 0; i < addrArray.length; i++) {
-          this.addrOptions.push({
-            value: addrArray[i].remark,
-            label: addrArray[i].remark
-          })
+    searchSth() { // 查询数据
+      this.viewLoading = 'visible' // 显示加载标志
+      this.$axios
+      .get('/macOldFourAir', {
+        params: {
+          beginTime: this.beginEndT[0],
+          endTime: this.beginEndT[1],
+          macAddress: this.addrChoose
         }
       })
-      .catch(error => {
-        console.log(error)
-      })
-    },
-    defaultDate() {
-      let end = new Date()
-      let start = new Date()
-      start.setTime(end.getTime() - (this.N-1) * 3600 * 1000 * 24)
-      start = start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate()
-      end = end.getFullYear() + '-' + (end.getMonth() + 1) + '-' + end.getDate()
-      this.value1 = [start, end]
-    },
-    // 获取表格数据后并筛选
-    getTable() {
-      let date = this.value1 // 日期
-      let filter = this.value2 // 站点
-      // 定义字典
-      this.viewLoading='visible'
-      this.$axios.get('/macOldFourAir',
-        {params: {
-            beginTime: date[0],
-            endTime: date[1],
-            macAddress: this.siteMap[this.value2],
-          }}
-      ).then(mofa => {
+      .then(mofa => {
         if (mofa.data.successful) {
           this.optionTemp.xAxis.data = mofa.data.data.time
           this.optionTemp.series[0].data = mofa.data.data.temp
           this.optionTemp.series[1].data = mofa.data.data.newTemps
           this.optionTemp.series[2].data = mofa.data.data.OldTemp
-
           this.optionHumidity.xAxis.data = mofa.data.data.time
           this.optionHumidity.series[0].data = mofa.data.data.humidity
           this.optionHumidity.series[1].data = mofa.data.data.newHumiditys
           this.optionHumidity.series[2].data = mofa.data.data.OldHumidity
-
           this.optionSpeed.xAxis.data = mofa.data.data.time
           this.optionSpeed.series[0].data = mofa.data.data.speed
-        }
-        else {
+        } else {
           this.optionTemp.xAxis.data = []
           this.optionTemp.series[0].data = []
           this.optionTemp.series[1].data = []
           this.optionTemp.series[2].data = []
-
+          this.optionHumidity.xAxis.data = []
           this.optionHumidity.series[0].data = []
           this.optionHumidity.series[1].data = []
           this.optionHumidity.series[2].data = []
-
+          this.optionSpeed.xAxis.data = []
           this.optionSpeed.series[0].data = []
         }
         // 作图
         this.tempChart.setOption(this.optionTemp)
         this.humidityChart.setOption(this.optionHumidity)
         this.speedChart.setOption(this.optionSpeed)
-        this.viewLoading='hidden'
+        this.viewLoading = 'hidden' // 显示加载标志
       }).catch(error => {
         console.log(error)
       })
     }
+  },
+  mounted() {
+    // 创建charts实例
+    this.tempChart = this.$echarts.init(document.getElementById('TempHour'))
+    this.humidityChart = this.$echarts.init(document.getElementById('HumidityHour'))
+    this.speedChart = this.$echarts.init(document.getElementById('SpeedHour'))
+    this.viewLoading = 'visible' // 因为初次自动查询在axios回调里有等待时间，所以这里先手动显示加载标志
+    // 开始日期和结束日期初始化
+    let t1 = this.$moment().subtract(this.N, 'days').format('YYYY-MM-DD')
+    let t2 = this.$moment().format('YYYY-MM-DD')
+    this.beginEndT = [t1, t2]
+    // 其它初始化
+    this.$axios
+    .get('/macAirDeviceList')
+    .then(madl => {
+      if (madl.data.successful && madl.data.data.length) {
+        this.addrChoose = madl.data.data[0].macAddress // 初始化站点选择
+        for (let i = 0; i < madl.data.data.length; i++) { // 初始化站点选项
+          this.addrOptions.push({
+            value: madl.data.data[i].macAddress,
+            label: madl.data.data[i].remark
+          })
+        }
+        this.searchSth() // 查询数据
+      }
+    })
+    .catch(error => {
+      console.log(error)
+    })
   }
 }
 </script>
@@ -377,31 +348,31 @@ export default {
   height: calc(100% - 105px);
   box-shadow: 0 0 2px 1px #ddd;
 }
-.filter_title {
+.title-filter {
   border-bottom: 1px solid #ccc;
   padding-bottom: 10px;
 }
-.filter_title i {
+.title-filter i {
   font-size: 25px;
   padding-right: 10px;
 }
-.filter_title span {
+.title-filter span {
   font-weight: bold;
   font-size: 18px;
   color: black;
 }
-.filter_container {
+.container-filter {
   margin-top: 10px;
   font-size: 15px;
 }
-.filter_container span {
+.container-filter span {
   padding-right: 10px;
 }
 .el-select {
   padding-right: 20px;
   width: 150px;
 }
-.table-container {
+.container-chart {
   position: relative;
   margin-top: 10px;
   /* height: 460px; */

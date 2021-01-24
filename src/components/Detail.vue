@@ -3,11 +3,14 @@
     <div class="navleft">
       <div class="li-head">站点总数：{{ countSite }}个</div>
       <div class="li-head1">
-        <span style="font-size:15px;font-weight:normal;color:rgb(7,193,96)">在线：</span>
-        <span style="font-size:15px;font-weight:normal;color:white;background-color:rgb(7,193,96);padding:0 4px">{{ countOL }}个</span><br/>
-        <span style="font-size:15px;font-weight:normal;color:#999">离线：</span>
-        <span style="font-size:15px;font-weight:normal;color:white;background-color:#999;padding:0 4px">{{ countSite - countOL }}个</span>
+        <span style="color:rgb(7,193,96)">在线：</span>
+        <span style="color:white;background-color:rgb(7,193,96);padding:0 4px;border-radius: 4px;">{{ countOL }}个</span><br/>
+        <span style="color:#999">离线：</span>
+        <span style="color:white;background-color:#999;padding:0 4px;border-radius: 4px;">{{ countSite - countOL }}个</span>
         <br/>
+        <span style="font-size:14px;font-weight:bold;">上次更新时间：</span>
+        <br/>
+        <span style="font-size:14px;">{{ refreshTime }}</span>
       </div>
       <div class="li-head2">
         站点列表
@@ -42,25 +45,18 @@
         <a href="javascript:void(0)" :class="{active:activeSign==4}" v-on:click="chooseData(4)" style="margin-right:60px">湿度</a>
         时间&nbsp;&nbsp;
         <el-date-picker
-          type="date"
-          v-model="beginT"
-          placeholder="开始日期"
+          style="width:250px;margin-right:20px"
           size="mini"
+          v-model="beginEndT"
           value-format="yyyy-MM-dd"
-          style="width:130px"
-          :editable="false"
-          :clearable="false">
-        </el-date-picker>
-        ～
-        <el-date-picker
-          type="date"
-          v-model="endT"
-          placeholder="结束日期"
-          size="mini"
-          value-format="yyyy-MM-dd"
-          style="width:130px;margin-right:20px"
-          :editable="false"
-          :clearable="false">
+          type="daterange"
+          align="left"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :picker-options="pickerOptions"
+          :clearable="false"
+          :editable="false">
         </el-date-picker>
         <el-button type="primary" size="mini" @click="focusInfo(termInfo.macAddress, termInfo.remark)"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
         <el-button type="success" plain size="mini" @click="exportExcel($event)" :style="{ visibility:(activeSign===1?'visible':'hidden') }" style="float:right"><i class="fa fa-download" aria-hidden="true"></i>&nbsp;导出Excel</el-button>
@@ -103,6 +99,33 @@ export default {
   name: 'Detail',
   data() {
     return {
+      pickerOptions: { // 日期快捷选项
+        shortcuts: [{
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近三个月',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            picker.$emit('pick', [start, end])
+          }
+        }]
+      },
       liList: [], // 左侧站点列表
       countSite: 0, // 站点总数
       countOL: 0, // 站点在线数
@@ -114,13 +137,15 @@ export default {
       airChart: '', // 气体图表
       tempChart: '', // 温度图表
       humidityChart: '', // 湿度图表
-      N: 2, // 默认显示前2天至当天的信息
-      beginT: '', // 开始日期
-      endT: '', // 结束日期
+      N: 2, // 默认显示N天前至当天的信息
+      beginEndT: [], // 开始结束日期
+      beginEndTState: [], // 开始结束日期状态，主要用于excel导出，因为这时日期选择器可能人为动过
       viewLoading: 'hidden', // 窗口可见性
       tableHeight: '100%', // 表格高度
       chartHeight: '100%', // 图表高度
-      tbList: [], // 存放详细表格数据
+      timer: null, // 定时器
+      refreshTime: '', // 更新时间
+      tbList: [], // 存放详细数据的表格
       optionAir: { // 气体曲线图配置
         tooltip: {
           show: true,
@@ -259,6 +284,7 @@ export default {
     focusInfo(addr, remark) { // 展示选定站点的信息
       let that = this // this拷贝，防止后续因层级关系无法调用this
       this.viewLoading = 'visible' // 显示加载标志
+      this.beginEndTState = this.beginEndT
       this.termInfo.macAddress = addr // 提前赋值，使左侧站点列表选中反应达到最快，增加用户体验
       this.$axios
       .all([this.$axios.get('/' + addr + '/macAirDeviceInfo'), // 获取选定站点的终端信息
@@ -266,8 +292,8 @@ export default {
             this.$axios.get('/macAirHourHistory', { // 获取选定站点在一定日期范围内的气体信息
               params: {
                 macAddress: addr,
-                beginTime: this.beginT,
-                endTime: this.endT
+                beginTime: this.beginEndT[0],
+                endTime: this.beginEndT[1]
               }
             })
       ])
@@ -332,18 +358,18 @@ export default {
           }
           that.termState = '离线' // 终端在线状态
         }
+        // 由于后续数据是逐个索引赋值的，所以先清空，提前清空，if后面就无需else
+        that.optionAir.series[0].data = []
+        that.optionAir.series[1].data = []
+        that.optionAir.series[2].data = []
+        that.optionAir.series[3].data = []
+        that.optionTemp.series[0].data = []
+        that.optionHumidity.series[0].data = []
+        that.optionAir.xAxis.data = []
+        that.optionTemp.xAxis.data = []
+        that.optionHumidity.xAxis.data = []
         if (mahh.data.successful && mahh.data.data.length) {
           that.tbList = mahh.data.data
-          // 图表数据初始化，因为赋值过程是一位一位地修改的，所以当长时间变短时间时，长时间多出的部分仍然可见，这是不对的
-          that.optionAir.series[0].data = []
-          that.optionAir.series[1].data = []
-          that.optionAir.series[2].data = []
-          that.optionAir.series[3].data = []
-          that.optionTemp.series[0].data = []
-          that.optionHumidity.series[0].data = []
-          that.optionAir.xAxis.data = []
-          that.optionTemp.xAxis.data = []
-          that.optionHumidity.xAxis.data = []
           // 图表数据赋值
           for (let i = 0; i < mahh.data.data.length; i++) {
             that.optionAir.series[0].data[i] = mahh.data.data[i].SO2
@@ -358,25 +384,45 @@ export default {
           }
         } else {
           that.tbList = []
-          that.optionAir.series[0].data = []
-          that.optionAir.series[1].data = []
-          that.optionAir.series[2].data = []
-          that.optionAir.series[3].data = []
-          that.optionTemp.series[0].data = []
-          that.optionHumidity.series[0].data = []
-          that.optionAir.xAxis.data = []
-          that.optionTemp.xAxis.data = []
-          that.optionHumidity.xAxis.data = []
         }
         // 作曲线图
         that.airChart.setOption(that.optionAir)
         that.tempChart.setOption(that.optionTemp)
         that.humidityChart.setOption(that.optionHumidity)
         that.viewLoading = 'hidden'
+        that.refreshTime = that.$moment().format('YYYY-MM-DD HH:mm:ss')
       }))
       .catch(function (error) { // 请求失败处理
         console.log(error)
       })
+    },
+    termStateRefresh() { // 站点在线状态刷新
+      this.$axios
+        .get('/macAirList') // 获取所有站点的终端信息
+        .then(mal => {
+          if (mal.data.successful && mal.data.data.length) {
+            this.countSite = mal.data.data.length // 站点总数
+            this.countOL = 0
+            for (let i = 0; i < mal.data.data.length; i++) { // 站点在线状态
+              if (parseInt(Date.now() / 1000) - this.$moment(mal.data.data[i].beginTime).unix() < 1800) {
+                this.termStateObj[mal.data.data[i].macAddress] = '在线'
+                this.countOL++
+              } else {
+                this.termStateObj[mal.data.data[i].macAddress] = '离线'
+              }
+            }
+          } else {
+            this.countSite = 0 // 站点总数
+            this.countOL = 0 // 在线站点数
+            for (let key in this.termStateObj) {
+              this.termStateObj[key] = '离线'
+            }
+          }
+          this.refreshTime = this.$moment().format('YYYY-MM-DD HH:mm:ss')
+        })
+        .catch(function(error) {
+          console.log(error)
+        })
     },
     chooseData(x) { // 选择要激活的选项卡的内容
       this.activeSign = x
@@ -386,14 +432,14 @@ export default {
       const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
       const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
       const data = this.tbList.map(v => filterVal.map(k => v[k]))
-      const fileName = this.beginT + '至' + this.endT + this.termInfo.remark + '详情'
+      const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.termInfo.remark + '详情'
       const [fileType, sheetName] = ['xlsx', '详情数据']
       this.$toExcel({th, data, fileName, fileType, sheetName})
     }
   },
   created () {
     console.log(document.body.clientWidth)
-    if (document.body.clientWidth < 1042) { // 如果浏览器窗口比较小则元素会被挤压多出一层从而占用表格和图表的高度，需作适当让步
+    if (document.body.clientWidth < 1069) { // 如果浏览器窗口比较小则元素会被挤压多出一层从而占用表格和图表的高度，需作适当让步
       this.tableHeight = 'calc(100% - 30px)'
       this.chartHeight = 'calc(100% - 30px)'
     }
@@ -404,8 +450,9 @@ export default {
     // 显示加载标志
     this.viewLoading = 'visible'
     // 开始日期和结束日期初始化
-    this.beginT = this.$moment().subtract(this.N, 'days').format('YYYY-MM-DD')
-    this.endT = this.$moment().format('YYYY-MM-DD')
+    let t1 = this.$moment().subtract(this.N, 'days').format('YYYY-MM-DD')
+    let t2 = this.$moment().format('YYYY-MM-DD')
+    this.beginEndT = [t1, t2]
     // 其它初始化（在线状态、站点标签及其点击事件等）
     this.$axios
     .all([this.$axios.get('/macAirDeviceList'), this.$axios.get('/macAirList')]) // 获取所有站点的终端信息
@@ -429,10 +476,15 @@ export default {
         that.liList = madl.data.data // 左侧栏列表
         that.focusInfo(madl.data.data[0].macAddress, madl.data.data[0].remark)
       }
+      that.timer = setInterval(that.termStateRefresh, 60000)
     }))
     .catch(function (error) { // 请求失败处理
       console.log(error)
     })
+  },
+  destroyed() {
+    clearInterval(this.timer)
+    this.timer = null
   }
 }
 </script>
@@ -451,9 +503,10 @@ export default {
   position: absolute;
 }
 .navleft {
-  width: 13%;
+  /*width: 13%;*/
+  width: 200px;
   float: left;
-  padding: 10px 0 10px 10px;
+  padding: 10px 5px 10px 10px;
   height: calc(100% - 50px);
   overflow-y: auto;
 }
@@ -502,6 +555,7 @@ export default {
   border-right: 2px solid #eee;
 }
 .li-head1 {
+  font-size: 15px;
   padding: 10px 0 10px 10px;
   border-bottom: 1px solid #eee;
   background-color: white;
@@ -518,8 +572,9 @@ export default {
   border-right: 2px solid #eee;
 }
 .winmain {
-  width: 87%;
-  padding: 10px;
+  /*width: 87%;*/
+  width: calc(100% - 200px);
+  padding: 10px 10px 10px 5px;
   float: left;
   height: calc(100% - 50px);
 }

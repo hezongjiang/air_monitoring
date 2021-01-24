@@ -61,4 +61,7 @@ body {
 .el-menu--horizontal>.el-submenu.is-active .el-submenu__title i {
   color: #409EFF !important;
 }
+.el-table .warning-row {
+  background-color: rgb(255, 240, 230);
+}
 </style>

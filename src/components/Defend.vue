@@ -2,27 +2,25 @@
 <template>
   <div class="container-main">
     <div class="winmain" >
-      <div class="filter_title">
+      <div class="title-filter">
         <span>站点维护记录</span>
       </div>
-      <!--筛选条件-->
-      <div class="filter_container">
+      <div class="container-filter">
         <span>站点</span>
-        <el-select size="mini" v-model="value1" clearable placeholder="请选择站点">
+        <el-select size="mini" v-model="addrChoose" clearable placeholder="请选择站点">
           <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
-        <el-button type="primary" size="mini" v-on:click="getTable"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
+        <el-button type="primary" size="mini" v-on:click="searchSth"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
         <el-button type="success" plain v-on:click="exportExcel($event)" size="mini" style="float: right"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
-        <AddDefend @onSubmit="getTable" ref="edit" style="float:right"></AddDefend>
+        <AddDefend @onSubmit="searchSth" ref="edit" style="float:right"></AddDefend>
       </div>
-      <!--表格-->
-      <div class="table-container">
+      <div class="container-table">
         <el-table
           id="table"
           :row-style="{height:'35px'}"
           :cell-style="{ padding:0, fontSize:'12px'}"
           :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
-          :data="filtedData.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
+          :data="tbList.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
           stripe
           highlight-current-row
           border
@@ -39,7 +37,6 @@
         <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
       </div>
     </div>
-    <!--分页器-->
     <el-pagination
       align="center"
       @size-change='handleSizeChange'
@@ -47,7 +44,7 @@
       :current-page="currentPage"
       :page-size="pageSize"
       layout="total, sizes, prev, pager, next"
-      :total="filtedData.length">
+      :total="tbList.length">
     </el-pagination>
   </div>
 </template>
@@ -59,7 +56,7 @@ export default {
   components: {AddDefend},
   data() {
     return {
-      pickerOptions: {
+      pickerOptions: { // 日期快捷选项
         shortcuts: [{
           text: '最近一周',
           onClick(picker) {
@@ -86,108 +83,72 @@ export default {
           }
         }]
       },
-      siteMark: { // mac地址与站点名称的对应关系
-        '绿岛湖': '440604:000:AAA',
-        '南庄实验中学': '440604:001:AAB',
-        '罗南村委': '440604:002:AAC',
-        '南庄水利所': '440604:003:AAD',
-        '吉利小学': '440604:004:AAE',
-        '罗格村委': '440604:005:AAF',
-        '龙津老年活动中心': '440604:006:AAG',
-        '南庄三中': '440604:007:AAH',
-        '吉利社区': '440604:008:AAI',
-        '龙湾大桥': '440604:009:AAJ',
-        '南庄污水处理厂': '440604:010:AAK',
-        '': ''
-      },
-      addrOptions: [],
-      value1: '',
-      tableData: [],
-      filtedData: [],
-      currentPage: 1,
-      pageSize: 20,
-      viewLoading: 'hidden',
-      tableHeight: 'calc( 100% - 10px)'
+      addrOptions: [], // 站点选项
+      addrChoose: '', // 站点选择
+      addrChooseState: '', // 站点选择状态，主要用于excel导出，因为这时站点选择器可能人为动过
+      tbList: [], // 表格数据
+      currentPage: 1, // 当前页
+      pageSize: 20, // 单页数
+      viewLoading: 'hidden', // 加载标志可见性
+      tableHeight: 'calc( 100% - 10px)' // 表格高度
     }
-  },
-  created () {
-    if (document.body.clientWidth < 891) {
-      this.tableHeight = 'calc(100% - 30px)'
-    }
-    console.log(this.tableHeight)
-  },
-  mounted() {
-    this.getAddr() // 获取站点选择下拉列表的选项
-    this.getTable() // 默认获取昨天零点到今天的数据
   },
   methods: {
-    getAddr() { // 获取下拉列表选项
-      this.$axios.get('/macAirDeviceList')
-      .then(res => {
-        let addrArray = res.data.data
-        for (let i = 0; i < addrArray.length; i++) {
-          this.addrOptions.push({
-            value: addrArray[i].remark,
-            label: addrArray[i].remark
-          })
-        }
-      })
-      .catch(error => {
-        console.log(error)
-      })
-    },
-    // 分页器
-    handleSizeChange(val) {
-      this.pageSize = val
-    },
-    handleCurrentChange(val) {
-      this.currentPage = val
-    },
-    // 导出为excel
-    exportExcel(e) {
-      e.currentTarget.blur()
-      const th = ['mac地址', '检修时间', '操作员', '空气传感器下次检修时间', 'pm下次检修时间', '检修内容']
-      const filterVal = ['macAddress', 'beginTime', 'person', 'airTime', 'pmTime', 'remark']
-      const data = this.filtedData.map(v => filterVal.map(k => v[k]))
-      const addr = (this.value1 === '') ? '所有站点' : this.value1
-      const fileName = addr + '维护记录'
-      const [fileType, sheetName] = ['xlsx', '站点维护记录']
-      this.$toExcel({th, data, fileName, fileType, sheetName})
-    },
-    // 获取表格数据后并筛选
-    getTable() {
-      // 定义字典
-      this.tableData = []
-      this.filtedData = []
-      this.currentPage = 1
-      this.viewLoading = 'visible'
+    searchSth() { // 查询数据
+      this.currentPage = 1 // 每次查询都回到第一页
+      this.viewLoading = 'visible' // 显示加载标志
+      this.addrChooseState = this.addrChoose // 主要用于excel导出，因为这时站点选择器可能人为动过
       this.$axios.get('/siteInfoList', {
         params: {
-          macAddress: this.siteMark[this.value1]
+          macAddress: this.addrChoose
         }
-      }).then(res => {
-        if (res.data.successful) {
-          if (res.data.data.length !== 0) {
-            console.log('有数据')
-            // 获取所有数据
-            this.tableData = res.data.data
-            // 根据下拉框选择的站点进行筛选
-            this.filtedData = this.tableData
-            // 数组按维护时间倒序排列
-            this.filtedData.sort(function(a, b) {
-              return new Date(b.beginTime) - new Date(a.beginTime)
-            })
-          } else {
-            console.log('无数据')
-          }
+      })
+      .then(sil => {
+        if (sil.data.successful && sil.data.data.length) {
+          this.tbList = sil.data.data
         } else {
-          console.log('fail')
+          this.tbList = []
         }
-        this.viewLoading='hidden'
+        this.viewLoading = 'hidden' // 隐藏加载标志
       }).catch(error => {
         console.log(error)
       })
+    },
+    handleSizeChange(val) { // 分页器
+      this.pageSize = val
+    },
+    handleCurrentChange(val) { // 分页器
+      this.currentPage = val
+    },
+    exportExcel(e) { // 导出为excel
+      e.currentTarget.blur()
+      const th = ['mac地址', '检修时间', '操作员', '空气传感器下次检修时间', 'pm下次检修时间', '检修内容']
+      const filterVal = ['macAddress', 'beginTime', 'person', 'airTime', 'pmTime', 'remark']
+      const data = this.tbList.map(v => filterVal.map(k => v[k]))
+      const fileName = this.addrChooseState + '维护记录'
+      const [fileType, sheetName] = ['xlsx', '站点维护记录']
+      this.$toExcel({th, data, fileName, fileType, sheetName})
     }
+  },
+  mounted() {
+    this.viewLoading = 'visible' // 因为初次自动查询在axios回调里有等待时间，所以这里先手动显示加载标志
+    // 其它初始化
+    this.$axios
+    .get('/macAirDeviceList')
+    .then(madl => {
+      if (madl.data.successful && madl.data.data.length) {
+        for (let i = 0; i < madl.data.data.length; i++) { // 初始化站点选项
+          this.addrOptions.push({
+            value: madl.data.data[i].macAddress,
+            label: madl.data.data[i].remark
+          })
+        }
+        this.searchSth() // 查询数据
+      }
+    })
+    .catch(error => {
+      console.log(error)
+    })
   }
 }
 </script>
@@ -214,31 +175,31 @@ export default {
   height: calc(100% - 105px);
   box-shadow: 0 0 2px 1px #ddd;
 }
-.filter_title {
+.title-filter {
   border-bottom: 1px solid #ccc;
   padding-bottom: 10px;
 }
-.filter_title i {
+.title-filter i {
   font-size: 25px;
   padding-right: 10px;
 }
-.filter_title span {
+.title-filter span {
   font-weight: bold;
   font-size: 18px;
   color: black;
 }
-.filter_container {
+.container-filter {
   margin-top: 10px;
   font-size: 15px;
 }
-.filter_container span {
+.container-filter span {
   padding-right: 10px;
 }
 .el-select {
   padding-right: 20px;
   width: 150px;
 }
-.table-container {
+.container-table {
   position: relative;
   margin-top: 10px;
   /* height: 460px; */

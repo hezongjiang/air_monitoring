@@ -2,27 +2,26 @@
 <template>
   <div class="container-main">
     <div class="winmain" >
-      <div class="filter_container">
+      <div class="container-title">
         <span>终端信息</span>
         <el-button type="success" plain v-on:click="exportExcel($event)" size="mini" style="float: right"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
       </div>
-      <!--表格-->
-      <div class="table-container">
+      <div class="container-table">
         <el-table
           id= "table"
           :row-style="{height:'35px'}"
           :cell-style="{ padding:0, fontSize:'12px'}"
           :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
-          :data="list"
-          stripe
+          :data="tbList"
           highlight-current-row
           border
+          :row-class-name="tableRowClassName"
           :height="tableHeight"
           tooltip-effect="dark">
           <el-table-column type="index" show-overflow-tooltip label="序号" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="remark" label="mac备注" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="macAddress" label="mac地址" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="remark" label="mac备注" align="center" width="120"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="macAddress" label="mac地址" align="center" width="120"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center" width="140"></el-table-column>
           <el-table-column show-overflow-tooltip prop="batteryInfo" label="电量" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="lon" label="经度" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="lat" label="纬度" align="center"></el-table-column>
@@ -39,42 +38,63 @@ export default {
   name: 'TermInfo',
   data() {
     return {
-      list: [],
-      tableHeight: 'calc(100% - 10px)',
-      viewLoading: 'hidden'
+      tbList: [], // 表格数据
+      termStateArr: [], // 终端在线状态
+      tableHeight: 'calc(100% - 10px)', // 表格高度
+      viewLoading: 'hidden' // 加载标志可见性
     }
   },
-  mounted() {
-    setInterval(this.getList, 60000)
-    this.getList()
-  },
   methods: {
-    getList() {
+    searchSth() {
+      let that = this // this拷贝，防止后续因层级关系无法调用this
       this.viewLoading = 'visible' // 显示加载标志
-      this.$axios.get('/macAirDeviceList')
-      .then(res => {
-        this.list = res.data.data
-        for(var i=0;i<this.list.length;i++) {
-            this.list[i].lon = parseFloat(this.list[i].lon/100).toFixed(6)
-            this.list[i].lat = parseFloat(this.list[i].lat/100).toFixed(6)
-            this.list[i].batteryInfo = parseInt(this.list[i].batteryInfo)
+      this.$axios
+      .all([this.$axios.get('/macAirDeviceList'), this.$axios.get('/macAirList')]) // 获取所有站点的终端信息
+      .then(this.$axios.spread(function(madl, mal) {
+        if (madl.data.successful && madl.data.data.length) {
+          that.tbList = madl.data.data
+          for (let i = 0; i < that.tbList.length; i++) {
+            that.tbList[i].lon = (parseFloat(that.tbList[i].lon) / 100).toFixed(6)
+            that.tbList[i].lat = (parseFloat(that.tbList[i].lat) / 100).toFixed(6)
+            that.tbList[i].batteryInfo = parseInt(that.tbList[i].batteryInfo)
+          }
+        } else {
+          that.tbList = []
         }
-        this.viewLoading = 'hidden' // 隐藏加载标志
-      })
+        if (mal.data.successful && mal.data.data.length) {
+          for (let i = 0; i < mal.data.data.length; i++) { // 站点在线状态
+            if (new Date().getTime() - Date.parse(mal.data.data[i].beginTime) > 1800000) {
+              that.termStateArr.push(mal.data.data[i].macAddress)
+            }
+          }
+        } else {
+          that.termStateArr = []
+        }
+        that.viewLoading = 'hidden' // 隐藏加载标志
+      }))
       .catch(error => {
         console.log(error)
       })
     },
+    tableRowClassName({row, rowIndex}) { // 根据实际情况调整表格记录背景颜色
+      if (this.termStateArr.includes(row.remark)) {
+        return 'warning-row'
+      }
+      return ''
+    },
     // 导出为excel
     exportExcel(e) {
       e.currentTarget.blur()
-      const th = ['mac备注','mac地址', '监测时间', '电量', '经度', '纬度', '固件版本']
+      const th = ['mac备注', 'mac地址', '监测时间', '电量', '经度', '纬度', '固件版本']
       const filterVal = ['remark', 'macAddress', 'beginTime', 'batteryInfo', 'lon', 'lat', 'version']
-      const data = this.list.map(v => filterVal.map(k => v[k]))
-      const fileName = '终端信息' + this.$moment().format("YYYY-MM-DD HH:mm:ss")
+      const data = this.tbList.map(v => filterVal.map(k => v[k]))
+      const fileName = '终端信息' + this.$moment().format('YYYY-MM-DD HH:mm:ss')
       const [fileType, sheetName] = ['xlsx', '终端信息']
       this.$toExcel({th, data, fileName, fileType, sheetName})
     }
+  },
+  mounted() {
+    this.searchSth()
   }
 }
 </script>
@@ -101,7 +121,7 @@ export default {
   height: calc(100% - 70px);
   box-shadow: 0 0 2px 1px #ddd;
 }
-.filter_container {
+.container-title {
   /* margin-top: 10px; */
   font-size: 15px;
   border-bottom: 1px solid #ccc;
@@ -110,16 +130,16 @@ export default {
 .el-select {
   padding-right: 15px;
 }
-.table-container {
+.container-table {
   position: relative;
   margin-top: 15px;
   /* height: 460px; */
   height: calc(100% - 40px);
 }
-.filter_container span {
+.container-title span {
   font-size: 18px;
   font-weight: bold;
-  color:black;
+  color: black;
 }
 #table {
   width: 100%;

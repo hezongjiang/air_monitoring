@@ -2,27 +2,26 @@
 <template>
   <div class="container-main">
     <div class="winmain" >
-      <div class="filter_container">
+      <div class="container-title">
         <span>实时空气数据<span style = "font-size:12px;font-weight:normal">（每30秒自动刷新）</span></span>
         <el-button type="success" plain v-on:click="exportExcel($event)" size="mini" style="float: right"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
       </div>
-      <!--表格-->
-      <div class="table-container">
+      <div class="container-table">
         <el-table
           id= "detailData"
           :row-style="{height:'35px'}"
           :cell-style="{ padding:0, fontSize:'12px'}"
           :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
-          :data="list"
-          stripe
+          :data="tbList"
           highlight-current-row
           border
+          :row-class-name="tableRowClassName"
           :height="tableHeight"
           tooltip-effect="dark">
           <el-table-column type="index" show-overflow-tooltip label="序号" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="macAddress" label="mac地址" align="center" width="120"></el-table-column>
           <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center" width="140"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="temp" label="气温（℃）" align="center" width="90"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="temp" label="气温（℃）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="humidity" label="湿度（%R.H.）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="SO2" label="SO2（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="NO2" label="NO2（μg/m³）" align="center"></el-table-column>
@@ -42,46 +41,59 @@ export default {
   name: 'AirQuality',
   data() {
     return {
-      list: [],
-      tableHeight: 'calc(100% - 10px)',
-      viewLoading: 'hidden',
-      timer: ''
+      tbList: [], // 存放数据的表格
+      tableHeight: 'calc(100% - 10px)', // 表格高度
+      viewLoading: 'hidden', // 加载标志可见性
+      timer: null // 定时器
     }
   },
-  mounted() {
-    this.timer = setInterval(this.getList, 30000)
-    this.getList()
-  },
-  destroyed() {
-    clearInterval(this.timer)
-    this.timer = null
-  },
   methods: {
-    getList() {
+    searchSth() { // 查询表格
       this.viewLoading = 'visible' // 显示加载标志
-      this.$axios.get('/macAirList')
-      .then(res => {
-        this.list = res.data.data
-        for(var i=0;i<this.list.length;i++) {
-          this.list[i].SO2 = parseFloat(this.list[i].SO2).toFixed(2)
-          this.list[i].NO2 = parseFloat(this.list[i].NO2).toFixed(2)
-          this.list[i].PM10 = parseFloat(this.list[i].PM10).toFixed(2)
-          this.list[i].PM25 = parseFloat(this.list[i].PM25).toFixed(2)
-          // 根据风速值选择不同强度的风
-          if(this.list[i].speed >= 10) { this.list[i].speed = this.list[i].speed + '（强风）' }
-          else if(this.list[i].speed >= 6) { this.list[i].speed = this.list[i].speed + '（和风）' }
-          else if(this.list[i].speed > 0) { this.list[i].speed = this.list[i].speed + '（微风）' }
-          else { this.list[i].speed = this.list[i].speed + '（无风）' }
-          // 根据风向值选择不同的风向
-          if(this.list[i].direct >= 348) { this.list[i].direct = this.list[i].direct + '（北风）' }
-          else if(this.list[i].direct >= 282) { this.list[i].direct = this.list[i].direct + '（西北风）' }
-          else if(this.list[i].direct >= 258) { this.list[i].direct = this.list[i].direct + '（西风）' }
-          else if(this.list[i].direct >= 192) { this.list[i].direct = this.list[i].direct + '（西南风）' }
-          else if(this.list[i].direct >= 168) { this.list[i].direct = this.list[i].direct + '（南风）' }
-          else if(this.list[i].direct >= 102) { this.list[i].direct = this.list[i].direct + '（东南风）' }
-          else if(this.list[i].direct >= 78) { this.list[i].direct = this.list[i].direct + '（东风）' }
-          else if(this.list[i].direct >= 12) { this.list[i].direct = this.list[i].direct + '（东北风）' }
-          else { this.list[i].direct = this.list[i].direct + '（北风）' }
+      this.$axios
+      .get('/macAirList') // 查询空气数据并进行格式调整
+      .then(mal => {
+        if (mal.data.successful && mal.data.data.length) {
+          this.tbList = mal.data.data // 所查数据
+          for (let i = 0; i < this.tbList.length; i++) { // 对每条记录都要进行格式调整
+            // 气体浓度值保留两位小数
+            this.tbList[i].SO2 = parseFloat(this.tbList[i].SO2).toFixed(2)
+            this.tbList[i].NO2 = parseFloat(this.tbList[i].NO2).toFixed(2)
+            this.tbList[i].PM10 = parseFloat(this.tbList[i].PM10).toFixed(2)
+            this.tbList[i].PM25 = parseFloat(this.tbList[i].PM25).toFixed(2)
+            // 根据风速值选择不同强度的风
+            if (this.tbList[i].speed >= 10) {
+              this.tbList[i].speed = this.tbList[i].speed + '（强风）'
+            } else if (this.tbList[i].speed >= 6) {
+              this.tbList[i].speed = this.tbList[i].speed + '（和风）'
+            } else if (this.tbList[i].speed > 0) {
+              this.tbList[i].speed = this.tbList[i].speed + '（微风）'
+            } else {
+              this.tbList[i].speed = this.tbList[i].speed + '（无风）'
+            }
+            // 根据风向值选择不同的风向
+            if (this.tbList[i].direct >= 348) {
+              this.tbList[i].direct = this.tbList[i].direct + '（北风）'
+            } else if (this.tbList[i].direct >= 282) {
+              this.tbList[i].direct = this.tbList[i].direct + '（西北风）'
+            } else if (this.tbList[i].direct >= 258) {
+              this.tbList[i].direct = this.tbList[i].direct + '（西风）'
+            } else if (this.tbList[i].direct >= 192) {
+              this.tbList[i].direct = this.tbList[i].direct + '（西南风）'
+            } else if (this.tbList[i].direct >= 168) {
+              this.tbList[i].direct = this.tbList[i].direct + '（南风）'
+            } else if (this.tbList[i].direct >= 102) {
+              this.tbList[i].direct = this.tbList[i].direct + '（东南风）'
+            } else if (this.tbList[i].direct >= 78) {
+              this.tbList[i].direct = this.tbList[i].direct + '（东风）'
+            } else if (this.tbList[i].direct >= 12) {
+              this.tbList[i].direct = this.tbList[i].direct + '（东北风）'
+            } else {
+              this.tbList[i].direct = this.tbList[i].direct + '（北风）'
+            }
+          }
+        } else {
+          this.tbList = []
         }
         this.viewLoading = 'hidden' // 隐藏加载标志
       })
@@ -89,16 +101,31 @@ export default {
         console.log(error)
       })
     },
+    // 根据情况改变表格记录背景颜色
+    tableRowClassName({row, rowIndex}) {
+      if (new Date().getTime() - Date.parse(row.beginTime) > 1800000) {
+        return 'warning-row'
+      }
+      return ''
+    },
     // 导出为excel
     exportExcel(e) {
       e.currentTarget.blur()
-      const th = ['mac地址','监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
-      const filterVal = ['macAddress','beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
-      const data = this.list.map(v => filterVal.map(k => v[k]))
-      const fileName = '实时空气数据' + this.$moment().format("YYYY-MM-DD HH:mm:ss")
+      const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
+      const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
+      const data = this.tbList.map(v => filterVal.map(k => v[k]))
+      const fileName = '实时空气数据' + this.$moment().format('YYYY-MM-DD HH:mm:ss')
       const [fileType, sheetName] = ['xlsx', '实时空气数据']
       this.$toExcel({th, data, fileName, fileType, sheetName})
     }
+  },
+  mounted() {
+    this.timer = setInterval(this.searchSth, 30000) // 周期查询表格
+    this.searchSth() // 首次需要手动查询
+  },
+  destroyed() {
+    clearInterval(this.timer)
+    this.timer = null
   }
 }
 </script>
@@ -125,7 +152,7 @@ export default {
   height: calc(100% - 70px);
   box-shadow: 0 0 2px 1px #ddd;
 }
-.filter_container {
+.container-title {
   /* margin-top: 10px; */
   font-size: 15px;
   border-bottom: 1px solid #ccc;
@@ -134,16 +161,16 @@ export default {
 .el-select {
   padding-right: 15px;
 }
-.table-container {
+.container-table {
   position: relative;
   margin-top: 15px;
   /* height: 460px; */
   height: calc(100% - 40px);
 }
-.filter_container span {
+.container-title span {
   font-size: 18px;
   font-weight: bold;
-  color:black;
+  color: black;
 }
 #detailData {
   width: 100%;

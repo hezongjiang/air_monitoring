@@ -2,16 +2,15 @@
 <template>
   <div class="container-main">
     <div class="winmain" >
-      <div class="filter_title">
+      <div class="title-filter">
         <span>原始数据下载</span>
       </div>
-      <!--筛选条件-->
-      <div class="filter_container">
+      <div class="container-filter">
         <span>时间</span>
         <el-date-picker
           style="width:250px;margin-right:20px"
           size="mini"
-          v-model="value1"
+          v-model="beginEndT"
           value-format="yyyy-MM-dd"
           type="daterange"
           align="left"
@@ -23,20 +22,19 @@
           :editable="false">
         </el-date-picker>
         <span>站点</span>
-        <el-select size="mini" v-model="value2" placeholder="请选择站点">
+        <el-select size="mini" v-model="addrChoose" placeholder="请选择站点">
           <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
-        <el-button type="primary" size="mini" v-on:click="getTable"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
+        <el-button type="primary" size="mini" v-on:click="searchSth"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
         <el-button type="success" plain v-on:click="exportExcel($event)" size="mini" style="float: right"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
       </div>
-      <!--表格-->
-      <div class="table-container">
+      <div class="container-table">
         <el-table
           id="table"
           :row-style="{height:'35px'}"
           :cell-style="{ padding:0, fontSize:'12px'}"
           :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
-          :data="list.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
+          :data="tbList.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
           stripe
           highlight-current-row
           border
@@ -57,7 +55,6 @@
         <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
       </div>
     </div>
-    <!--分页器-->
     <el-pagination
       align="center"
       @size-change='handleSizeChange'
@@ -65,7 +62,7 @@
       :current-page="currentPage"
       :page-size="pageSize"
       layout="total, sizes, prev, pager, next"
-      :total="list.length">
+      :total="tbList.length">
     </el-pagination>
   </div>
 </template>
@@ -75,7 +72,7 @@ export default {
   name: 'OriginalData',
   data() {
     return {
-      pickerOptions: {
+      pickerOptions: { // 日期快捷选项
         shortcuts: [{
           text: '最近一周',
           onClick(picker) {
@@ -102,128 +99,121 @@ export default {
           }
         }]
       },
-      addrOptions: [],
-      value1: '',
-      value2: '吉利社区',
-      list: [],
-      currentPage: 1,
-      pageSize: 20,
-      viewLoading: 'hidden',
-      tableHeight: 'calc(100% - 10px)',
-      siteMap: { // mac地址与站点名称的对应关系
-        '龙湾大桥': '440604:009:AAJ',
-        '罗南村委': '440604:002:AAC',
-        '绿岛湖': '440604:000:AAA',
-        '龙津老年活动中心': '440604:006:AAG',
-        '南庄三中': '440604:007:AAH',
-        '吉利小学': '440604:004:AAE',
-        '罗格村委': '440604:005:AAF',
-        '吉利社区': '440604:008:AAI',
-        '南庄实验中学': '440604:001:AAB',
-        '南庄水利所': '440604:003:AAD',
-        '南庄污水处理厂': '440604:010:AAK'
-      }
+      addrOptions: [], // 站点选项
+      addrChoose: '', // 站点选择
+      addrChooseState: '', // 站点选择状态，主要用于excel导出，因为这时站点选择器可能人为动过
+      beginEndT: [], // 开始结束日期
+      beginEndTState: [], // 开始结束日期状态，主要用于excel导出，因为这时日期选择器可能人为动过
+      N: 1, // 默认显示N天前至当天的信息
+      tbList: [], // 表格数据
+      currentPage: 1, // 当前页
+      pageSize: 20, // 单页数
+      viewLoading: 'hidden', // 加载标志可见性
+      tableHeight: 'calc(100% - 10px)' // 表格高度
     }
-  },
-  created () {
-    if(document.body.clientWidth<891) {
-      this.tableHeight="calc(100% - 30px)"
-    }
-    console.log(this.tableHeight)
-  },
-  mounted() {
-    this.getAddr() // 获取站点选择下拉列表的选项
-    this.defaultDate() // 默认日期选择昨天零点到今天
-    this.getTable() // 默认获取昨天零点到今天的数据
   },
   methods: {
-    getAddr() { // 获取下拉列表选项
-      this.$axios.get('/macAirDeviceList')
-      .then(res => {
-        let addrArray = res.data.data
-        for (let i = 0; i < addrArray.length; i++) {
-          this.addrOptions.push({
-            value: addrArray[i].remark,
-            label: addrArray[i].remark
-          })
+    searchSth() { // 查询数据
+      this.currentPage = 1 // 每次查询都回到第一页
+      this.viewLoading = 'visible' // 显示加载标志
+      this.addrChooseState = this.addrChoose // 主要用于excel导出，因为这时站点选择器可能人为动过
+      this.beginEndTState = this.beginEndT // 主要用于excel导出，因为这时日期选择器可能人为动过
+      this.$axios
+      .get('/macAllHistory', {
+        params: {
+          macAddress: this.addrChoose,
+          beginTime: this.beginEndT[0],
+          endTime: this.beginEndT[1]
         }
       })
-      .catch(error => {
-        console.log(error)
-      })
-    },
-    defaultDate() {
-      let end = new Date()
-      let start = new Date()
-      start.setTime(end.getTime() - 3600 * 1000 * 24)
-      start = start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate()
-      end = end.getFullYear() + '-' + (end.getMonth() + 1) + '-' + end.getDate()
-      this.value1 = [start, end]
-    },
-    // 分页器
-    handleSizeChange(val) {
-      this.pageSize = val
-    },
-    handleCurrentChange(val) {
-      this.currentPage = val
-    },
-    // 导出为excel
-    exportExcel(e) {
-      e.currentTarget.blur()
-      const th = ['mac地址','监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
-      const filterVal = ['macAddress','beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
-      const data = this.list.map(v => filterVal.map(k => v[k]))
-      const fileName = this.value1[0] + '至' + this.value1[1] + this.value2 + '原始数据下载'
-      const [fileType, sheetName] = ['xlsx', '原始数据下载']
-      this.$toExcel({th, data, fileName, fileType, sheetName})
-    },
-    // 获取表格数据后并筛选
-    getTable() {
-      let date = this.value1 // 日期
-      let filter = this.value2 // 站点
-      // 定义字典
-      this.list = []
-      this.currentPage = 1
-      this.viewLoading='visible'
-      this.$axios.get('/macAllHistory',
-        {params: {
-            macAddress: this.siteMap[this.value2],
-            beginTime: date[0],
-            endTime: date[1],
-          }}
-      ).then(res => {
-        if (res.data.successful) {
-          this.list = res.data.data
-          for(var i=0;i<this.list.length;i++) {
-          this.list[i].SO2 = parseFloat(this.list[i].SO2).toFixed(2)
-          this.list[i].NO2 = parseFloat(this.list[i].NO2).toFixed(2)
-          this.list[i].PM10 = parseFloat(this.list[i].PM10).toFixed(2)
-          this.list[i].PM25 = parseFloat(this.list[i].PM25).toFixed(2)
-          // 根据风速值选择不同强度的风
-          if(this.list[i].speed >= 10) { this.list[i].speed = this.list[i].speed + '（强风）' }
-          else if(this.list[i].speed >= 6) { this.list[i].speed = this.list[i].speed + '（和风）' }
-          else if(this.list[i].speed > 0) { this.list[i].speed = this.list[i].speed + '（微风）' }
-          else { this.list[i].speed = this.list[i].speed + '（无风）' }
-          // 根据风向值选择不同的风向
-          if(this.list[i].direct >= 348) { this.list[i].direct = this.list[i].direct + '（北风）' }
-          else if(this.list[i].direct >= 282) { this.list[i].direct = this.list[i].direct + '（西北风）' }
-          else if(this.list[i].direct >= 258) { this.list[i].direct = this.list[i].direct + '（西风）' }
-          else if(this.list[i].direct >= 192) { this.list[i].direct = this.list[i].direct + '（西南风）' }
-          else if(this.list[i].direct >= 168) { this.list[i].direct = this.list[i].direct + '（南风）' }
-          else if(this.list[i].direct >= 102) { this.list[i].direct = this.list[i].direct + '（东南风）' }
-          else if(this.list[i].direct >= 78) { this.list[i].direct = this.list[i].direct + '（东风）' }
-          else if(this.list[i].direct >= 12) { this.list[i].direct = this.list[i].direct + '（东北风）' }
-          else { this.list[i].direct = this.list[i].direct + '（北风）' }
-        }
-          this.viewLoading='hidden'
+      .then(mah => {
+        if (mah.data.successful && mah.data.data.length) {
+          this.tbList = mah.data.data
+          for (let i = 0; i < this.tbList.length; i++) {
+            // 气体浓度值保留两位小数
+            this.tbList[i].SO2 = parseFloat(this.tbList[i].SO2).toFixed(2)
+            this.tbList[i].NO2 = parseFloat(this.tbList[i].NO2).toFixed(2)
+            this.tbList[i].PM10 = parseFloat(this.tbList[i].PM10).toFixed(2)
+            this.tbList[i].PM25 = parseFloat(this.tbList[i].PM25).toFixed(2)
+            // 根据风速值选择不同强度的风
+            if (this.tbList[i].speed >= 10) {
+              this.tbList[i].speed = this.tbList[i].speed + '（强风）'
+            } else if (this.tbList[i].speed >= 6) {
+              this.tbList[i].speed = this.tbList[i].speed + '（和风）'
+            } else if (this.tbList[i].speed > 0) {
+              this.tbList[i].speed = this.tbList[i].speed + '（微风）'
+            } else {
+              this.tbList[i].speed = this.tbList[i].speed + '（无风）'
+            }
+            // 根据风向值选择不同的风向
+            if (this.tbList[i].direct >= 348) {
+              this.tbList[i].direct = this.tbList[i].direct + '（北风）'
+            } else if (this.tbList[i].direct >= 282) {
+              this.tbList[i].direct = this.tbList[i].direct + '（西北风）'
+            } else if (this.tbList[i].direct >= 258) {
+              this.tbList[i].direct = this.tbList[i].direct + '（西风）'
+            } else if (this.tbList[i].direct >= 192) {
+              this.tbList[i].direct = this.tbList[i].direct + '（西南风）'
+            } else if (this.tbList[i].direct >= 168) {
+              this.tbList[i].direct = this.tbList[i].direct + '（南风）'
+            } else if (this.tbList[i].direct >= 102) {
+              this.tbList[i].direct = this.tbList[i].direct + '（东南风）'
+            } else if (this.tbList[i].direct >= 78) {
+              this.tbList[i].direct = this.tbList[i].direct + '（东风）'
+            } else if (this.tbList[i].direct >= 12) {
+              this.tbList[i].direct = this.tbList[i].direct + '（东北风）'
+            } else {
+              this.tbList[i].direct = this.tbList[i].direct + '（北风）'
+            }
+          }
         } else {
-          console.log('fail')
-          this.viewLoading='hidden'
+          this.tbList = []
         }
+        this.viewLoading = 'hidden'
       }).catch(error => {
         console.log(error)
       })
+    },
+    handleSizeChange(val) { // 分页器
+      this.pageSize = val
+    },
+    handleCurrentChange(val) { // 分页器
+      this.currentPage = val
+    },
+    exportExcel(e) { // 导出为excel
+      e.currentTarget.blur()
+      const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
+      const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
+      const data = this.tbList.map(v => filterVal.map(k => v[k]))
+      const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.addrChooseState + '原始数据下载'
+      const [fileType, sheetName] = ['xlsx', '原始数据下载']
+      this.$toExcel({th, data, fileName, fileType, sheetName})
     }
+  },
+  mounted() {
+    this.viewLoading = 'visible' // 因为初次自动查询在axios回调里有等待时间，所以这里先手动显示加载标志
+    // 开始日期和结束日期初始化
+    let t1 = this.$moment().subtract(this.N, 'days').format('YYYY-MM-DD')
+    let t2 = this.$moment().format('YYYY-MM-DD')
+    this.beginEndT = [t1, t2]
+    // 其它初始化
+    this.$axios
+    .get('/macAirDeviceList')
+    .then(madl => {
+      if (madl.data.successful && madl.data.data.length) {
+        this.addrChoose = madl.data.data[0].macAddress // 初始化站点选择
+        for (let i = 0; i < madl.data.data.length; i++) { // 初始化站点选项
+          this.addrOptions.push({
+            value: madl.data.data[i].macAddress,
+            label: madl.data.data[i].remark
+          })
+        }
+        this.searchSth() // 查询数据
+      }
+    })
+    .catch(error => {
+      console.log(error)
+    })
   }
 }
 </script>
@@ -250,31 +240,31 @@ export default {
   height: calc(100% - 105px);
   box-shadow: 0 0 2px 1px #ddd;
 }
-.filter_title {
+.title-filter {
   border-bottom: 1px solid #ccc;
   padding-bottom: 10px;
 }
-.filter_title i {
+.title-filter i {
   font-size: 25px;
   padding-right: 10px;
 }
-.filter_title span {
+.title-filter span {
   font-weight: bold;
   font-size: 18px;
   color: black;
 }
-.filter_container {
+.container-filter {
   margin-top: 10px;
   font-size: 15px;
 }
-.filter_container span {
+.container-filter span {
   padding-right: 10px;
 }
 .el-select {
   padding-right: 20px;
   width: 150px;
 }
-.table-container {
+.container-table {
   position: relative;
   margin-top: 10px;
   /* height: 460px; */

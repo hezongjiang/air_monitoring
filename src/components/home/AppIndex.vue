@@ -1,14 +1,18 @@
 <!--首页-->
 <template>
-  <div class="container">
+  <div class="container-main">
     <div class="navleft">
       <div class="li-head">站点总数：{{ countSite }}个</div>
       <div class="li-head1">
-        <span style="font-size:15px;font-weight:normal;color:rgb(7,193,96)">在线：</span>
-        <span style="font-size:15px;font-weight:normal;color:white;background-color:rgb(7,193,96);padding:0 4px">{{ countOL }}个</span><br/>
-        <span style="font-size:15px;font-weight:normal;color:#999">离线：</span>
-        <span style="font-size:15px;font-weight:normal;color:white;background-color:#999;padding:0 4px">{{ countSite - countOL }}个</span>
+        <span style="color:rgb(7,193,96)">在线：</span>
+        <span style="color:white;background-color:rgb(7,193,96);padding:0 4px;border-radius: 4px;">{{ countOL }}个</span>
         <br/>
+        <span style="color:#999">离线：</span>
+        <span style="color:white;background-color:#999;padding:0 4px;border-radius: 4px;">{{ countSite - countOL }}个</span>
+        <br/>
+        <span style="font-size:14px;font-weight:bold;">上次更新时间：</span>
+        <br/>
+        <span style="font-size:14px;">{{ refreshTime }}</span>
       </div>
       <div class="li-head2">
         站点列表
@@ -90,6 +94,8 @@ export default {
       charts: '', // 用于实例化24小时曲线图表
       viewInfo: 'hidden', // 悬浮窗口可见性
       viewLoading: 'hidden', // 加载标志可见性
+      timer: null, // 定时器
+      refreshTime: '', // 更新时间
       optionAir: { // 24小时曲线图配置
         title: {
           text: '24小时气体实时曲线',
@@ -152,9 +158,16 @@ export default {
     }
   },
   methods: {
-    focusInfo(addr, remark) { // 展示选定站点的信息
-      let that = this // this拷贝，防止后续因层级关系无法调用this
+    focusInfo(addr, remark) {
+      let that = this
       this.viewLoading = 'visible' // 显示加载标志
+      this.focusInfo1(addr, remark)
+      clearInterval(this.timer)
+      this.timer = null
+      this.timer = setInterval(function() { that.focusInfo1(addr, remark) }, 30000)
+    },
+    focusInfo1(addr, remark) { // 展示选定站点的信息
+      let that = this // this拷贝，防止后续因层级关系无法调用this
       this.termInfo.macAddress = addr // 提前赋值，使左侧站点列表选中反应达到最快，增加用户体验
       this.$axios
       .all([this.$axios.get('/' + addr + '/macAirDeviceInfo'), // 获取选定站点的终端信息
@@ -307,8 +320,37 @@ export default {
         that.charts.setOption(that.optionAir) // 作24小时曲线图
         that.viewInfo = 'visible' // 显示悬浮窗口
         that.viewLoading = 'hidden' // 隐藏加载标志
+        that.refreshTime = that.$moment().format('YYYY-MM-DD HH:mm:ss')
       }))
-      .catch(function (error) { // 请求失败处理
+      .catch(function(error) { // 请求失败处理
+        console.log(error)
+      })
+    },
+    termStateRefresh() { // 站点在线状态刷新
+      this.$axios
+      .get('/macAirList') // 获取所有站点的终端信息
+      .then(mal => {
+        if (mal.data.successful && mal.data.data.length) {
+          this.countSite = mal.data.data.length // 站点总数
+          this.countOL = 0
+          for (let i = 0; i < mal.data.data.length; i++) { // 站点在线状态
+            if (parseInt(Date.now() / 1000) - this.$moment(mal.data.data[i].beginTime).unix() < 1800) {
+              this.termStateObj[mal.data.data[i].macAddress] = '在线'
+              this.countOL++
+            } else {
+              this.termStateObj[mal.data.data[i].macAddress] = '离线'
+            }
+          }
+        } else {
+          this.countSite = 0 // 站点总数
+          this.countOL = 0 // 在线站点数
+          for (let key in this.termStateObj) {
+            this.termStateObj[key] = '离线'
+          }
+        }
+        this.refreshTime = this.$moment().format('YYYY-MM-DD HH:mm:ss')
+      })
+      .catch(function(error) {
         console.log(error)
       })
     },
@@ -339,6 +381,9 @@ export default {
     closeSuspend() { // 关闭悬浮窗口
       this.viewInfo = 'hidden' // 隐藏悬浮窗口
       this.termInfo.macAddress = '' // 去掉左侧列表选中标志
+      clearInterval(this.timer)
+      this.timer = null
+      this.timer = setInterval(this.termStateRefresh, 60000)
     }
   },
   mounted () {
@@ -379,14 +424,20 @@ export default {
           }
         }
       }
+      that.refreshTime = that.$moment().format('YYYY-MM-DD HH:mm:ss')
       // 隐藏加载标志
       that.viewLoading = 'hidden'
+      that.timer = setInterval(that.termStateRefresh, 60000)
     }))
     .catch(function (error) { // 请求失败处理
       console.log(error)
     })
     // 创建charts图表实例
     this.charts = this.$echarts.init(document.getElementById('main'))
+  },
+  destroyed() {
+    clearInterval(this.timer)
+    this.timer = null
   }
 }
 </script>
@@ -397,7 +448,7 @@ export default {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
-.container {
+.container-main {
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -405,23 +456,24 @@ export default {
   position: absolute;
 }
 .navleft {
-  width: 13%;
+  /*width: 13%;*/
+  width: 200px;
   float: left;
-  padding:10px 0 10px 10px;
+  padding: 10px 5px 10px 10px;
   /* height: 605px; */
   height: calc(100% - 50px);
   overflow-y: auto;
 }
 .navleft ul {
-  background-color:white;
+  background-color: white;
   border-radius: 0 0 4px 4px;
   list-style-type: none;
   padding: 0;
   margin: 0;
   /* text-align: center; */
-  border-bottom:2px solid #eee;
-  border-left:2px solid #eee;
-  border-right:2px solid #eee;
+  border-bottom: 2px solid #eee;
+  border-left: 2px solid #eee;
+  border-right: 2px solid #eee;
 }
 .navleft ul li {
   padding: 5px 0;
@@ -430,20 +482,20 @@ export default {
   display: block;
   padding: 4px 0;
   font-size: 15px;
-  color:#999;
+  color: #999;
   text-decoration: none;
 }
 .navleft ul a:hover {
-  color:#666;
+  color: #666;
 }
 .navleft .active a {
   border-left:4px solid rgb(253,216,69);
-  color:#000;
+  color: #000;
   font-weight: bold;
 }
 .navleft a:hover {
   border-left:4px solid rgb(253,216,69);
-  color:#000;
+  color: #000;
   font-weight: bold;
 }
 .li-head {
@@ -454,16 +506,17 @@ export default {
   color: rgb(40,40,40);
   /* border-bottom: 1px solid #ccc; */
   background-color: white;
-  border-top:2px solid #eee;
-  border-left:2px solid #eee;
-  border-right:2px solid #eee;
+  border-top: 2px solid #eee;
+  border-left: 2px solid #eee;
+  border-right: 2px solid #eee;
 }
 .li-head1 {
+  font-size: 15px;
   padding: 10px 0 10px 10px;
   border-bottom: 1px solid #eee;
   background-color: white;
-  border-left:2px solid #eee;
-  border-right:2px solid #eee;
+  border-left: 2px solid #eee;
+  border-right: 2px solid #eee;
 }
 .li-head2 {
   font-size: 17px;
@@ -471,20 +524,21 @@ export default {
   padding: 10px 0 6px 10px;
   color: rgb(40,40,40);
   background-color: white;
-  border-left:2px solid #eee;
-  border-right:2px solid #eee;
+  border-left: 2px solid #eee;
+  border-right: 2px solid #eee;
 }
 .bdmap {
-  width: 87%;
+  /*width: 87%;*/
+  width: calc(100% - 200px);
   height: calc(100% - 50px);
   /* height: 100%; */
-  padding: 10px;
+  padding: 10px 10px 10px 5px;
   float: left;
   position: relative;
 }
 #allmap {
   border-radius: 4px;
-  width: calc(100% - 20px);
+  width: calc(100% - 15px);
 	height: calc(100% - 20px);
 	margin: 0;
 	position: absolute;
@@ -495,7 +549,7 @@ export default {
   left: 14%;
   top: calc(50% - 200px);
   z-index: 1;
-  background-color:rgba(255,255,255,0.9);
+  background-color: rgba(255,255,255,0.9);
   padding: 12px 16px;
   border-radius: 4px;
   width: 73%;
@@ -509,7 +563,7 @@ export default {
   text-align: left;
   font-size: 18px;
   font-weight: bold;
-  color:black;
+  color: black;
 }
 .winchild1 .state-detail .view-detail {
   font-size: 15px;
@@ -520,7 +574,7 @@ export default {
   font-weight: bold;
   text-align: left;
   font-size: 15px;
-  color:#999;
+  color: #999;
 }
 .winchild1 .air-type .el-col span {
   font-size: 12px;
@@ -529,6 +583,7 @@ export default {
   font-weight: bold;
   text-align: left;
   font-size: 18px;
+  color: black;
 }
 .winchild1 .other-item .el-col {
   font-weight: bold;
@@ -543,17 +598,17 @@ export default {
   font-weight: bold;
   text-align: left;
   font-size: 18px;
-  color:black;
+  color: black;
 }
 .el-col a {
   color: white;
-  background-color:#ffdf4f;
-  padding:6px 6px 6px 12px;
+  background-color: #ffdf4f;
+  padding: 6px 6px 6px 12px;
   text-decoration: none;
   border-radius: 4px;
 }
 .el-col a:hover {
-  background-color:#ffef6f;
+  background-color: #ffef6f;
 }
 #main {
   width: 73%;
@@ -563,7 +618,7 @@ export default {
   left: 14%;
   padding: 12px 12px;
   z-index: 1;
-  background-color:rgba(255,255,255,0.9);
+  background-color: rgba(255,255,255,0.9);
   border-radius: 4px;
   box-shadow: 0 0 2px 1px #ddd;
 }
@@ -576,9 +631,9 @@ export default {
 .air-indicator {
   position: absolute;
   bottom: 10px;
-  left: 10px;
+  left: 5px;
   z-index: 0;
-  background-color:white;
+  background-color: white;
   padding: 3px 3px 0 3px;
   border-radius: 4px;
   box-shadow: 0 0 2px 1px #ddd;

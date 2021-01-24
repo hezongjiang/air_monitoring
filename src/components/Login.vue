@@ -1,8 +1,8 @@
 <template>
     <!--登录界面-->
 
-      <el-form class="login-container" status-icon :rules="loginRules" :model="loginForm" ref="loginForm">
-        <h2 class="login-title">大气质量智能监控平台</h2>
+      <el-form class="container-login" status-icon :rules="loginRules" :model="loginForm" ref="loginForm">
+        <h2 class="title-login">大气质量智能监控平台</h2>
         <div class='tips' :class="displaySign===0?'':goneClass">&nbsp;</div>
         <div class="tips" :class="displaySign===1?'':goneClass">{{tip1}}</div>
         <div class="tips" :class="displaySign===2?'':goneClass">{{tip2}}</div>
@@ -129,7 +129,7 @@ export default {
 </script>
 
 <style scoped>
-.login-container {
+.container-login {
   margin: 90px auto;
   width: 300px;
   padding: 10px 40px;
@@ -137,7 +137,7 @@ export default {
   box-shadow: 0 10px 20px rgba(0,0,0,0.05);
   background: white;
 }
-.login-title {
+.title-login {
   text-align: center;
 }
 .tips {
@@ -150,11 +150,11 @@ export default {
   display: none;
 }
 .el-input__inner {
-  background-color:blue !important;
+  background-color: blue !important;
 }
 .identifybox {
   display: flex;
   justify-content: space-between;
-  margin-top:7px;
+  margin-top: 7px;
 }
 </style>

@@ -2,16 +2,15 @@
 <template>
   <div class="container-main">
     <div class="winmain" >
-      <div class="filter_title">
+      <div class="title-filter">
         <span>异常告警</span>
       </div>
-      <!--筛选条件-->
-      <div class="filter_container">
+      <div class="container-filter">
         <span>时间</span>
         <el-date-picker
           style="width:250px;margin-right:20px"
           size="mini"
-          v-model="value1"
+          v-model="beginEndT"
           value-format="yyyy-MM-dd"
           type="daterange"
           align="left"
@@ -22,21 +21,20 @@
           :clearable="false"
           :editable="false">
         </el-date-picker>
-        <span>站点</span>
-        <el-select size="mini" v-model="value2" clearable placeholder="请选择站点">
-          <el-option v-for="item in addrOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+        <span>气体类型</span>
+        <el-select size="mini" v-model="airChoose" placeholder="请选择气体类型">
+          <el-option v-for="item in airOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
         </el-select>
-        <el-button type="primary" size="mini" v-on:click="getTable"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
+        <el-button type="primary" size="mini" v-on:click="searchSth"><i class="fa fa-search" aria-hidden="true"></i>&nbsp;查询</el-button>
         <el-button type="success" plain v-on:click="exportExcel($event)" size="mini" style="float: right"><i class="fa fa-download"></i>&nbsp;导出Excel</el-button>
       </div>
-      <!--表格-->
-      <div class="table-container">
+      <div class="container-table">
         <el-table
           id="table"
           :row-style="{height:'35px'}"
           :cell-style="{ padding:0, fontSize:'12px'}"
           :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
-          :data="filtedData.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
+          :data="tbList.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
           stripe
           highlight-current-row
           border
@@ -52,7 +50,6 @@
         <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
       </div>
     </div>
-    <!--分页器-->
     <el-pagination
       align="center"
       @size-change='handleSizeChange'
@@ -60,7 +57,7 @@
       :current-page="currentPage"
       :page-size="pageSize"
       layout="total, sizes, prev, pager, next"
-      :total="filtedData.length">
+      :total="tbList.length">
     </el-pagination>
   </div>
 </template>
@@ -70,7 +67,7 @@ export default {
   name: 'Alarm',
   data() {
     return {
-      pickerOptions: {
+      pickerOptions: { // 日期快捷选项
         shortcuts: [{
           text: '最近一周',
           onClick(picker) {
@@ -97,133 +94,99 @@ export default {
           }
         }]
       },
-      addrOptions: [],
-      value1: '',
-      value2: '',
-      tableData: [],
-      filtedData: [],
-      currentPage: 1,
-      pageSize: 20,
-      viewLoading: 'hidden',
-      tableHeight: 'calc(100% - 10px)'
+      airOptions: [{ // 气体选项
+        value: 1,
+        label: 'SO2'
+      }, {
+        value: 2,
+        label: 'NO2'
+      }, {
+        value: 3,
+        label: 'PM10'
+      }, {
+        value: 4,
+        label: 'PM2.5'
+      }, {
+        value: 5,
+        label: '温度'
+      }, {
+        value: 6,
+        label: '湿度'
+      }],
+      airChoose: 1, // 气体选择
+      airChooseState: 1, // 气体选择状态
+      beginEndT: '', // 开始结束时间
+      beginEndTState: [], // 开始结束日期状态，主要用于excel导出，因为这时日期选择器可能人为动过
+      N: 1, // 默认显示N天前至当天的信息
+      tbList: [], // 表格数据
+      currentPage: 1, // 当前页
+      pageSize: 20, // 单页数
+      viewLoading: 'hidden', // 加载标志可见性
+      tableHeight: 'calc(100% - 10px)', // 表格高度
+      airTypeOptions: { // 气体类型选项
+        1: 'SO2',
+        2: 'NO2',
+        3: 'PM10',
+        4: 'PM2.5',
+        5: '温度',
+        6: '湿度'
+      },
+      topTypeOptions: { // 异常类型选项
+        1: '异常突变',
+        2: '正常突变'
+      }
     }
-  },
-  created () {
-    if(document.body.clientWidth<891) {
-      this.tableHeight="calc(100% - 30px)"
-    }
-    console.log(this.tableHeight)
-  },
-  mounted() {
-    this.getAddr() // 获取站点选择下拉列表的选项
-    this.defaultDate() // 默认日期选择昨天零点到今天
-    this.getTable() // 默认获取昨天零点到今天的数据
   },
   methods: {
-    getAddr() { // 获取下拉列表选项
-      this.$axios.get('/macAirDeviceList')
-      .then(res => {
-        let addrArray = res.data.data
-        for (let i = 0; i < addrArray.length; i++) {
-          this.addrOptions.push({
-            value: i + 1,
-            label: addrArray[i].remark
-          })
+    searchSth() {
+      this.currentPage = 1 // 每次查询都回到第一页
+      this.viewLoading = 'visible' // 显示加载标志
+      this.airChooseState = this.airChoose // 主要用于excel导出，因为这时气体选择器可能人为动过
+      this.beginEndTState = this.beginEndT // 主要用于excel导出，因为这时日期选择器可能人为动过
+      this.$axios
+      .get('/topAirInfo', {
+        params: {
+          beginTime: this.beginEndT[0],
+          endTime: this.beginEndT[1],
+          airType: this.airChoose
+        }}
+      ).then(tai => {
+        if (tai.data.successful && tai.data.data.length) {
+          this.tbList = tai.data.data
+          for (let i = 0; i < this.tbList.length; i++) {
+            this.tbList[i].airType = this.airTypeOptions[this.tbList[i].airType]
+            this.tbList[i].topType = this.topTypeOptions[this.tbList[i].topType]
+          }
+        } else {
+          this.tbList = []
         }
-      })
-      .catch(error => {
+        this.viewLoading = 'hidden' // 隐藏加载标志
+      }).catch(error => {
         console.log(error)
       })
     },
-    defaultDate() {
-      let end = new Date()
-      let start = new Date()
-      start.setTime(end.getTime() - 3600 * 1000 * 24)
-      start = start.getFullYear() + '-' + (start.getMonth() + 1) + '-' + start.getDate()
-      end = end.getFullYear() + '-' + (end.getMonth() + 1) + '-' + end.getDate()
-      this.value1 = [start, end]
-    },
-    // 分页器
-    handleSizeChange(val) {
+    handleSizeChange(val) { // 分页器
       this.pageSize = val
     },
-    handleCurrentChange(val) {
+    handleCurrentChange(val) { // 分页器
       this.currentPage = val
     },
-    // 导出为excel
-    exportExcel(e) {
+    exportExcel(e) { // 导出为excel
       e.currentTarget.blur()
       const th = ['站点名称', '告警时间', '气体类型', '气体值', '异常类型']
       const filterVal = ['macAddress', 'beginTime', 'airType', 'airValue', 'topType']
-      const data = this.filtedData.map(v => filterVal.map(k => v[k]))
-      const addr = (this.value2 === '') ? '所有站点' : this.addrOptions[this.value2 - 1].label
-      const fileName = this.value1[0] + '至' + this.value1[1] + addr + '告警'
+      const data = this.tbList.map(v => filterVal.map(k => v[k]))
+      const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.airChooseState + '告警'
       const [fileType, sheetName] = ['xlsx', '告警数据']
       this.$toExcel({th, data, fileName, fileType, sheetName})
-    },
-    // 获取表格数据后并筛选
-    getTable() {
-      let date = this.value1 // 日期
-      let filter = this.value2 // 站点
-      // 定义字典
-      const airTypeMap = {1: 'SO2', 2: 'NO2', 3: 'PM10', 4: 'PM2.5', 5: '温度', 6: '湿度'}
-      const topTypeMap = {1: '异常突变', 2: '正常突变'}
-      this.tableData = []
-      this.filtedData = []
-      this.currentPage = 1
-      this.viewLoading='visible'
-      for (let i = 1; i <= 6; i++) {
-        this.$axios.get('/topAirInfo',
-          {params: {
-              beginTime: date[0],
-              endTime: date[1],
-              airType: i
-            }}
-        ).then(res => {
-          if (res.data.successful) {
-            if (res.data.data.length !== 0) {
-              console.log('有数据')
-              let topData = res.data.data
-              // 获取该日期下的所有数据
-              for (let k = 0; k < topData.length; k++) {
-                this.tableData.push(
-                  {
-                    macAddress: topData[k].macAddress,
-                    beginTime: topData[k].beginTime,
-                    airType: airTypeMap[topData[k].airType],
-                    airValue: topData[k].airValue,
-                    topType: topTypeMap[topData[k].topType]
-                  }
-                )
-              }
-              // 根据下拉框选择的站点进行筛选
-              if (filter) {
-                this.filtedData = this.tableData.filter((item) => {
-                    return item.macAddress === this.addrOptions[filter - 1].label
-                  }
-                )
-                console.log(this.addrOptions[filter - 1].label)
-              } else {
-                this.filtedData = this.tableData
-              }
-              // 数组按告警时间倒序排列
-              this.filtedData.sort(function(a, b) {
-                return new Date(b.beginTime) - new Date(a.beginTime)
-              })
-            } else {
-              console.log('无数据')
-            }
-          } else {
-            console.log('fail')
-          }
-          if(i==6) {
-            this.viewLoading='hidden'
-          }
-        }).catch(error => {
-          console.log(error)
-        })
-      }
     }
+  },
+  mounted() {
+    // 开始日期和结束日期初始化
+    let t1 = this.$moment().subtract(this.N, 'days').format('YYYY-MM-DD')
+    let t2 = this.$moment().format('YYYY-MM-DD')
+    this.beginEndT = [t1, t2]
+    this.searchSth() // 查询数据
   }
 }
 </script>
@@ -250,31 +213,31 @@ export default {
   height: calc(100% - 105px);
   box-shadow: 0 0 2px 1px #ddd;
 }
-.filter_title {
+.title-filter {
   border-bottom: 1px solid #ccc;
   padding-bottom: 10px;
 }
-.filter_title i {
+.title-filter i {
   font-size: 25px;
   padding-right: 10px;
 }
-.filter_title span {
+.title-filter span {
   font-weight: bold;
   font-size: 18px;
   color: black;
 }
-.filter_container {
+.container-filter {
   margin-top: 10px;
   font-size: 15px;
 }
-.filter_container span {
+.container-filter span {
   padding-right: 10px;
 }
 .el-select {
   padding-right: 20px;
   width: 150px;
 }
-.table-container {
+.container-table {
   position: relative;
   margin-top: 10px;
   /* height: 460px; */
