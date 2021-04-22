@@ -439,8 +439,11 @@ export default {
   },
   created () {
     console.log(document.body.clientWidth)
-    if (document.body.clientWidth < 1069) { // 如果浏览器窗口比较小则元素会被挤压多出一层从而占用表格和图表的高度，需作适当让步
+    // 判断浏览器宽度是否小于阈值
+    if (document.body.clientWidth < 1069) {
+      // 修改表格高度
       this.tableHeight = 'calc(100% - 30px)'
+      // 修改图表高度
       this.chartHeight = 'calc(100% - 30px)'
     }
   },
@@ -474,7 +477,7 @@ export default {
       }
       if (madl.data.successful && madl.data.data.length) {
         that.liList = madl.data.data // 左侧栏列表
-        that.focusInfo(madl.data.data[0].macAddress, madl.data.data[0].remark)
+        that.focusInfo(that.$route.query.macAddress, that.$route.query.remark)
       }
       that.timer = setInterval(that.termStateRefresh, 60000)
     }))

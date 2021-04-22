@@ -26,7 +26,7 @@
       <div class="winchild1" :style="{visibility: viewInfo}">
         <el-row class="state-detail" type="flex" align="bottom">
           <el-col :span="16" class="term-state">{{ termInfo.remark }}<span :style="{color:(termState === '在线' ? '#11aa11' : '#999' )}" style="font-size:13px;color:green;font-weight:normal">&nbsp;&nbsp;{{ termState }}</span><span style="font-size:13px;color:#999;font-weight:normal">&nbsp;&nbsp;监测时间：{{ airInfo.beginTime }}</span></el-col>
-          <el-col :span="8" class="view-detail"><router-link to="/detail">查看详情<i class="el-icon-caret-right"></i></router-link></el-col>
+          <el-col :span="8" class="view-detail"><router-link :to="{path:'/detail',query:{macAddress:termInfo.macAddress,remark:termInfo.remark}}">查看详情<i class="el-icon-caret-right"></i></router-link></el-col>
         </el-row>
         <el-row class="air-type" type="flex" align="bottom" style="padding-top:14px">
           <el-col :span="3">SO<span>2&nbsp;μg/m3</span></el-col>

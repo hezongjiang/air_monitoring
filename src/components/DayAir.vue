@@ -44,7 +44,7 @@
           highlight-current-row
           border
           :height= "tableHeight"
-          :style="{ visibility:(chartSign===0?'visible':'hidden')}"
+          :style="{visibility:(chartSign===0?'visible':'hidden')}"
           tooltip-effect="dark">
           <el-table-column type="index" show-overflow-tooltip label="序号" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center" width="130"></el-table-column>

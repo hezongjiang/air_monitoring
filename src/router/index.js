@@ -38,107 +38,102 @@ const router = new Router({
         {
           path: '/index',
           name: 'AppIndex',
-          component: AppIndex, // 路由定义/index指向AppIndex这个组件
+          component: AppIndex // 路由定义/index指向AppIndex这个组件
         },
         {
           path: '/detail',
           name: 'Detail',
-          component: Detail,
-        },
-        {
-          path: '/analyse',
-          name: 'Analyse',
-          component: Analyse,
+          component: Detail
         },
         {
           path: '/quality',
           name: 'AirQuality',
-          component: AirQuality,
+          component: AirQuality
         },
         {
           path: '/historydata',
           name: 'HistoryData',
-          component: HistoryData,
+          component: HistoryData
         },
         {
           path: '/terminfo',
           name: 'TermInfo',
-          component: TermInfo,
+          component: TermInfo
         },
         {
           path: '/hourair',
           name: 'HourAir',
-          component: HourAir,
+          component: HourAir
         },
         {
           path: '/hourairall',
           name: 'HourAirAll',
-          component: HourAirAll,
+          component: HourAirAll
         },
         {
           path: '/dayair',
           name: 'DayAir',
-          component: DayAir,
+          component: DayAir
         },
         {
           path: '/originaldata',
           name: 'OriginalData',
-          component: OriginalData,
+          component: OriginalData
         },
         {
           path: '/originalcurve',
           name: 'OriginalCurve',
-          component: OriginalCurve,
+          component: OriginalCurve
         },
         {
           path: '/sitecontrast',
           name: 'SiteContrast',
-          component: SiteContrast,
+          component: SiteContrast
         },
         {
           path: '/temphumidspeed',
           name: 'TempHumidSpeed',
-          component: TempHumidSpeed,
+          component: TempHumidSpeed
         },
         {
           path: '/aircontrast',
           name: 'AirContrast',
-          component: AirContrast,
+          component: AirContrast
         },
         {
           path: '/alarm',
           name: 'Alarm',
-          component: Alarm,
+          component: Alarm
         },
         {
           path: '/battery',
           name: 'Battery',
-          component: Battery,
+          component: Battery
         },
         {
           path: '/aqi',
           name: 'AQI',
-          component: AQI,
+          component: AQI
         },
         {
           path: '/log',
           name: 'Log',
-          component: Log,
+          component: Log
         },
         {
           path: '/defend',
           name: 'Defend',
-          component: Defend,
+          component: Defend
         },
         {
           path: '/iaqi',
           name: 'IAQI',
-          component: IAQI,
+          component: IAQI
         },
         {
           path: '/rose',
           name: 'Rose',
-          component: Rose,
+          component: Rose
         }
       ]
     },

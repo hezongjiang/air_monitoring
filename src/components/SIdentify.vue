@@ -93,7 +93,7 @@ export default {
       ctx.fillStyle = this.randomColor(this.colorMin, this.colorMax)
       ctx.font =
         this.randomNum(this.fontSizeMin, this.fontSizeMax) + 'px SimHei'
-      var x = (i+0.6) * (this.contentWidth / (this.identifyCode.length + 1))
+      var x = (i + 0.6) * (this.contentWidth / (this.identifyCode.length + 1))
       var y = this.randomNum(this.fontSizeMax, this.contentHeight - 5)
       var deg = this.randomNum(-5, 5)
       // 修改坐标原点和旋转角度

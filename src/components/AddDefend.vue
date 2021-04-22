@@ -65,7 +65,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <div class="tips" :class="displaySign===1?'':goneClass">{{tip}}</div>
+        <div class="tips" :style="{display:(displaySign===1?'':'none')}">{{tip}}</div>
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button type="primary" @click="onSubmit">提 交</el-button>
       </div>
@@ -79,7 +79,6 @@
     data() {
       return {
         tip: '必填项不能为空',
-        goneClass: 'sth-gone',
         displaySign: 0,
         dialogFormVisible: false,
         addrOptions: [],
@@ -194,8 +193,5 @@
     font-size: 14px;
     color: #f56c6c;
     line-height: 20px;
-  }
-  .sth-gone {
-    display: none;
   }
 </style>

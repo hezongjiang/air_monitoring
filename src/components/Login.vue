@@ -1,6 +1,5 @@
 <template>
     <!--登录界面-->
-
       <el-form class="container-login" status-icon :rules="loginRules" :model="loginForm" ref="loginForm">
         <h2 class="title-login">大气质量智能监控平台</h2>
         <div class='tips' :class="displaySign===0?'':goneClass">&nbsp;</div>
@@ -40,7 +39,7 @@ export default {
       loginForm: {
         username: '',
         password: '',
-        verifycode: '',
+        verifycode: ''
       },
       responseResult: [],
       tip1: '账号和密码不能为空',
@@ -48,7 +47,7 @@ export default {
       tip3: '验证码错误',
       displaySign: 0,
       goneClass: 'sth-gone',
-      identifyCodes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R','S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+      identifyCodes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
       identifyCode: '',
       loginRules: { // 绑定在form表单中的验证规则
         username: [{ required: true, message: '账号不能为空', trigger: 'blur' },
@@ -56,7 +55,7 @@ export default {
         password: [{ required: true, message: '密码不能为空', trigger: 'blur' },
                    { min: 4, message: '密码长度至少为4位', trigger: 'blur' }],
         verifycode: [{ required: true, message: '验证码不能为空', trigger: 'blur' }]
-      },
+      }
     }
   },
   components: {
@@ -66,14 +65,11 @@ export default {
     login() {
       if (this.loginForm.username === '' || this.loginForm.password === '') { // 检验是否为空
         this.displaySign = 1
-      }
-      else if (this.loginForm.username.length < 4 || this.loginForm.password.length < 4) {
+      } else if (this.loginForm.username.length < 4 || this.loginForm.password.length < 4) {
         this.displaySign = 2
-      }
-      else if (this.loginForm.verifycode.toUpperCase() != this.identifyCode) { // 检验验证码
+      } else if (this.loginForm.verifycode.toUpperCase() !== this.identifyCode) { // 检验验证码
         this.displaySign = 3
-      }
-      else {
+      } else {
         this.displaySign = 0
         this.$axios.get('/login',
           {params: {
@@ -90,7 +86,7 @@ export default {
                 })
                 // 登录成功后，将loginForm信息存入本地
                 var path = this.$route.query.redirect
-                window.sessionStorage.setItem('username',this.loginForm.username)
+                window.sessionStorage.setItem('username', this.loginForm.username)
                 this.$router.push(path === '/' || path === undefined ? '/index' : path)
               } else {
                 this.$message({
@@ -114,9 +110,7 @@ export default {
     },
     makeCode(o, l) {
       for (let i = 0; i < l; i++) {
-        this.identifyCode += this.identifyCodes[
-          this.randomNum(0, this.identifyCodes.length)
-        ]
+        this.identifyCode += this.identifyCodes[this.randomNum(0, this.identifyCodes.length)]
       }
       console.log(this.identifyCode)
     }
