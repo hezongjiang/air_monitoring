@@ -121,13 +121,24 @@ export default {
       this.currentPage = val
     },
     exportExcel(e) { // 导出为excel
+      let addrRemark = ''
       e.currentTarget.blur()
-      const th = ['mac地址', '检修时间', '操作员', '空气传感器下次检修时间', 'pm下次检修时间', '检修内容']
-      const filterVal = ['macAddress', 'beginTime', 'person', 'airTime', 'pmTime', 'remark']
-      const data = this.tbList.map(v => filterVal.map(k => v[k]))
-      const fileName = this.addrChooseState + '维护记录'
-      const [fileType, sheetName] = ['xlsx', '站点维护记录']
-      this.$toExcel({th, data, fileName, fileType, sheetName})
+      this.$axios
+      .get('/' + this.addrChooseState + '/macAirDeviceInfo')
+      .then(madi => {
+        if (madi.data.successful && madi.data.data.length) {
+          addrRemark = madi.data.data[0].remark
+        }
+        const th = ['mac地址', '检修时间', '操作员', '空气传感器下次检修时间', 'pm下次检修时间', '检修内容']
+        const filterVal = ['macAddress', 'beginTime', 'person', 'airTime', 'pmTime', 'remark']
+        const data = this.tbList.map(v => filterVal.map(k => v[k]))
+        const fileName = this.$moment().format('YYYY-MM-DD HH-mm-ss') + addrRemark + '维护记录'
+        const [fileType, sheetName] = ['xlsx', '站点维护记录']
+        this.$toExcel({th, data, fileName, fileType, sheetName})
+      })
+      .catch(error => {
+        console.log(error)
+      })
     }
   },
   mounted() {

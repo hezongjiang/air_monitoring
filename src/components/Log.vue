@@ -61,7 +61,7 @@ export default {
       const th = ['更新时间', '更新日志']
       const filterVal = ['createTime', 'remark']
       const data = this.tbList.map(v => filterVal.map(k => v[k]))
-      const fileName = 'Web更新日志' + this.$moment().format('YYYY-MM-DD HH:mm:ss')
+      const fileName = this.$moment().format('YYYY-MM-DD HH-mm-ss') + 'Web更新日志'
       const [fileType, sheetName] = ['xlsx', 'Web更新日志']
       this.$toExcel({th, data, fileName, fileType, sheetName})
     }

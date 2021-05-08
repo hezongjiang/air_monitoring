@@ -88,7 +88,7 @@ export default {
       const th = ['mac备注', 'mac地址', '监测时间', '电量', '经度', '纬度', '固件版本']
       const filterVal = ['remark', 'macAddress', 'beginTime', 'batteryInfo', 'lon', 'lat', 'version']
       const data = this.tbList.map(v => filterVal.map(k => v[k]))
-      const fileName = '终端信息' + this.$moment().format('YYYY-MM-DD HH:mm:ss')
+      const fileName = this.$moment().format('YYYY-MM-DD HH-mm-ss') + '终端信息'
       const [fileType, sheetName] = ['xlsx', '终端信息']
       this.$toExcel({th, data, fileName, fileType, sheetName})
     }

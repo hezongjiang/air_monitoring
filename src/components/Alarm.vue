@@ -176,7 +176,7 @@ export default {
       const th = ['站点名称', '告警时间', '气体类型', '气体值', '异常类型']
       const filterVal = ['macAddress', 'beginTime', 'airType', 'airValue', 'topType']
       const data = this.tbList.map(v => filterVal.map(k => v[k]))
-      const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.airChooseState + '告警'
+      const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.airTypeOptions[this.airChooseState] + '异常告警'
       const [fileType, sheetName] = ['xlsx', '告警数据']
       this.$toExcel({th, data, fileName, fileType, sheetName})
     }

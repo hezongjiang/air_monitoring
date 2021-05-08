@@ -181,13 +181,24 @@ export default {
       this.currentPage = val
     },
     exportExcel(e) { // 导出为excel
+      let addrRemark = ''
       e.currentTarget.blur()
-      const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
-      const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
-      const data = this.tbList.map(v => filterVal.map(k => v[k]))
-      const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.addrChooseState + '原始数据下载'
-      const [fileType, sheetName] = ['xlsx', '原始数据下载']
-      this.$toExcel({th, data, fileName, fileType, sheetName})
+      this.$axios
+      .get('/' + this.addrChooseState + '/macAirDeviceInfo')
+      .then(madi => {
+        if (madi.data.successful && madi.data.data.length) {
+          addrRemark = madi.data.data[0].remark
+        }
+        const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
+        const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
+        const data = this.tbList.map(v => filterVal.map(k => v[k]))
+        const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + addrRemark + '原始数据下载'
+        const [fileType, sheetName] = ['xlsx', '原始数据下载']
+        this.$toExcel({th, data, fileName, fileType, sheetName})
+      })
+      .catch(error => {
+        console.log(error)
+      })
     }
   },
   mounted() {

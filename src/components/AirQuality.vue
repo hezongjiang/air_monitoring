@@ -116,7 +116,7 @@ export default {
       const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', 'CO（μg/m³）', 'O3（μg/m³）', '风速（m/s）', '风向']
       const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'CO', 'O3', 'speed', 'direct']
       const data = this.tbList.map(v => filterVal.map(k => v[k]))
-      const fileName = '实时空气数据' + this.$moment().format('YYYY-MM-DD HH:mm:ss')
+      const fileName = this.$moment().format('YYYY-MM-DD HH-mm-ss') + '实时空气数据'
       const [fileType, sheetName] = ['xlsx', '实时空气数据']
       this.$toExcel({th, data, fileName, fileType, sheetName})
     }
