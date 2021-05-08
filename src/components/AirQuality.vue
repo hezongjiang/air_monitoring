@@ -27,6 +27,8 @@
           <el-table-column show-overflow-tooltip prop="NO2" label="NO2（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="PM10" label="PM10（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="PM25" label="PM2.5（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="CO" label="CO（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="O3" label="O3（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="speed" label="风速（m/s）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="direct" label="风向" align="center" width="110"></el-table-column>
         </el-table>
@@ -111,8 +113,8 @@ export default {
     // 导出为excel
     exportExcel(e) {
       e.currentTarget.blur()
-      const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
-      const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
+      const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', 'CO（μg/m³）', 'O3（μg/m³）', '风速（m/s）', '风向']
+      const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'CO', 'O3', 'speed', 'direct']
       const data = this.tbList.map(v => filterVal.map(k => v[k]))
       const fileName = '实时空气数据' + this.$moment().format('YYYY-MM-DD HH:mm:ss')
       const [fileType, sheetName] = ['xlsx', '实时空气数据']

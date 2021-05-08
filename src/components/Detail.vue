@@ -80,6 +80,8 @@
             <el-table-column show-overflow-tooltip prop="NO2" label="NO2（μg/m³）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="PM10" label="PM10（μg/m³）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="PM25" label="PM2.5（μg/m³）" align="center"></el-table-column>
+            <el-table-column show-overflow-tooltip prop="CO" label="CO（μg/m³）" align="center"></el-table-column>
+            <el-table-column show-overflow-tooltip prop="O3" label="O3（μg/m³）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="speed" label="风速（m/s）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="direct" label="风向" align="center"></el-table-column>
           </el-table>
@@ -158,7 +160,7 @@ export default {
         legend: {
           top: 10,
           right: 10,
-          data: ['SO2', 'NO2', 'PM10', 'PM2.5']
+          data: ['SO2', 'NO2', 'PM10', 'PM2.5', 'CO', 'O3']
         },
         grid: {
           left: '38px',
@@ -201,6 +203,18 @@ export default {
         },
         {
           name: 'PM2.5',
+          data: [],
+          type: 'line',
+          smooth: true
+        },
+        {
+          name: 'CO',
+          data: [],
+          type: 'line',
+          smooth: true
+        },
+        {
+          name: 'O3',
           data: [],
           type: 'line',
           smooth: true
@@ -363,6 +377,8 @@ export default {
         that.optionAir.series[1].data = []
         that.optionAir.series[2].data = []
         that.optionAir.series[3].data = []
+        that.optionAir.series[4].data = []
+        that.optionAir.series[5].data = []
         that.optionTemp.series[0].data = []
         that.optionHumidity.series[0].data = []
         that.optionAir.xAxis.data = []
@@ -376,6 +392,8 @@ export default {
             that.optionAir.series[1].data[i] = mahh.data.data[i].NO2
             that.optionAir.series[2].data[i] = mahh.data.data[i].PM10
             that.optionAir.series[3].data[i] = mahh.data.data[i].PM25
+            that.optionAir.series[4].data[i] = mahh.data.data[i].CO
+            that.optionAir.series[5].data[i] = mahh.data.data[i].O3
             that.optionTemp.series[0].data[i] = mahh.data.data[i].temp
             that.optionHumidity.series[0].data[i] = mahh.data.data[i].humidity
             that.optionAir.xAxis.data[i] = mahh.data.data[i].beginTime
@@ -429,8 +447,8 @@ export default {
     },
     exportExcel(e) { // 导出excel文件
       e.currentTarget.blur()
-      const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
-      const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
+      const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', 'CO（μg/m³）', 'O3（μg/m³）', '风速（m/s）', '风向']
+      const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'CO', 'O3', 'speed', 'direct']
       const data = this.tbList.map(v => filterVal.map(k => v[k]))
       const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.termInfo.remark + '详情'
       const [fileType, sheetName] = ['xlsx', '详情数据']

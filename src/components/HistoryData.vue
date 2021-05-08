@@ -34,7 +34,7 @@
           :row-style="{height:'35px'}"
           :cell-style="{ padding:0, fontSize:'12px'}"
           :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
-          :data="tbList.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
+          :data="tbList"
           stripe
           highlight-current-row
           border
@@ -49,6 +49,8 @@
           <el-table-column show-overflow-tooltip prop="NO2" label="NO2（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="PM10" label="PM10（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="PM25" label="PM2.5（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="CO" label="CO（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="O3" label="O3（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="speed" label="风速（m/s）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="direct" label="风向" align="center" width="110"></el-table-column>
         </el-table>
@@ -63,7 +65,7 @@
       :current-page="currentPage"
       :page-size="pageSize"
       layout="total, sizes, prev, pager, next"
-      :total="tbList.length">
+      :total="tbListTotal">
     </el-pagination>
   </div>
 </template>
@@ -100,6 +102,7 @@ export default {
           }
         }]
       },
+      tbListTotal: 0,
       addrOptions: [], // 站点选项
       N: 1, // 默认显示N天前至当天的信息
       beginEndT: [], // 开始结束日期
@@ -114,8 +117,7 @@ export default {
     }
   },
   methods: {
-    searchSth() { // 查询数据
-      this.currentPage = 1 // 每次查询都回到第一页
+    searchSomething() { // 查询数据
       this.viewLoading = 'visible' // 显示加载标志
       this.beginEndTState = this.beginEndT // 主要用于excel导出，因为这时日期选择器可能人为动过
       this.addrChooseState = this.addrChoose // 主要用于excel导出，因为这时站点选择器可能人为动过
@@ -124,11 +126,14 @@ export default {
         params: {
           macAddress: this.addrChoose,
           beginTime: this.beginEndT[0],
-          endTime: this.beginEndT[1]
+          endTime: this.beginEndT[1],
+          pageIndex: this.currentPage,
+          pageSize: this.pageSize
         }
       })
       .then(mah => {
         if (mah.data.successful && mah.data.data.length) {
+          this.tbListTotal = mah.data.total
           this.tbList = mah.data.data
           for (let i = 0; i < this.tbList.length; i++) {
             // 气体浓度值保留两位小数
@@ -175,16 +180,23 @@ export default {
         console.log(error)
       })
     },
+    searchSth() {
+      this.currentPage = 1 // 每次查询都回到第一页
+      this.searchSomething()
+    },
     handleSizeChange(val) { // 分页器
       this.pageSize = val
+      this.currentPage = 1 // 每次查询都回到第一页
+      this.searchSomething()
     },
     handleCurrentChange(val) { // 分页器
       this.currentPage = val
+      this.searchSomething()
     },
     exportExcel(e) { // 导出为excel
       e.currentTarget.blur()
-      const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
-      const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
+      const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', 'CO（μg/m³）', 'O3（μg/m³）', '风速（m/s）', '风向']
+      const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'CO', 'O3', 'speed', 'direct']
       const data = this.tbList.map(v => filterVal.map(k => v[k]))
       const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.addrChooseState + '历史数据详情'
       const [fileType, sheetName] = ['xlsx', '历史数据详情']

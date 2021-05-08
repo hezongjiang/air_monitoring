@@ -33,40 +33,44 @@
           <el-col :span="3">NO<span>2&nbsp;μg/m3</span></el-col>
           <el-col :span="3">PM10<span>&nbsp;μg/m3</span></el-col>
           <el-col :span="3">PM2.5<span>&nbsp;μg/m3</span></el-col>
-          <el-col :span="3">经度</el-col>
-          <el-col :span="3" :offset="3">纬度</el-col>
-          <el-col :span="3" style="text-align:right;font-size:13px;color:black">{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></el-col>
+          <el-col :span="3">CO<span>&nbsp;μg/m3</span></el-col>
+          <el-col :span="4">经度</el-col>
+          <el-col :span="3">纬度</el-col>
+          <el-col :span="2" style="text-align:right;font-size:13px;color:black">{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></el-col>
         </el-row>
         <el-row class="air-value" type="flex" align="bottom" style="padding-top:3px">
           <el-col :span="3" :style="{color:colorSO2}">{{ parseFloat(airInfo.SO2).toFixed(2) }}</el-col>
           <el-col :span="3" :style="{color:colorNO2}">{{ parseFloat(airInfo.NO2).toFixed(2) }}</el-col>
           <el-col :span="3" :style="{color:colorPM10}">{{ parseFloat(airInfo.PM10).toFixed(2) }}</el-col>
           <el-col :span="3" :style="{color:colorPM25}">{{ parseFloat(airInfo.PM25).toFixed(2) }}</el-col>
-          <el-col :span="6">{{ parseFloat(termInfo.lon/100).toFixed(6) }}</el-col>
-          <el-col :span="6">{{ parseFloat(termInfo.lat/100).toFixed(6) }}</el-col>
+          <el-col :span="3" :style="{color:colorCO}">{{ parseFloat(airInfo.CO).toFixed(2) }}</el-col>
+          <el-col :span="4">{{ parseFloat(termInfo.lon/100).toFixed(6) }}</el-col>
+          <el-col :span="5">{{ parseFloat(termInfo.lat/100).toFixed(6) }}</el-col>
         </el-row>
         <el-row class="other-item" type="flex" align="bottom" style="padding-top:14px">
+          <el-col :span="3">O3<span>&nbsp;μg/m3</span></el-col>
           <el-col :span="3">温度<span>&nbsp;℃</span></el-col>
           <el-col :span="3">湿度<span>&nbsp;%R.H.</span></el-col>
           <el-col :span="3">风速<span>&nbsp;m/s</span></el-col>
           <el-col :span="3">风向</el-col>
-          <el-col :span="6">设备编号</el-col>
-          <el-col :span="6">固件版本</el-col>
+          <el-col :span="4">固件版本</el-col>
+          <el-col :span="5">设备编号</el-col>
         </el-row>
         <el-row class="other-value" type="flex" align="bottom" style="padding-top:3px">
+          <el-col :span="3" :style="{color:colorO3}">{{ parseFloat(airInfo.O3).toFixed(2) }}</el-col>
           <el-col :span="3">{{ airInfo.temp }}</el-col>
           <el-col :span="3">{{ airInfo.humidity }}</el-col>
           <el-col :span="3">{{ airInfo.speed }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windSpe }}</span></el-col>
           <el-col :span="3">{{ airInfo.direct }}<span style="font-size:12px;color:#999">&nbsp;&nbsp;{{ windDir }}</span></el-col>
-          <el-col :span="6">{{ termInfo.macAddress }}</el-col>
-          <el-col :span="6">{{ termInfo.version }}</el-col>
+          <el-col :span="4">{{ termInfo.version }}</el-col>
+          <el-col :span="5">{{ termInfo.macAddress }}</el-col>
         </el-row>
       </div>
       <div id="main" :style="{visibility: viewInfo}"></div>
       <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
       <div class="win-close-btn" :style="{visibility: viewInfo}"><el-button type="danger" size="mini" icon="el-icon-error" style="font-size:16px" @click="closeSuspend"><span style="font-size:15px">关闭悬浮窗口</span></el-button></div>
       <div class="air-indicator" :style="{visibility: viewInfo}">
-        <img src="@/assets/airIndicator.png" width="145" height="136" alt="气体浓度指示图">
+        <img src="@/assets/airIndicator.png" width="85" height="136" alt="气体浓度指示图">
       </div>
     </div>
   </div>
@@ -76,6 +80,9 @@ export default {
   name: 'AppIndex',
   data () {
     return {
+      madl: [],
+      macAddressTemp: '',
+      remarkTemp: '',
       liList: [], // 左侧站点列表
       countSite: 0, // 站点总数
       countOL: 0, // 站点在线数
@@ -89,6 +96,8 @@ export default {
       colorNO2: 'black', // NO2颜色
       colorPM10: 'black', // PM10颜色
       colorPM25: 'black', // PM2.5颜色
+      colorCO: 'black', // CO颜色
+      colorO3: 'black', // O3颜色
       windSpe: '', // 风速文字描述
       windDir: '', // 风向文字描述
       charts: '', // 用于实例化24小时曲线图表
@@ -107,7 +116,7 @@ export default {
         },
         legend: {
           right: 0,
-          data: ['SO2', 'NO2', 'PM10', 'PM2.5']
+          data: ['SO2', 'NO2', 'PM10', 'PM2.5', 'CO', 'O3']
         },
         grid: {
           top: '60px',
@@ -153,6 +162,18 @@ export default {
             data: [],
             type: 'line',
             smooth: true
+          },
+          {
+            name: 'CO',
+            data: [],
+            type: 'line',
+            smooth: true
+          },
+          {
+            name: 'O3',
+            data: [],
+            type: 'line',
+            smooth: true
           }]
       }
     }
@@ -183,7 +204,10 @@ export default {
       .then(this.$axios.spread(function (madi, mal, mahh) {
         if (madi.data.successful && madi.data.data.length) {
           that.termInfo = madi.data.data[0] // 站点信息对象
-          that.map.panTo(new BMap.Point(madi.data.data[0].lon / 100, madi.data.data[0].lat / 100)) // 设置地图中心点坐标
+          let convertor = new BMap.Convertor()
+          let pointArr = []
+          pointArr.push(new BMap.Point(madi.data.data[0].lon / 100, madi.data.data[0].lat / 100))
+          convertor.translate(pointArr, 1, 5, that.translatePanToCallback)
           switch (Math.round(parseInt(madi.data.data[0].batteryInfo) / 10)) { // 根据电池电量值选择不同的电池图标
             case 0:
               that.batteryIcon = 'fa fa-battery-0'
@@ -273,6 +297,8 @@ export default {
               that.setColorAir('NO2', that.airInfo.NO2)
               that.setColorAir('PM10', that.airInfo.PM10)
               that.setColorAir('PM25', that.airInfo.PM25)
+              that.setColorAir('CO', that.airInfo.CO)
+              that.setColorAir('O3', that.airInfo.O3)
               break // 一旦找到了选定的站点则跳出循环
             }
           }
@@ -308,6 +334,8 @@ export default {
             that.optionAir.series[1].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].NO2
             that.optionAir.series[2].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].PM10
             that.optionAir.series[3].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].PM25
+            that.optionAir.series[4].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].CO
+            that.optionAir.series[5].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].O3
             that.optionAir.xAxis.data[i] = mahh.data.data[mahh.data.data.length - 24 + i].beginTime
           }
         } else {
@@ -315,6 +343,8 @@ export default {
           that.optionAir.series[1].data = []
           that.optionAir.series[2].data = []
           that.optionAir.series[3].data = []
+          that.optionAir.series[4].data = []
+          that.optionAir.series[5].data = []
           that.optionAir.xAxis.data = []
         }
         that.charts.setOption(that.optionAir) // 作24小时曲线图
@@ -357,25 +387,68 @@ export default {
     setColorAir(air, value) { // 根据气体值选择不同的颜色
       switch (air) {
         case 'SO2':
-          this.colorSO2 = this.setColor(value)
+          this.colorSO2 = this.setSO2Color(value)
           break
         case 'NO2':
-          this.colorNO2 = this.setColor(value)
+          this.colorNO2 = this.setNO2Color(value)
           break
         case 'PM10':
-          this.colorPM10 = this.setColor(value)
+          this.colorPM10 = this.setPM10Color(value)
           break
         case 'PM25':
-          this.colorPM25 = this.setColor(value)
+          this.colorPM25 = this.setPM25Color(value)
+        case 'CO':
+          this.colorCO = this.setCOColor(value)
+        case 'O3':
+          this.colorO3 = this.setO3Color(value)
           break
       }
     },
-    setColor(value) { // 设置气体颜色
-      if (value >= 301) return '#8c0000'
-      else if (value >= 201) return '#993366'
-      else if (value >= 151) return '#ff2f2f'
-      else if (value >= 101) return '#ff9600'
-      else if (value >= 51) return '#ffdf4f'
+    setSO2Color(value) { // 设置气体颜色
+      if (value > 800) return '#993366'
+      else if (value > 650) return '#ff2f2f'
+      else if (value > 500) return '#ff9600'
+      else if (value > 150) return '#ffdf4f'
+      else return '#7fcf9f'
+    },
+    setNO2Color(value) { // 设置气体颜色
+      if (value > 2340) return '#8c0000'
+      else if (value > 1200) return '#993366'
+      else if (value > 700) return '#ff2f2f'
+      else if (value > 200) return '#ff9600'
+      else if (value > 100) return '#ffdf4f'
+      else return '#7fcf9f'
+    },
+    setPM10Color(value) { // 设置气体颜色
+      if (value > 420) return '#8c0000'
+      else if (value > 350) return '#993366'
+      else if (value > 250) return '#ff2f2f'
+      else if (value > 150) return '#ff9600'
+      else if (value > 50) return '#ffdf4f'
+      else return '#7fcf9f'
+    },
+    setPM25Color(value) { // 设置气体颜色
+      if (value > 250) return '#8c0000'
+      else if (value > 150) return '#993366'
+      else if (value > 115) return '#ff2f2f'
+      else if (value > 75) return '#ff9600'
+      else if (value > 35) return '#ffdf4f'
+      else return '#7fcf9f'
+    },
+    setCOColor(value) { // 设置气体颜色
+      if (value > 90) return '#8c0000'
+      else if (value > 60) return '#993366'
+      else if (value > 35) return '#ff2f2f'
+      else if (value > 10) return '#ff9600'
+      else if (value > 5) return '#ffdf4f'
+      else return '#7fcf9f'
+    },
+    setO3Color(value) { // 设置气体颜色
+      if (value > 800) return '#8c0000'
+      else if (value > 265) return '#993366'
+      else if (value > 215) return '#ff2f2f'
+      else if (value > 160) return '#ff9600'
+      else if (value > 100) return '#ffdf4f'
       else return '#7fcf9f'
     },
     closeSuspend() { // 关闭悬浮窗口
@@ -384,6 +457,23 @@ export default {
       clearInterval(this.timer)
       this.timer = null
       this.timer = setInterval(this.termStateRefresh, 60000)
+    },
+    translateCallback(data) {
+      let that = this
+      if (data.status === 0) {
+        for (let i = 0; i < this.madl.length; i++) {
+          var marker = new BMap.Marker(data.points[i]) // 站点标记
+          var label = new BMap.Label(this.madl[i].remark, {offset: new BMap.Size(20, 0)}) // 标记标签
+          marker.setLabel(label) // 为站点标记绑定标签
+          marker.addEventListener('click', function () {
+            that.focusInfo(that.madl[i].macAddress, that.madl[i].remark)
+          }) // 为站点标记添加点击事件
+          this.map.addOverlay(marker) // 在地图上添加站点标记
+        }
+      }
+    },
+    translatePanToCallback(data) {
+      this.map.panTo(data.points[0]) // 设置地图中心点坐标
     }
   },
   mounted () {
@@ -403,15 +493,13 @@ export default {
     .then(this.$axios.spread(function(madl, mal) {
       if (madl.data.successful && madl.data.data.length) {
         that.liList = madl.data.data // 左侧栏列表
+        that.madl = madl.data.data
+        let pointArr = []
         for (let i = 0; i < madl.data.data.length; i++) { // 设置站点地图标记
-          var marker = new BMap.Marker(new BMap.Point(madl.data.data[i].lon / 100, madl.data.data[i].lat / 100)) // 站点标记
-          var label = new BMap.Label(madl.data.data[i].remark, {offset: new BMap.Size(20, 0)}) // 标记标签
-          marker.setLabel(label) // 为站点标记绑定标签
-          marker.addEventListener('click', function () {
-            that.focusInfo(madl.data.data[i].macAddress, madl.data.data[i].remark)
-          }) // 为站点标记添加点击事件
-          that.map.addOverlay(marker) // 在地图上添加站点标记
+          pointArr.push(new BMap.Point(madl.data.data[i].lon / 100, madl.data.data[i].lat / 100))
         }
+        let convertor = new BMap.Convertor()
+        convertor.translate(pointArr, 1, 5, that.translateCallback)
       }
       if (mal.data.successful && mal.data.data.length) {
         that.countSite = mal.data.data.length // 站点总数

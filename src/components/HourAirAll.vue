@@ -184,6 +184,12 @@ export default {
       }, {
         value: 'PM25',
         label: 'PM2.5'
+      }, {
+        value: 'CO',
+        label: 'CO'
+      }, {
+        value: 'O3',
+        label: 'O3'
       }],
       optionAir: { // 气体图表配置
         tooltip: {

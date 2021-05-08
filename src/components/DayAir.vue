@@ -54,6 +54,8 @@
           <el-table-column show-overflow-tooltip prop="NO2" label="NO2（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="PM10" label="PM10（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="PM25" label="PM2.5（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="CO" label="CO（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="O3" label="O3（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="speed" label="风速（m/s）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="direct" label="风向" align="center" width="120"></el-table-column>
         </el-table>
@@ -131,7 +133,7 @@ export default {
         legend: {
           top: 10,
           right: 0,
-          data: ['SO2', 'NO2', 'PM10', 'PM2.5', '温度', '湿度']
+          data: ['SO2', 'NO2', 'PM10', 'PM2.5', 'CO', 'O3', '温度', '湿度']
         },
         grid: {
           left: '40px',
@@ -179,6 +181,18 @@ export default {
           smooth: true
         },
         {
+          name: 'CO',
+          data: [],
+          type: 'line',
+          smooth: true
+        },
+        {
+          name: 'O3',
+          data: [],
+          type: 'line',
+          smooth: true
+        },
+        {
           name: '温度',
           data: [],
           type: 'line',
@@ -218,6 +232,8 @@ export default {
         this.optionAir.series[3].data = []
         this.optionAir.series[4].data = []
         this.optionAir.series[5].data = []
+        this.optionAir.series[6].data = []
+        this.optionAir.series[7].data = []
         if (madh.data.successful && madh.data.data.length) {
           this.tbList = madh.data.data
           for (let i = 0; i < this.tbList.length; i++) {
@@ -226,8 +242,10 @@ export default {
             this.optionAir.series[1].data[i] = madh.data.data[this.tbList.length - 1 - i].NO2
             this.optionAir.series[2].data[i] = madh.data.data[this.tbList.length - 1 - i].PM10
             this.optionAir.series[3].data[i] = madh.data.data[this.tbList.length - 1 - i].PM25
-            this.optionAir.series[4].data[i] = madh.data.data[this.tbList.length - 1 - i].temp
-            this.optionAir.series[5].data[i] = madh.data.data[this.tbList.length - 1 - i].humidity
+            this.optionAir.series[4].data[i] = madh.data.data[this.tbList.length - 1 - i].CO
+            this.optionAir.series[5].data[i] = madh.data.data[this.tbList.length - 1 - i].O3
+            this.optionAir.series[6].data[i] = madh.data.data[this.tbList.length - 1 - i].temp
+            this.optionAir.series[7].data[i] = madh.data.data[this.tbList.length - 1 - i].humidity
           }
           for (let i = 0; i < this.tbList.length; i++) {
             // 气体浓度值保留两位小数
@@ -296,8 +314,8 @@ export default {
     },
     exportExcel(e) { // 导出为excel
       e.currentTarget.blur()
-      const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
-      const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
+      const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', 'CO（μg/m³）', 'O3（μg/m³）', '风速（m/s）', '风向']
+      const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'CO', 'O3', 'speed', 'direct']
       const data = this.tbList.map(v => filterVal.map(k => v[k]))
       const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.addrChooseState + '每日空气'
       const [fileType, sheetName] = ['xlsx', '每日空气']
