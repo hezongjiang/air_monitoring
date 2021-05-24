@@ -37,6 +37,8 @@
         <div id="NO2Hour" :style="{ visibility:(airChoose==='NO2'?'visible':'hidden'), height:chartHeight }"></div>
         <div id="PM10Hour" :style="{ visibility:(airChoose==='PM10'?'visible':'hidden'), height:chartHeight }"></div>
         <div id="PM25Hour" :style="{ visibility:(airChoose==='PM25'?'visible':'hidden'), height:chartHeight }"></div>
+        <div id="COHour" :style="{ visibility:(airChoose==='CO'?'visible':'hidden'), height:chartHeight }"></div>
+        <div id="O3Hour" :style="{ visibility:(airChoose==='O3'?'visible':'hidden'), height:chartHeight }"></div>
         <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
       </div>
     </div>
@@ -70,7 +72,7 @@ export default {
           onClick(picker) {
             const end = new Date()
             const start = new Date()
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
             picker.$emit('pick', [start, end])
           }
         }]
@@ -79,6 +81,8 @@ export default {
       NO2Chart: '', // NO2图表
       PM10Chart: '', // PM10图表
       PM25Chart: '', // PM2.5图表
+      COChart: '', // CO图表
+      O3Chart: '', // O3图表
       addrOptions: [], // 站点选项
       addrChoose: '', // 站点选择
       tbList1: [], // 存放要导出为excel文件的数据
@@ -102,6 +106,12 @@ export default {
       }, {
         value: 'PM25',
         label: 'PM2.5'
+      }, {
+        value: 'CO',
+        label: 'CO'
+      }, {
+        value: 'O3',
+        label: 'O3'
       }],
       optionSO2: { // SO2图表配置
         tooltip: {
@@ -294,6 +304,102 @@ export default {
           type: 'line',
           smooth: true
         }]
+      },
+      optionCO: { // CO图表配置
+        tooltip: {
+          show: true,
+          trigger: 'axis'
+        },
+        dataZoom: {
+          type: 'inside',
+          filterMode: 'none'
+        },
+        legend: {
+          top: 10,
+          right: 0,
+          data: ['校准小时走势', '原始小时走势']
+        },
+        grid: {
+          left: '40px',
+          right: '39px',
+          bottom: '40px',
+          top: '40px'
+        },
+        xAxis: {
+          name: '时间',
+          nameLocation: 'middle',
+          nameTextStyle: { padding: [10, 0, 0, 0] },
+          type: 'category',
+          boundaryGap: false,
+          data: [],
+          axisLabel: { fontSize: 11 }
+        },
+        yAxis: {
+          name: '浓度（mg/m³）',
+          nameTextStyle: { padding: [0, 0, 0, 20] },
+          type: 'value',
+          axisLabel: { fontSize: 11 }
+        },
+        series: [{
+          name: '校准小时走势',
+          data: [],
+          type: 'line',
+          smooth: true
+        },
+        {
+          name: '原始小时走势',
+          data: [],
+          type: 'line',
+          smooth: true
+        }]
+      },
+      optionO3: { // O3图表配置
+        tooltip: {
+          show: true,
+          trigger: 'axis'
+        },
+        dataZoom: {
+          type: 'inside',
+          filterMode: 'none'
+        },
+        legend: {
+          top: 10,
+          right: 0,
+          data: ['校准小时走势', '原始小时走势']
+        },
+        grid: {
+          left: '40px',
+          right: '39px',
+          bottom: '40px',
+          top: '40px'
+        },
+        xAxis: {
+          name: '时间',
+          nameLocation: 'middle',
+          nameTextStyle: { padding: [10, 0, 0, 0] },
+          type: 'category',
+          boundaryGap: false,
+          data: [],
+          axisLabel: { fontSize: 11 }
+        },
+        yAxis: {
+          name: '浓度（μg/m³）',
+          nameTextStyle: { padding: [0, 0, 0, 20] },
+          type: 'value',
+          axisLabel: { fontSize: 11 }
+        },
+        series: [{
+          name: '校准小时走势',
+          data: [],
+          type: 'line',
+          smooth: true
+        },
+        {
+          name: '原始小时走势',
+          data: [],
+          type: 'line',
+          smooth: true
+        }]
       }
     }
   },
@@ -323,6 +429,12 @@ export default {
           this.optionPM25.xAxis.data = mofa.data.data.time
           this.optionPM25.series[0].data = mofa.data.data.PM25
           this.optionPM25.series[1].data = mofa.data.data.OldPM25
+          this.optionCO.xAxis.data = mofa.data.data.time
+          this.optionCO.series[0].data = mofa.data.data.CO
+          this.optionCO.series[1].data = mofa.data.data.OldCO
+          this.optionO3.xAxis.data = mofa.data.data.time
+          this.optionO3.series[0].data = mofa.data.data.O3
+          this.optionO3.series[1].data = mofa.data.data.OldO3
         } else {
           this.optionSO2.xAxis.data = []
           this.optionSO2.series[0].data = []
@@ -336,12 +448,20 @@ export default {
           this.optionPM25.xAxis.data = []
           this.optionPM25.series[0].data = []
           this.optionPM25.series[1].data = []
+          this.optionCO.xAxis.data = []
+          this.optionCO.series[0].data = []
+          this.optionCO.series[1].data = []
+          this.optionO3.xAxis.data = []
+          this.optionO3.series[0].data = []
+          this.optionO3.series[1].data = []
         }
         // 作图
         this.SO2Chart.setOption(this.optionSO2)
         this.NO2Chart.setOption(this.optionNO2)
         this.PM10Chart.setOption(this.optionPM10)
         this.PM25Chart.setOption(this.optionPM25)
+        this.COChart.setOption(this.optionCO)
+        this.O3Chart.setOption(this.optionO3)
         this.viewLoading = 'hidden' // 隐藏加载标志
       }).catch(error => {
         console.log(error)
@@ -464,6 +584,8 @@ export default {
     this.NO2Chart = this.$echarts.init(document.getElementById('NO2Hour'))
     this.PM10Chart = this.$echarts.init(document.getElementById('PM10Hour'))
     this.PM25Chart = this.$echarts.init(document.getElementById('PM25Hour'))
+    this.COChart = this.$echarts.init(document.getElementById('COHour'))
+    this.O3Chart = this.$echarts.init(document.getElementById('O3Hour'))
     this.viewLoading = 'visible' // 因为初次自动查询在axios回调里有等待时间，所以这里先手动显示加载标志
     // 开始日期和结束日期初始化
     let t1 = this.$moment().subtract(this.N, 'days').format('YYYY-MM-DD')
@@ -543,7 +665,7 @@ export default {
   /* height: 460px; */
   height: calc(100% - 70px);
 }
-#SO2Hour, #NO2Hour, #PM10Hour, #PM25 {
+#SO2Hour, #NO2Hour, #PM10Hour, #PM25Hour, #COHour, #O3Hour {
   width: 100%;
   /* height: 468px; */
   position: absolute;

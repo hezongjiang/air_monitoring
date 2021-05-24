@@ -24,7 +24,6 @@
       </el-submenu>
       <el-submenu index="3">
         <template slot="title">小时报表</template>
-        <el-menu-item index="/sitecontrast">站点曲线对比</el-menu-item>
         <el-menu-item index="/temphumidspeed">气温/湿度/风速小时报表</el-menu-item>
         <el-menu-item index="/aircontrast">气体数据小时报表</el-menu-item>
       </el-submenu>

@@ -121,7 +121,7 @@ export default {
         grid: {
           top: '60px',
           left: '40px',
-          right: '20px',
+          right: '50px',
           bottom: '36px'
         },
         xAxis: {
@@ -133,12 +133,17 @@ export default {
           data: [],
           axisLabel: { fontSize: 11 }
         },
-        yAxis: {
+        yAxis: [{
           name: '浓度（μg/m³）',
           nameTextStyle: { padding: [0, 0, 0, 12] },
           type: 'value',
           axisLabel: { fontSize: 11 }
-        },
+        }, {
+          name: '浓度（mg/m³）',
+          nameTextStyle: { padding: [0, 0, 0, 12] },
+          type: 'value',
+          axisLabel: { fontSize: 11 }
+        }],
         series: [{
           name: 'SO2',
           data: [],
@@ -166,6 +171,7 @@ export default {
           {
             name: 'CO',
             data: [],
+            yAxisIndex: 1,
             type: 'line',
             smooth: true
           },

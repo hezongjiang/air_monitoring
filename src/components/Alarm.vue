@@ -112,6 +112,12 @@ export default {
       }, {
         value: 6,
         label: '湿度'
+      }, {
+        value: 7,
+        label: 'CO'
+      }, {
+        value: 8,
+        label: 'O3'
       }],
       airChoose: 1, // 气体选择
       airChooseState: 1, // 气体选择状态
@@ -129,7 +135,9 @@ export default {
         3: 'PM10',
         4: 'PM2.5',
         5: '温度',
-        6: '湿度'
+        6: '湿度',
+        7: 'CO',
+        8: 'O3'
       },
       topTypeOptions: { // 异常类型选项
         1: '异常突变',

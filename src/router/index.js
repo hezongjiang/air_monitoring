@@ -3,7 +3,6 @@ import Router from 'vue-router'
 import Login from '@/components/Login'
 import AppIndex from '@/components/home/AppIndex'
 import Home from '@/components/Home'
-import Analyse from '@/components/Analyse'
 import Detail from '@/components/Detail'
 import AirQuality from '@/components/AirQuality'
 import HistoryData from '@/components/HistoryData'
@@ -13,7 +12,6 @@ import HourAirAll from '@/components/HourAirAll'
 import DayAir from '@/components/DayAir'
 import OriginalData from '@/components/OriginalData'
 import OriginalCurve from '@/components/OriginalCurve'
-import SiteContrast from '@/components/SiteContrast'
 import TempHumidSpeed from '@/components/TempHumidSpeed'
 import AirContrast from '@/components/AirContrast'
 import Alarm from '@/components/Alarm'
@@ -86,11 +84,6 @@ const router = new Router({
           component: OriginalCurve
         },
         {
-          path: '/sitecontrast',
-          name: 'SiteContrast',
-          component: SiteContrast
-        },
-        {
           path: '/temphumidspeed',
           name: 'TempHumidSpeed',
           component: TempHumidSpeed
@@ -146,13 +139,15 @@ const router = new Router({
 })
 // 挂载路由导航守卫
 router.beforeEach((to, from, next) => {
-  if(to.path === '/login') return next()
+  if (to.path === '/login') return next()
   // 获取token
   const tokenStr = window.sessionStorage.getItem('username')
-  if(!tokenStr) return next({
-    path: 'login',
-    query: {redirect: to.fullPath}
-  })
+  if (!tokenStr) {
+    return next({
+      path: 'login',
+      query: {redirect: to.fullPath}
+    })
+  }
   next()
 })
 
