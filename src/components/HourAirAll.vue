@@ -40,6 +40,7 @@
         <div id="multiSiteAirContrast" :style="{ visibility:(chartSign===1?'visible':'hidden'), height:chartHeight }"></div>
         <el-table
           id="table1"
+          ref="table1"
           :row-style="{height:'35px'}"
           :cell-style="{ padding:0, fontSize:'12px'}"
           :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
@@ -50,22 +51,11 @@
           :height= "tableHeight"
           :style="{ visibility:(chartSign===0&&typeState===1?'visible':'hidden') }"
           tooltip-effect="dark">
-          <el-table-column type="index" show-overflow-tooltip label="序号" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="time" label="监测时间" align="center" width="100"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air1" label="绿岛湖" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air2" label="南庄实验中学" align="center" width="100"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air3" label="罗南村委" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air4" label="南庄水利所" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air5" label="吉利小学" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air6" label="罗格村委" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air7" label="龙津老年活动中心" align="center" width="130"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air8" label="南庄三中" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air9" label="吉利社区" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air10" label="龙湾大桥" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air11" label="南庄污水处理厂" align="center" width="115"></el-table-column>
+          <el-table-column v-for="(item, index) in columnConfig1" :key="index" :type="item.type" :prop="item.prop" :label="item.label" :align="item.align" :width="item.width" :show-overflow-tooltip="item.of"></el-table-column>
         </el-table>
         <el-table
           id="table2"
+          ref="table2"
           :row-style="{height:'35px'}"
           :cell-style="{ padding:0, fontSize:'12px'}"
           :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
@@ -76,17 +66,7 @@
           :height= "tableHeight"
           :style="{ visibility:(chartSign===0&&typeState===2?'visible':'hidden') }"
           tooltip-effect="dark">
-          <el-table-column type="index" show-overflow-tooltip label="序号" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="time" label="监测时间" align="center" width="100"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air1" label="广台-紫洞" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air2" label="季华-紫洞" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air3" label="季华-禅港" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air4" label="广台-禅港" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air5" label="罗南-禅港" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air6" label="南庄-紫洞" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air7" label="南庄-陶兴" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air8" label="吉利-龙津" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="air9" label="南庄-龙津" align="center"></el-table-column>
+          <el-table-column v-for="(item, index) in columnConfig2" :key="index" :type="item.type" :prop="item.prop" :label="item.label" :align="item.align" :width="item.width" :show-overflow-tooltip="item.of"></el-table-column>
         </el-table>
         <div class="loading" :style="{visibility: viewLoading}"><i style="font-size:30px" class="el-icon-loading"></i><br/>loading...</div>
       </div>
@@ -98,20 +78,9 @@
       :current-page="currentPage"
       :page-sizes="[24]"
       :page-size="pageSize"
-      :style="{ visibility:(chartSign===0&&typeState===1?'visible':'hidden') }"
+      :style="{ visibility:(chartSign===0?'visible':'hidden') }"
       layout="total, sizes, prev, pager, next"
-      :total="tbList1.length">
-    </el-pagination>
-    <el-pagination
-      align="center"
-      @size-change='handleSizeChange'
-      @current-change='handleCurrentChange'
-      :current-page="currentPage"
-      :page-sizes="[24]"
-      :page-size="pageSize"
-      :style="{ visibility:(chartSign===0&&typeState===2?'visible':'hidden') }"
-      layout="total, sizes, prev, pager, next"
-      :total="tbList2.length">
+      :total="typeState === 1 ? tbList1.length : tbList2.length">
     </el-pagination>
   </div>
 </template>
@@ -149,6 +118,14 @@ export default {
           }
         }]
       },
+      columnConfig1: [
+        {of: true, type: 'index', label: '序号', align: 'center'},
+        {of: true, prop: 'time', label: '监测时间', align: 'center', width: '101'}
+      ],
+      columnConfig2: [
+        {of: true, type: 'index', label: '序号', align: 'center'},
+        {of: true, prop: 'time', label: '监测时间', align: 'center', width: '101'}
+      ],
       airChart: '', // 气体数据图表
       beginEndT: [], // 开始结束日期
       beginEndTState: [], // 开始结束日期状态，主要用于excel导出，因为这时日期选择器可能人为动过
@@ -226,72 +203,7 @@ export default {
           type: 'value',
           axisLabel: { fontSize: 11 }
         },
-        series: [{
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
-          name: '',
-          data: [],
-          type: 'line',
-          smooth: true
-        }]
+        series: []
       }
     }
   },
@@ -304,6 +216,7 @@ export default {
       this.beginEndTState = this.beginEndT // 主要用于excel导出，因为这时日期选择器可能人为动过
       this.tbList1 = [] // 由于两张表格切换查找，初始化，避免查询错误导致上一次的数据还在，就奇奇怪怪的
       this.tbList2 = [] // 由于两张表格切换查找，初始化，避免查询错误导致上一次的数据还在，就奇奇怪怪的
+      this.optionAir.series = []
       this.$axios
       .get('/macAllAirHour', {
         params: {
@@ -321,21 +234,14 @@ export default {
             this.tbList2 = maah.data.newData
           }
           this.optionAir.legend.data = maah.data.macName
-          for (let i = 0; i < this.optionAir.legend.data.length; i++) {
-            this.optionAir.series[i].name = this.optionAir.legend.data[i]
+          for (let i = 0; i < maah.data.macName.length; i++) {
+            this.optionAir.series[i] = {}
+            this.optionAir.series[i].name = maah.data.macName[i]
+            this.optionAir.series[i].data = maah.data.data['air' + (i + 1)]
+            this.optionAir.series[i].type = 'line'
+            this.optionAir.series[i].smooth = true
           }
           this.optionAir.xAxis.data = maah.data.data.time
-          this.optionAir.series[0].data = maah.data.data.air1
-          this.optionAir.series[1].data = maah.data.data.air2
-          this.optionAir.series[2].data = maah.data.data.air3
-          this.optionAir.series[3].data = maah.data.data.air4
-          this.optionAir.series[4].data = maah.data.data.air5
-          this.optionAir.series[5].data = maah.data.data.air6
-          this.optionAir.series[6].data = maah.data.data.air7
-          this.optionAir.series[7].data = maah.data.data.air8
-          this.optionAir.series[8].data = maah.data.data.air9
-          this.optionAir.series[9].data = maah.data.data.air10
-          this.optionAir.series[10].data = maah.data.data.air11
         } else {
           if (this.typeState === 1) {
             this.tbList1 = []
@@ -344,12 +250,20 @@ export default {
           }
           this.optionAir.xAxis.data = []
           this.optionAir.legend.data = []
-          for (let i = 0; i < this.optionAir.legend.data.length; i++) {
+          for (let i = 0; i < maah.data.macName.length; i++) {
             this.optionAir.series[i].name = ''
             this.optionAir.series[i].data = []
           }
         }
+        this.$refs.table1.doLayout()
+        this.$refs.table2.doLayout()
         // 作图
+        if (this.airChooseState === 'CO') {
+          this.optionAir.yAxis.name = '浓度（mg/m³）'
+        } else {
+          this.optionAir.yAxis.name = '浓度（μg/m³）'
+        }
+        this.airChart.clear()
         this.airChart.setOption(this.optionAir)
         this.viewLoading = 'hidden'
       })
@@ -379,21 +293,23 @@ export default {
     },
     exportExcel(e) { // 导出excel文件
       e.currentTarget.blur()
-      if (this.typeState === 1) {
-        let th = ['监测时间', '绿岛湖', '南庄实验中学', '罗南村委', '南庄水利所', '吉利小学', '罗格村委', '龙津老年活动中心', '南庄三中', '吉利社区', '龙湾大桥', '污水处理厂']
-        let filterVal = ['time', 'air1', 'air2', 'air3', 'air4', 'air5', 'air6', 'air7', 'air8', 'air9', 'air10', 'air11']
-        let data = this.tbList1.map(v => filterVal.map(k => v[k]))
-        let fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.airChooseState + '南庄一期All站点小时空气'
-        let [fileType, sheetName] = ['xlsx', 'All站点小时空气']
-        this.$toExcel({th, data, fileName, fileType, sheetName})
-      } else if (this.typeState === 2) {
-        let th = ['监测时间', '广台-紫洞', '季华-紫洞', '季华-禅港', '广台-禅港', '罗南-禅港', '南庄-紫洞', '南庄-陶兴', '吉利-龙津', '南庄-龙津']
-        let filterVal = ['time', 'air1', 'air2', 'air3', 'air4', 'air5', 'air6', 'air7', 'air8', 'air9']
-        let data = this.tbList2.map(v => filterVal.map(k => v[k]))
-        let fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.airChooseState + '南庄二期All站点小时空气'
-        let [fileType, sheetName] = ['xlsx', 'All站点小时空气']
-        this.$toExcel({th, data, fileName, fileType, sheetName})
+      let th = this.optionAir.legend.data
+      th.unshift('监测时间')
+      let filterVal = ['time']
+      for (let i = 1; i < th.length; i++) {
+        filterVal[i] = 'air' + i
       }
+      let data = []
+      let fileName = ''
+      if (this.typeState === 1) {
+        data = this.tbList1.map(v => filterVal.map(k => v[k]))
+        fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.airChooseState + '南庄一期All站点小时空气'
+      } else if (this.typeState === 2) {
+        data = this.tbList2.map(v => filterVal.map(k => v[k]))
+        fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.airChooseState + '南庄二期All站点小时空气'
+      }
+      let [fileType, sheetName] = ['xlsx', 'All站点小时空气']
+      this.$toExcel({th, data, fileName, fileType, sheetName})
     }
   },
   mounted () {
@@ -401,10 +317,53 @@ export default {
     let t1 = this.$moment().subtract(this.N, 'days').format('YYYY-MM-DD')
     let t2 = this.$moment().format('YYYY-MM-DD')
     this.beginEndT = [t1, t2]
-    // 创建charts实例
-    this.airChart = this.$echarts.init(document.getElementById('multiSiteAirContrast'))
-    // 查询数据
-    this.searchSth()
+    let that = this
+    this.$axios
+    .all([
+      this.$axios.get('/macAllAirHour', {
+        params: {
+          beginTime: this.beginEndT[0],
+          endTime: this.beginEndT[1],
+          airType: 'SO2',
+          type: 1
+        }
+      }),
+      this.$axios.get('/macAllAirHour', {
+        params: {
+          beginTime: this.beginEndT[0],
+          endTime: this.beginEndT[1],
+          airType: 'SO2',
+          type: 2
+        }
+      })
+    ])
+    .then(this.$axios.spread(function (maah1, maah2) {
+      if (maah1.data.successful) {
+        for (let i = 0; i < maah1.data.macName.length; i++) {
+          that.columnConfig1[i + 2] = {}
+          that.columnConfig1[i + 2].of = true
+          that.columnConfig1[i + 2].prop = 'air' + (i + 1)
+          that.columnConfig1[i + 2].label = maah1.data.macName[i]
+          that.columnConfig1[i + 2].align = 'center'
+        }
+      }
+      if (maah2.data.successful) {
+        for (let i = 0; i < maah2.data.macName.length; i++) {
+          that.columnConfig2[i + 2] = {}
+          that.columnConfig2[i + 2].of = true
+          that.columnConfig2[i + 2].prop = 'air' + (i + 1)
+          that.columnConfig2[i + 2].label = maah2.data.macName[i]
+          that.columnConfig2[i + 2].align = 'center'
+        }
+      }
+      // 创建charts实例
+      that.airChart = that.$echarts.init(document.getElementById('multiSiteAirContrast'))
+      // 查询数据
+      that.searchSth()
+    }))
+    .catch(function (error) { // 请求失败处理
+      console.log(error)
+    })
   }
 }
 </script>

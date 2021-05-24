@@ -29,11 +29,11 @@
           <el-col :span="8" class="view-detail"><router-link :to="{path:'/detail',query:{macAddress:termInfo.macAddress,remark:termInfo.remark}}">查看详情<i class="el-icon-caret-right"></i></router-link></el-col>
         </el-row>
         <el-row class="air-type" type="flex" align="bottom" style="padding-top:14px">
-          <el-col :span="3">SO<span>2&nbsp;μg/m3</span></el-col>
-          <el-col :span="3">NO<span>2&nbsp;μg/m3</span></el-col>
-          <el-col :span="3">PM10<span>&nbsp;μg/m3</span></el-col>
-          <el-col :span="3">PM2.5<span>&nbsp;μg/m3</span></el-col>
-          <el-col :span="3">CO<span>&nbsp;μg/m3</span></el-col>
+          <el-col :span="3">SO<span>2&nbsp;μg/m³</span></el-col>
+          <el-col :span="3">NO<span>2&nbsp;μg/m³</span></el-col>
+          <el-col :span="3">PM10<span>&nbsp;μg/m³</span></el-col>
+          <el-col :span="3">PM2.5<span>&nbsp;μg/m³</span></el-col>
+          <el-col :span="3">CO<span>&nbsp;mg/m³</span></el-col>
           <el-col :span="4">经度</el-col>
           <el-col :span="3">纬度</el-col>
           <el-col :span="2" style="text-align:right;font-size:13px;color:black">{{ parseInt(termInfo.batteryInfo) }}%&nbsp;<i :class="batteryIcon" aria-hidden="true" style="font-size:15px"></i></el-col>
@@ -48,7 +48,7 @@
           <el-col :span="5">{{ parseFloat(termInfo.lat/100).toFixed(6) }}</el-col>
         </el-row>
         <el-row class="other-item" type="flex" align="bottom" style="padding-top:14px">
-          <el-col :span="3">O3<span>&nbsp;μg/m3</span></el-col>
+          <el-col :span="3">O3<span>&nbsp;μg/m³</span></el-col>
           <el-col :span="3">温度<span>&nbsp;℃</span></el-col>
           <el-col :span="3">湿度<span>&nbsp;%R.H.</span></el-col>
           <el-col :span="3">风速<span>&nbsp;m/s</span></el-col>
@@ -397,11 +397,12 @@ export default {
           break
         case 'PM25':
           this.colorPM25 = this.setPM25Color(value)
+          break
         case 'CO':
           this.colorCO = this.setCOColor(value)
+          break
         case 'O3':
           this.colorO3 = this.setO3Color(value)
-          break
       }
     },
     setSO2Color(value) { // 设置气体颜色
@@ -445,10 +446,10 @@ export default {
     },
     setO3Color(value) { // 设置气体颜色
       if (value > 800) return '#8c0000'
-      else if (value > 265) return '#993366'
-      else if (value > 215) return '#ff2f2f'
-      else if (value > 160) return '#ff9600'
-      else if (value > 100) return '#ffdf4f'
+      else if (value > 400) return '#993366'
+      else if (value > 300) return '#ff2f2f'
+      else if (value > 200) return '#ff9600'
+      else if (value > 160) return '#ffdf4f'
       else return '#7fcf9f'
     },
     closeSuspend() { // 关闭悬浮窗口

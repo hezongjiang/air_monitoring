@@ -80,7 +80,7 @@
             <el-table-column show-overflow-tooltip prop="NO2" label="NO2（μg/m³）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="PM10" label="PM10（μg/m³）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="PM25" label="PM2.5（μg/m³）" align="center"></el-table-column>
-            <el-table-column show-overflow-tooltip prop="CO" label="CO（μg/m³）" align="center"></el-table-column>
+            <el-table-column show-overflow-tooltip prop="CO" label="CO（mg/m³）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="O3" label="O3（μg/m³）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="speed" label="风速（m/s）" align="center"></el-table-column>
             <el-table-column show-overflow-tooltip prop="direct" label="风向" align="center"></el-table-column>
@@ -159,7 +159,7 @@ export default {
         },
         legend: {
           top: 10,
-          right: 10,
+          right: 100,
           data: ['SO2', 'NO2', 'PM10', 'PM2.5', 'CO', 'O3']
         },
         grid: {
@@ -177,12 +177,16 @@ export default {
           data: [],
           axisLabel: { fontSize: 11 }
         },
-        yAxis: {
+        yAxis: [{
           name: '浓度（μg/m³）',
           nameTextStyle: { padding: [0, 0, 0, 20] },
           type: 'value',
           axisLabel: { fontSize: 11 }
-        },
+        }, {
+          name: '浓度（mg/m³）',
+          type: 'value',
+          axisLabel: { fontSize: 11 }
+        }],
         series: [{
           name: 'SO2',
           data: [],
@@ -210,6 +214,7 @@ export default {
         {
           name: 'CO',
           data: [],
+          yAxisIndex: 1,
           type: 'line',
           smooth: true
         },
@@ -447,7 +452,7 @@ export default {
     },
     exportExcel(e) { // 导出excel文件
       e.currentTarget.blur()
-      const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', 'CO（μg/m³）', 'O3（μg/m³）', '风速（m/s）', '风向']
+      const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', 'CO（mg/m³）', 'O3（μg/m³）', '风速（m/s）', '风向']
       const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'CO', 'O3', 'speed', 'direct']
       const data = this.tbList.map(v => filterVal.map(k => v[k]))
       const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.termInfo.remark + '详情'

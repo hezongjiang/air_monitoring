@@ -87,11 +87,6 @@ export default {
           type: 'inside',
           filterMode: 'none'
         },
-        legend: {
-          top: 10,
-          right: 0,
-          data: ['IAQI', 'PM2.5']
-        },
         grid: {
           left: '40px',
           right: '39px',
@@ -108,18 +103,12 @@ export default {
           axisLabel: { fontSize: 11 }
         },
         yAxis: {
-          name: '浓度（μg/m³）',
+          name: 'IAQI',
           nameTextStyle: { padding: [0, 0, 0, 20] },
           type: 'value',
           axisLabel: { fontSize: 11 }
         },
         series: [{
-          name: 'IAQI',
-          data: [],
-          type: 'line',
-          smooth: true
-        },
-        {
           name: 'PM2.5',
           data: [],
           type: 'line',
@@ -144,20 +133,17 @@ export default {
           this.tbList = []
           for (let i = 0; i < mdi.data.data.time.length; i++) {
             this.tbList[i] = {}
-            this.tbList[i].IAQI = mdi.data.data.IAQI[i]
-            this.tbList[i].PM25 = mdi.data.data.PM25[i]
+            this.tbList[i].IAQI = mdi.data.data.AQI[i]
             this.tbList[i].time = mdi.data.data.time[i]
           }
           for (let i = 0; i < this.tbList.length; i++) {
             this.optionAir.xAxis.data = mdi.data.data.time
-            this.optionAir.series[0].data = mdi.data.data.IAQI
-            this.optionAir.series[1].data = mdi.data.data.PM25
+            this.optionAir.series[0].data = mdi.data.data.AQI
           }
         } else {
           this.tbList = []
           this.optionAir.xAxis.data = []
           this.optionAir.series[0].data = []
-          this.optionAir.series[1].data = []
         }
         // 作图
         this.airChart.setOption(this.optionAir)
@@ -167,13 +153,25 @@ export default {
       })
     },
     exportExcel(e) { // 导出为excel
+      let addrRemark = ''
       e.currentTarget.blur()
-      const th = ['监测时间', 'IAQI', 'PM2.5（μg/m³）']
-      const filterVal = ['time', 'IAQI', 'PM25']
-      const data = this.tbList.map(v => filterVal.map(k => v[k]))
-      const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + this.addrChooseState + '站点日均IAQI统计'
-      const [fileType, sheetName] = ['xlsx', '站点日均IAQI统计']
-      this.$toExcel({th, data, fileName, fileType, sheetName})
+      this.$axios
+      .get('/' + this.addrChooseState + '/macAirDeviceInfo')
+      .then(madi => {
+        if (madi.data.successful && madi.data.data.length) {
+          addrRemark = madi.data.data[0].remark
+        }
+        const th = ['监测时间', 'IAQI']
+        const filterVal = ['time', 'IAQI']
+        const data = this.tbList.map(v => filterVal.map(k => v[k]))
+        const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + addrRemark + '站点日均IAQI统计'
+        const [fileType, sheetName] = ['xlsx', '站点日均IAQI统计']
+        this.$toExcel({th, data, fileName, fileType, sheetName})
+      })
+      .catch(error => {
+        console.log(error)
+      })
+      e.currentTarget.blur()
     }
   },
   mounted() {
