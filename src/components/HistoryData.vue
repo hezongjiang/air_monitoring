@@ -41,7 +41,6 @@
           :height= "tableHeight"
           tooltip-effect="dark">
           <el-table-column type="index" show-overflow-tooltip label="序号" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="macAddress" label="mac地址" align="center" width="120"></el-table-column>
           <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center" width="140"></el-table-column>
           <el-table-column show-overflow-tooltip prop="temp" label="气温（℃）" align="center" width="90"></el-table-column>
           <el-table-column show-overflow-tooltip prop="humidity" label="湿度（%R.H.）" align="center"></el-table-column>
@@ -97,7 +96,7 @@ export default {
           onClick(picker) {
             const end = new Date()
             const start = new Date()
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
             picker.$emit('pick', [start, end])
           }
         }]
@@ -258,8 +257,8 @@ export default {
         } else {
           tbL = []
         }
-        const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', 'CO（mg/m³）', 'O3（μg/m³）', '风速（m/s）', '风向']
-        const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'CO', 'O3', 'speed', 'direct']
+        const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', 'CO（mg/m³）', 'O3（μg/m³）', '风速（m/s）', '风向']
+        const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'CO', 'O3', 'speed', 'direct']
         const data = tbL.map(v => filterVal.map(k => v[k]))
         const fileName = that.beginEndTState[0] + '至' + that.beginEndTState[1] + addrRemark + '历史数据详情'
         const [fileType, sheetName] = ['xlsx', '历史数据详情']

@@ -34,14 +34,13 @@
           :row-style="{height:'35px'}"
           :cell-style="{ padding:0, fontSize:'12px'}"
           :header-cell-style="{ background:'#dddddd', fontSize:'13px'}"
-          :data="tbList.slice((currentPage - 1) * pageSize,currentPage * pageSize)"
+          :data="tbList"
           stripe
           highlight-current-row
           border
           :height= "tableHeight"
           tooltip-effect="dark">
           <el-table-column type="index" show-overflow-tooltip label="序号" align="center"></el-table-column>
-          <el-table-column show-overflow-tooltip prop="macAddress" label="mac地址" align="center" width="120"></el-table-column>
           <el-table-column show-overflow-tooltip prop="beginTime" label="监测时间" align="center" width="140"></el-table-column>
           <el-table-column show-overflow-tooltip prop="temp" label="气温（℃）" align="center" width="90"></el-table-column>
           <el-table-column show-overflow-tooltip prop="humidity" label="湿度（%R.H.）" align="center"></el-table-column>
@@ -49,6 +48,8 @@
           <el-table-column show-overflow-tooltip prop="NO2" label="NO2（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="PM10" label="PM10（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="PM25" label="PM2.5（μg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="CO" label="CO（mg/m³）" align="center"></el-table-column>
+          <el-table-column show-overflow-tooltip prop="O3" label="O3（μg/m³）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="speed" label="风速（m/s）" align="center"></el-table-column>
           <el-table-column show-overflow-tooltip prop="direct" label="风向" align="center" width="110"></el-table-column>
         </el-table>
@@ -62,7 +63,7 @@
       :current-page="currentPage"
       :page-size="pageSize"
       layout="total, sizes, prev, pager, next"
-      :total="tbList.length">
+      :total="tbListTotal">
     </el-pagination>
   </div>
 </template>
@@ -94,11 +95,12 @@ export default {
           onClick(picker) {
             const end = new Date()
             const start = new Date()
-            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
             picker.$emit('pick', [start, end])
           }
         }]
       },
+      tbListTotal: 0,
       addrOptions: [], // 站点选项
       addrChoose: '', // 站点选择
       addrChooseState: '', // 站点选择状态，主要用于excel导出，因为这时站点选择器可能人为动过
@@ -113,8 +115,7 @@ export default {
     }
   },
   methods: {
-    searchSth() { // 查询数据
-      this.currentPage = 1 // 每次查询都回到第一页
+    searchSomething() { // 查询数据
       this.viewLoading = 'visible' // 显示加载标志
       this.addrChooseState = this.addrChoose // 主要用于excel导出，因为这时站点选择器可能人为动过
       this.beginEndTState = this.beginEndT // 主要用于excel导出，因为这时日期选择器可能人为动过
@@ -123,11 +124,14 @@ export default {
         params: {
           macAddress: this.addrChoose,
           beginTime: this.beginEndT[0],
-          endTime: this.beginEndT[1]
+          endTime: this.beginEndT[1],
+          pageIndex: this.currentPage,
+          pageSize: this.pageSize
         }
       })
       .then(mah => {
         if (mah.data.successful && mah.data.data.length) {
+          this.tbListTotal = mah.data.total
           this.tbList = mah.data.data
           for (let i = 0; i < this.tbList.length; i++) {
             // 气体浓度值保留两位小数
@@ -135,6 +139,8 @@ export default {
             this.tbList[i].NO2 = parseFloat(this.tbList[i].NO2).toFixed(2)
             this.tbList[i].PM10 = parseFloat(this.tbList[i].PM10).toFixed(2)
             this.tbList[i].PM25 = parseFloat(this.tbList[i].PM25).toFixed(2)
+            this.tbList[i].CO = parseFloat(this.tbList[i].CO).toFixed(2)
+            this.tbList[i].O3 = parseFloat(this.tbList[i].O3).toFixed(2)
             // 根据风速值选择不同强度的风
             if (this.tbList[i].speed >= 10) {
               this.tbList[i].speed = this.tbList[i].speed + '（强风）'
@@ -174,28 +180,89 @@ export default {
         console.log(error)
       })
     },
+    searchSth() {
+      this.currentPage = 1 // 每次查询都回到第一页
+      this.searchSomething()
+    },
     handleSizeChange(val) { // 分页器
       this.pageSize = val
+      this.currentPage = 1 // 每次查询都回到第一页
+      this.searchSomething()
     },
     handleCurrentChange(val) { // 分页器
       this.currentPage = val
+      this.searchSomething()
     },
     exportExcel(e) { // 导出为excel
+      let tbL = []
       let addrRemark = ''
+      let that = this
       e.currentTarget.blur()
       this.$axios
-      .get('/' + this.addrChooseState + '/macAirDeviceInfo')
-      .then(madi => {
+      .all([this.$axios.get('/' + this.addrChooseState + '/macAirDeviceInfo'),
+        this.$axios.get('/macAllHistory', {
+          params: {
+            macAddress: this.addrChooseState,
+            beginTime: this.beginEndTState[0],
+            endTime: this.beginEndTState[1]
+          }
+        })
+      ])
+      .then(this.$axios.spread(function (madi, mah) {
         if (madi.data.successful && madi.data.data.length) {
           addrRemark = madi.data.data[0].remark
         }
-        const th = ['mac地址', '监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', '风速（m/s）', '风向']
-        const filterVal = ['macAddress', 'beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'speed', 'direct']
-        const data = this.tbList.map(v => filterVal.map(k => v[k]))
-        const fileName = this.beginEndTState[0] + '至' + this.beginEndTState[1] + addrRemark + '原始数据下载'
+        if (mah.data.successful && mah.data.data.length) {
+          tbL = mah.data.data
+          for (let i = 0; i < tbL.length; i++) {
+            // 气体浓度值保留两位小数
+            tbL[i].SO2 = parseFloat(tbL[i].SO2).toFixed(2)
+            tbL[i].NO2 = parseFloat(tbL[i].NO2).toFixed(2)
+            tbL[i].PM10 = parseFloat(tbL[i].PM10).toFixed(2)
+            tbL[i].PM25 = parseFloat(tbL[i].PM25).toFixed(2)
+            tbL[i].CO = parseFloat(tbL[i].CO).toFixed(2)
+            tbL[i].O3 = parseFloat(tbL[i].O3).toFixed(2)
+            // 根据风速值选择不同强度的风
+            if (tbL[i].speed >= 10) {
+              tbL[i].speed = tbL[i].speed + '（强风）'
+            } else if (tbL[i].speed >= 6) {
+              tbL[i].speed = tbL[i].speed + '（和风）'
+            } else if (tbL[i].speed > 0) {
+              tbL[i].speed = tbL[i].speed + '（微风）'
+            } else {
+              tbL[i].speed = tbL[i].speed + '（无风）'
+            }
+            // 根据风向值选择不同的风向
+            if (tbL[i].direct >= 348) {
+              tbL[i].direct = tbL[i].direct + '（北风）'
+            } else if (tbL[i].direct >= 282) {
+              tbL[i].direct = tbL[i].direct + '（西北风）'
+            } else if (tbL[i].direct >= 258) {
+              tbL[i].direct = tbL[i].direct + '（西风）'
+            } else if (tbL[i].direct >= 192) {
+              tbL[i].direct = tbL[i].direct + '（西南风）'
+            } else if (tbL[i].direct >= 168) {
+              tbL[i].direct = tbL[i].direct + '（南风）'
+            } else if (tbL[i].direct >= 102) {
+              tbL[i].direct = tbL[i].direct + '（东南风）'
+            } else if (tbL[i].direct >= 78) {
+              tbL[i].direct = tbL[i].direct + '（东风）'
+            } else if (tbL[i].direct >= 12) {
+              tbL[i].direct = tbL[i].direct + '（东北风）'
+            } else {
+              tbL[i].direct = tbL[i].direct + '（北风）'
+            }
+          }
+        } else {
+          tbL = []
+        }
+        const th = ['监测时间', '气温（℃）', '湿度（%R.H.）', 'SO2（μg/m³）', 'NO2（μg/m³）', 'PM10（μg/m³）', 'PM2.5（μg/m³）', 'CO（mg/m³）', 'O3（μg/m³）', '风速（m/s）', '风向']
+        const filterVal = ['beginTime', 'temp', 'humidity', 'SO2', 'NO2', 'PM10', 'PM25', 'CO', 'O3', 'speed', 'direct']
+        const data = tbL.map(v => filterVal.map(k => v[k]))
+        const fileName = that.beginEndTState[0] + '至' + that.beginEndTState[1] + addrRemark + '原始数据下载'
         const [fileType, sheetName] = ['xlsx', '原始数据下载']
-        this.$toExcel({th, data, fileName, fileType, sheetName})
-      })
+        that.$toExcel({th, data, fileName, fileType, sheetName})
+      }))
       .catch(error => {
         console.log(error)
       })
