@@ -129,6 +129,7 @@ export default {
           endTime: this.beginEndT[1]
         }}
       ).then(mdi => {
+        console.log(mdi.data)
         if (mdi.data.successful) {
           this.tbList = []
           for (let i = 0; i < mdi.data.data.time.length; i++) {

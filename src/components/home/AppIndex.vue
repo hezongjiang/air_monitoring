@@ -80,7 +80,6 @@ export default {
   name: 'AppIndex',
   data () {
     return {
-      madl: [],
       macAddressTemp: '',
       remarkTemp: '',
       liList: [], // 左侧站点列表
@@ -335,6 +334,7 @@ export default {
           that.colorPM25 = 'black' // PM2.5颜色
         }
         if (mahh.data.successful && mahh.data.data.length) {
+          console.log(mahh.data.data)
           for (let i = 0; i < 24; i++) { // 只取最近24小时的气体信息
             that.optionAir.series[0].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].SO2
             that.optionAir.series[1].data[i] = mahh.data.data[mahh.data.data.length - 24 + i].NO2
@@ -465,20 +465,6 @@ export default {
       this.timer = null
       this.timer = setInterval(this.termStateRefresh, 60000)
     },
-    translateCallback(data) {
-      let that = this
-      if (data.status === 0) {
-        for (let i = 0; i < this.madl.length; i++) {
-          var marker = new BMap.Marker(data.points[i]) // 站点标记
-          var label = new BMap.Label(this.madl[i].remark, {offset: new BMap.Size(20, 0)}) // 标记标签
-          marker.setLabel(label) // 为站点标记绑定标签
-          marker.addEventListener('click', function () {
-            that.focusInfo(that.madl[i].macAddress, that.madl[i].remark)
-          }) // 为站点标记添加点击事件
-          this.map.addOverlay(marker) // 在地图上添加站点标记
-        }
-      }
-    },
     translatePanToCallback(data) {
       this.map.panTo(data.points[0]) // 设置地图中心点坐标
     }
@@ -500,13 +486,42 @@ export default {
     .then(this.$axios.spread(function(madl, mal) {
       if (madl.data.successful && madl.data.data.length) {
         that.liList = madl.data.data // 左侧栏列表
-        that.madl = madl.data.data
         let pointArr = []
         for (let i = 0; i < madl.data.data.length; i++) { // 设置站点地图标记
           pointArr.push(new BMap.Point(madl.data.data[i].lon / 100, madl.data.data[i].lat / 100))
         }
-        let convertor = new BMap.Convertor()
-        convertor.translate(pointArr, 1, 5, that.translateCallback)
+        let group = 0
+        let total = 0
+        if (pointArr.length % 10 > 0) {
+          group = parseInt(pointArr.length / 10) + 1
+        } else {
+          group = parseInt(pointArr.length / 10)
+        }
+        for (let i = 0; i < group; i++) {
+          let pointArray = []
+          let madlTemp = []
+          for (let j = 0; j < 10; j++) {
+            if (total < pointArr.length) {
+              pointArray.push(new BMap.Point(madl.data.data[i * 10 + j].lon / 100, madl.data.data[i * 10 + j].lat / 100))
+              madlTemp.push(madl.data.data[i * 10 + j])
+            }
+            total++
+          }
+          let convertor = new BMap.Convertor()
+          convertor.translate(pointArray, 1, 5, function(data, m = madlTemp) {
+            if (data.status === 0) {
+              for (let i = 0; i < data.points.length; i++) {
+                var marker = new BMap.Marker(data.points[i]) // 站点标记
+                var label = new BMap.Label(m[i].remark, {offset: new BMap.Size(20, 0)}) // 标记标签
+                marker.setLabel(label) // 为站点标记绑定标签
+                marker.addEventListener('click', function () {
+                  that.focusInfo(m[i].macAddress, m[i].remark)
+                }) // 为站点标记添加点击事件
+                that.map.addOverlay(marker) // 在地图上添加站点标记
+              }
+            }
+          })
+        }
       }
       if (mal.data.successful && mal.data.data.length) {
         that.countSite = mal.data.data.length // 站点总数
